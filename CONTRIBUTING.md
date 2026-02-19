@@ -13,6 +13,9 @@ git clone https://github.com/Slashgear/gdpr-report.git
 cd gdpr-report
 pnpm install
 pnpm build
+
+# Run the CLI locally
+node dist/cli.js scan https://example.com
 ```
 
 ## Workflow

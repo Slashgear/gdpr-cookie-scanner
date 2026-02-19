@@ -11,6 +11,7 @@ jobs:
       contents: write
       pull-requests: write
       packages: write
+      id-token: write # required for npm trusted publishing (OIDC)
 
     steps:
       - uses: actions/checkout@v4
@@ -40,7 +41,7 @@ jobs:
           commit: "chore: release new version"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_PROVENANCE: "true"
 
       - name: Configure registry for GitHub Packages
         if: steps.changesets.outputs.published == 'true'

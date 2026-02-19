@@ -8,20 +8,22 @@ CLI tool to automatically audit the GDPR cookie consent compliance of a website:
 ## Installation
 
 ```bash
-# Install dependencies
-pnpm install
-
-# Install Playwright browsers (first-time setup only)
+npm install -g @slashgear/gdpr-cookie-scanner
 npx playwright install chromium
+```
 
-# Build
-pnpm build
+Or run without installing:
+
+```bash
+npx @slashgear/gdpr-cookie-scanner gdpr-scan scan https://example.com
+# Playwright is still required the first time:
+npx playwright install chromium
 ```
 
 ## Usage
 
 ```bash
-node dist/cli.js scan <url> [options]
+gdpr-scan scan <url> [options]
 ```
 
 ### Options
@@ -38,16 +40,16 @@ node dist/cli.js scan <url> [options]
 
 ```bash
 # Basic scan
-node dist/cli.js scan https://example.com
+gdpr-scan scan https://example.com
 
 # With custom output directory
-node dist/cli.js scan https://example.com -o ./reports
+gdpr-scan scan https://example.com -o ./reports
 
 # Scan in English, without screenshots
-node dist/cli.js scan https://example.com --locale en-US --no-screenshots
+gdpr-scan scan https://example.com --locale en-US --no-screenshots
 
 # Show the built-in tracker database
-node dist/cli.js list-trackers
+gdpr-scan list-trackers
 ```
 
 ## How it works
@@ -118,10 +120,7 @@ pnpm format       # oxfmt
 
 ## Release
 
-Releases are published to [GitHub Packages](https://github.com/Slashgear/gdpr-report/pkgs/npm/gdpr-cookie-scanner) automatically when a GitHub Release is created. To release:
-
-1. Create a new GitHub Release with a tag matching `vX.Y.Z`
-2. The [release workflow](.github/workflows/release.yml) builds and publishes `@slashgear/gdpr-cookie-scanner` to GitHub Packages
+Releases are published automatically to [npm](https://www.npmjs.com/package/@slashgear/gdpr-cookie-scanner) and [GitHub Packages](https://github.com/Slashgear/gdpr-report/pkgs/npm/gdpr-cookie-scanner) via [Changesets](https://github.com/changesets/changesets). See [CONTRIBUTING.md](CONTRIBUTING.md) for the release process.
 
 ## Contributing
 
