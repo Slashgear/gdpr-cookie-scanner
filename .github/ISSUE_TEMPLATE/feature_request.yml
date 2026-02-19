@@ -1,0 +1,26 @@
+name: Feature request
+description: Proposer une amélioration ou une nouvelle règle RGPD
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problème ou cas non couvert
+      description: Quelle situation le scanner ne gère pas actuellement ?
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Solution proposée
+    validations:
+      required: true
+
+  - type: input
+    id: reference
+    attributes:
+      label: Référence légale (si applicable)
+      placeholder: "ex: CNIL 2022, RGPD Art. 7, CEPD 03/2022"
+    validations:
+      required: false

@@ -1,0 +1,44 @@
+name: Bug report
+description: Signaler un problème avec le scanner
+labels: [bug]
+body:
+  - type: input
+    id: url
+    attributes:
+      label: URL scannée
+      description: L'URL qui a provoqué le problème (optionnel si sensible)
+    validations:
+      required: false
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description du problème
+      description: Ce qui s'est passé vs ce qui était attendu
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Commande utilisée
+      render: bash
+      placeholder: node dist/cli.js scan https://...
+    validations:
+      required: true
+
+  - type: textarea
+    id: output
+    attributes:
+      label: Sortie / erreur
+      render: text
+    validations:
+      required: false
+
+  - type: input
+    id: version
+    attributes:
+      label: Version de Node.js
+      placeholder: "ex: 22.0.0"
+    validations:
+      required: true
