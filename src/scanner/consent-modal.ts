@@ -1,0 +1,276 @@
+import type { Page } from "playwright";
+import type { ConsentModal, ConsentButton, ConsentCheckbox, ConsentButtonType } from "../types.js";
+import { analyzeButtonWording } from "../analyzers/wording.js";
+import type { ScanOptions } from "../types.js";
+
+/**
+ * Ordered list of CSS selectors to try for detecting a consent modal/banner.
+ * Covers major CMP platforms (Axeptio, Cookiebot, OneTrust, Didomi, Tarteaucitron, etc.)
+ */
+const MODAL_SELECTORS = [
+  // Well-known CMPs
+  "#axeptio_overlay",
+  "#axeptio-root",
+  "#CybotCookiebotDialog",
+  "#onetrust-consent-sdk",
+  "#onetrust-banner-sdk",
+  ".didomi-popup-container",
+  ".didomi-consent-popup",
+  "#didomi-host",
+  "#tarteaucitronRoot",
+  "#tarteaucitron",
+  "#usercentrics-root",
+  "#sp-cc",
+  "#gdpr-consent-tool-wrapper",
+  ".cc-banner",
+  ".cc-window",
+  "#cookieConsent",
+  "#cookie-consent",
+  "#cookie-banner",
+  "#cookie-notice",
+  "#cookie-law-info-bar",
+  // Generic heuristics
+  "[class*='cookie'][class*='banner']",
+  "[class*='cookie'][class*='modal']",
+  "[class*='cookie'][class*='popup']",
+  "[class*='consent'][class*='banner']",
+  "[class*='consent'][class*='modal']",
+  "[id*='cookie'][id*='banner']",
+  "[id*='cookie'][id*='modal']",
+  "[id*='consent']",
+  "[aria-label*='cookie' i]",
+  "[aria-label*='consent' i]",
+  "[aria-label*='cookies' i]",
+  "[role='dialog'][aria-label*='cookie' i]",
+  "[role='alertdialog']",
+];
+
+const ACCEPT_PATTERNS = [
+  /\b(accept|accepter|acceptez|tout accepter|accept all|j'accepte|i accept|agree|ok\b|d'accord|continuer|continue|valider|confirmer)\b/i,
+];
+
+const REJECT_PATTERNS = [
+  /\b(refus|refuse|refuser|reject|deny|decline|tout refuser|reject all|non merci|no thanks|continuer sans accepter|skip)\b/i,
+];
+
+const PREFERENCES_PATTERNS = [
+  /\b(param[eè]tres|pr[eé]f[eé]rences|personnaliser|customise|customize|manage|g[eé]rer|options|choose|choisir|configure)\b/i,
+];
+
+export async function detectConsentModal(page: Page, options: ScanOptions): Promise<ConsentModal> {
+  // Try each selector until we find a visible modal
+  let foundSelector: string | null = null;
+
+  for (const selector of MODAL_SELECTORS) {
+    try {
+      const element = await page.$(selector);
+      if (!element) continue;
+      const isVisible = await element.isVisible();
+      if (isVisible) {
+        foundSelector = selector;
+        break;
+      }
+    } catch {
+      continue;
+    }
+  }
+
+  // Fallback: look for any large fixed/sticky element with cookie-related text
+  if (!foundSelector) {
+    foundSelector = await page.evaluate(() => {
+      const candidates = document.querySelectorAll("div, section, aside, dialog");
+      const keywords = /cookie|consent|consentement|rgpd|gdpr|privacy|vie priv/i;
+
+      for (const el of candidates) {
+        const style = window.getComputedStyle(el);
+        const isFixed = style.position === "fixed" || style.position === "sticky";
+        const text = el.textContent ?? "";
+        const hasCookieText = keywords.test(text);
+        const isLargeEnough = el.getBoundingClientRect().width > 200;
+
+        if (isFixed && hasCookieText && isLargeEnough) {
+          // Generate a unique selector
+          if (el.id) return `#${el.id}`;
+          const classes = Array.from(el.classList).slice(0, 2).join(".");
+          if (classes) return `${el.tagName.toLowerCase()}.${classes}`;
+        }
+      }
+      return null;
+    });
+  }
+
+  if (!foundSelector) {
+    return {
+      detected: false,
+      selector: null,
+      text: "",
+      buttons: [],
+      checkboxes: [],
+      hasGranularControls: false,
+      layerCount: 0,
+      screenshotPath: null,
+    };
+  }
+
+  // Extract modal text
+  const modalText = await page.$eval(foundSelector, (el) => el.textContent ?? "").catch(() => "");
+
+  // Find all buttons and interactive elements within the modal
+  const buttons = await extractButtons(page, foundSelector);
+
+  // Find checkboxes / toggles
+  const checkboxes = await extractCheckboxes(page, foundSelector);
+
+  // Detect if there are nested layers (e.g., "more options" behind a click)
+  const hasGranularControls =
+    checkboxes.length > 0 || buttons.some((b) => b.type === "preferences");
+
+  return {
+    detected: true,
+    selector: foundSelector,
+    text: modalText.trim().replace(/\s+/g, " "),
+    buttons,
+    checkboxes,
+    hasGranularControls,
+    layerCount: hasGranularControls ? 2 : 1,
+    screenshotPath: null,
+  };
+}
+
+async function extractButtons(page: Page, modalSelector: string): Promise<ConsentButton[]> {
+  const buttonEls = await page.$$(
+    `${modalSelector} button, ${modalSelector} [role="button"], ${modalSelector} a[href="#"]`,
+  );
+
+  const buttons: ConsentButton[] = [];
+
+  for (const el of buttonEls) {
+    try {
+      const text = ((await el.textContent()) ?? "").trim();
+      if (!text) continue;
+
+      const isVisible = await el.isVisible();
+      const box = await el.boundingBox();
+
+      const computedStyle = await el.evaluate((node) => {
+        const style = window.getComputedStyle(node as Element);
+        return {
+          fontSize: parseFloat(style.fontSize),
+          backgroundColor: style.backgroundColor,
+          color: style.color,
+        };
+      });
+
+      const type = classifyButtonType(text);
+
+      // Build a unique selector for this button
+      const selector = await el.evaluate((node) => {
+        const el = node as Element;
+        if (el.id) return `#${el.id}`;
+        const classes = Array.from(el.classList).slice(0, 3).join(".");
+        const tag = el.tagName.toLowerCase();
+        // Try to build a text-based selector as fallback
+        const escapedText = el.textContent?.trim().substring(0, 30) ?? "";
+        return classes ? `${tag}.${classes}` : `${tag}:has-text("${escapedText}")`;
+      });
+
+      const contrastRatio = computeContrastRatio(
+        computedStyle.color,
+        computedStyle.backgroundColor,
+      );
+
+      buttons.push({
+        type,
+        text,
+        selector,
+        isVisible,
+        boundingBox: box,
+        fontSize: computedStyle.fontSize || null,
+        backgroundColor: computedStyle.backgroundColor,
+        textColor: computedStyle.color,
+        contrastRatio,
+        clickDepth: 1,
+      });
+    } catch {
+      continue;
+    }
+  }
+
+  return buttons;
+}
+
+async function extractCheckboxes(page: Page, modalSelector: string): Promise<ConsentCheckbox[]> {
+  return page
+    .evaluate((selector) => {
+      const modal = document.querySelector(selector);
+      if (!modal) return [];
+
+      const checkboxes: ConsentCheckbox[] = [];
+      const inputs = modal.querySelectorAll(
+        'input[type="checkbox"], input[type="radio"], [role="switch"], [role="checkbox"]',
+      );
+
+      for (const input of inputs) {
+        const el = input as HTMLInputElement;
+        // Find associated label
+        let label = "";
+        if (el.id) {
+          const labelEl = document.querySelector(`label[for="${el.id}"]`);
+          label = labelEl?.textContent?.trim() ?? "";
+        }
+        if (!label) {
+          const parent = el.closest("label") ?? el.parentElement;
+          label = parent?.textContent?.trim() ?? "";
+        }
+
+        checkboxes.push({
+          name: el.name || el.id || "",
+          label: label.substring(0, 100),
+          isCheckedByDefault: el.checked || el.getAttribute("aria-checked") === "true",
+          category: "unknown", // will be classified later
+          selector: el.id ? `#${el.id}` : "",
+        });
+      }
+
+      return checkboxes;
+    }, modalSelector)
+    .catch(() => [] as ConsentCheckbox[]);
+}
+
+function classifyButtonType(text: string): ConsentButtonType {
+  if (ACCEPT_PATTERNS.some((p) => p.test(text))) return "accept";
+  if (REJECT_PATTERNS.some((p) => p.test(text))) return "reject";
+  if (PREFERENCES_PATTERNS.some((p) => p.test(text))) return "preferences";
+  if (/\b(ferm|close|×|✕)\b/i.test(text)) return "close";
+  return "unknown";
+}
+
+/**
+ * Basic contrast ratio computation from RGB strings.
+ * Returns null if colors cannot be parsed.
+ */
+function computeContrastRatio(fg: string, bg: string): number | null {
+  const fgRgb = parseRgb(fg);
+  const bgRgb = parseRgb(bg);
+  if (!fgRgb || !bgRgb) return null;
+
+  const fgL = relativeLuminance(fgRgb);
+  const bgL = relativeLuminance(bgRgb);
+  const lighter = Math.max(fgL, bgL);
+  const darker = Math.min(fgL, bgL);
+  return parseFloat(((lighter + 0.05) / (darker + 0.05)).toFixed(2));
+}
+
+function parseRgb(color: string): [number, number, number] | null {
+  const match = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+  if (!match) return null;
+  return [parseInt(match[1], 10), parseInt(match[2], 10), parseInt(match[3], 10)];
+}
+
+function relativeLuminance([r, g, b]: [number, number, number]): number {
+  const toLinear = (c: number) => {
+    const s = c / 255;
+    return s <= 0.04045 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
+  };
+  return 0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b);
+}

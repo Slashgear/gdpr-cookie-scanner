@@ -1,0 +1,203 @@
+import type {
+  ComplianceScore,
+  ConsentModal,
+  DarkPatternIssue,
+  ScannedCookie,
+  NetworkRequest,
+} from "../types.js";
+import { analyzeButtonWording, analyzeModalText } from "./wording.js";
+
+interface ComplianceInput {
+  modal: ConsentModal;
+  cookiesBeforeInteraction: ScannedCookie[];
+  cookiesAfterAccept: ScannedCookie[];
+  cookiesAfterReject: ScannedCookie[];
+  networkBeforeInteraction: NetworkRequest[];
+  networkAfterAccept: NetworkRequest[];
+  networkAfterReject: NetworkRequest[];
+}
+
+export function analyzeCompliance(input: ComplianceInput): ComplianceScore {
+  const issues: DarkPatternIssue[] = [];
+
+  // ── A. Consent validity (0-25) ────────────────────────────────
+  let consentValidity = 25;
+
+  if (!input.modal.detected) {
+    issues.push({
+      type: "no-reject-button",
+      severity: "critical",
+      description: "No cookie consent modal detected",
+      evidence: "A consent mechanism is required before depositing non-essential cookies",
+    });
+    consentValidity = 0;
+  } else {
+    // Wording analysis
+    const wordingResult = analyzeButtonWording(input.modal.buttons);
+    const textResult = analyzeModalText(input.modal.text);
+    issues.push(...wordingResult.issues, ...textResult.issues);
+
+    // Pre-ticked checkboxes
+    const preTicked = input.modal.checkboxes.filter((c) => c.isCheckedByDefault);
+    if (preTicked.length > 0) {
+      issues.push({
+        type: "pre-ticked",
+        severity: "critical",
+        description: `${preTicked.length} checkbox(es) pre-ticked by default`,
+        evidence: `Pre-ticked boxes are invalid consent under RGPD Recital 32. Affected: ${preTicked.map((c) => c.label || c.name).join(", ")}`,
+      });
+      consentValidity -= 10;
+    }
+
+    // Missing info deductions
+    if (textResult.missingInfo.includes("purposes")) consentValidity -= 5;
+    if (textResult.missingInfo.includes("third-parties")) consentValidity -= 5;
+    if (textResult.missingInfo.length >= 3) consentValidity -= 5;
+  }
+
+  // ── B. Easy refusal (0-25) ────────────────────────────────────
+  let easyRefusal = 25;
+
+  if (!input.modal.detected) {
+    easyRefusal = 0;
+  } else {
+    const acceptButton = input.modal.buttons.find((b) => b.type === "accept");
+    const rejectButton = input.modal.buttons.find((b) => b.type === "reject");
+
+    if (!rejectButton) {
+      issues.push({
+        type: "buried-reject",
+        severity: "critical",
+        description: "No reject button on first layer",
+        evidence: "CNIL (2022) requires reject to require no more clicks than accept",
+      });
+      easyRefusal -= 15;
+    } else if (rejectButton.clickDepth > (acceptButton?.clickDepth ?? 1)) {
+      issues.push({
+        type: "click-asymmetry",
+        severity: "critical",
+        description: "Reject requires more clicks than accept",
+        evidence: `Accept: ${acceptButton?.clickDepth ?? 1} click(s), Reject: ${rejectButton.clickDepth} click(s)`,
+      });
+      easyRefusal -= 15;
+    }
+
+    // Visual asymmetry: if accept button is significantly larger/more prominent
+    if (acceptButton && rejectButton && acceptButton.boundingBox && rejectButton.boundingBox) {
+      const acceptArea = acceptButton.boundingBox.width * acceptButton.boundingBox.height;
+      const rejectArea = rejectButton.boundingBox.width * rejectButton.boundingBox.height;
+      if (acceptArea > rejectArea * 3) {
+        issues.push({
+          type: "asymmetric-prominence",
+          severity: "warning",
+          description: "Accept button is significantly larger than reject button",
+          evidence: `Accept area: ${Math.round(acceptArea)}px², Reject area: ${Math.round(rejectArea)}px²`,
+        });
+        easyRefusal -= 5;
+      }
+    }
+
+    // Font size asymmetry
+    if (acceptButton?.fontSize && rejectButton?.fontSize) {
+      if (acceptButton.fontSize > rejectButton.fontSize * 1.3) {
+        issues.push({
+          type: "nudging",
+          severity: "warning",
+          description: "Accept button font is significantly larger than reject button",
+          evidence: `Accept: ${acceptButton.fontSize}px, Reject: ${rejectButton.fontSize}px`,
+        });
+        easyRefusal -= 5;
+      }
+    }
+  }
+
+  // ── C. Transparency (0-25) ────────────────────────────────────
+  let transparency = 25;
+
+  if (!input.modal.detected) {
+    transparency = 0;
+  } else {
+    if (!input.modal.hasGranularControls) {
+      transparency -= 10;
+    }
+    // Already deducted in consentValidity for missing info
+    const wordingResult = analyzeModalText(input.modal.text);
+    if (wordingResult.missingInfo.length > 0) {
+      transparency -= wordingResult.missingInfo.length * 3;
+    }
+  }
+
+  // ── D. Cookie behavior (0-25) ─────────────────────────────────
+  let cookieBehavior = 25;
+
+  // Cookies deposited before any interaction that require consent
+  const illegalPreConsentCookies = input.cookiesBeforeInteraction.filter((c) => c.requiresConsent);
+
+  if (illegalPreConsentCookies.length > 0) {
+    issues.push({
+      type: "auto-consent",
+      severity: "critical",
+      description: `${illegalPreConsentCookies.length} non-essential cookie(s) deposited before any interaction`,
+      evidence: illegalPreConsentCookies.map((c) => `${c.name} (${c.category})`).join(", "),
+    });
+    cookieBehavior -= Math.min(20, illegalPreConsentCookies.length * 4);
+  }
+
+  // Non-essential cookies persisting after reject
+  const consentCookiesAfterReject = input.cookiesAfterReject.filter(
+    (c) => c.requiresConsent && c.capturedAt === "after-reject",
+  );
+
+  if (consentCookiesAfterReject.length > 0) {
+    issues.push({
+      type: "auto-consent",
+      severity: "critical",
+      description: `${consentCookiesAfterReject.length} non-essential cookie(s) persist after rejection`,
+      evidence: consentCookiesAfterReject.map((c) => `${c.name} (${c.category})`).join(", "),
+    });
+    cookieBehavior -= Math.min(15, consentCookiesAfterReject.length * 3);
+  }
+
+  // Network trackers firing before interaction
+  const preInteractionTrackers = input.networkBeforeInteraction.filter(
+    (r) => r.trackerCategory !== null && r.trackerCategory !== "cdn",
+  );
+
+  if (preInteractionTrackers.length > 0) {
+    issues.push({
+      type: "auto-consent",
+      severity: "critical",
+      description: `${preInteractionTrackers.length} tracker request(s) fired before any consent`,
+      evidence: [...new Set(preInteractionTrackers.map((r) => r.trackerName ?? r.url))]
+        .slice(0, 5)
+        .join(", "),
+    });
+    cookieBehavior -= Math.min(10, preInteractionTrackers.length * 2);
+  }
+
+  // Clamp all scores
+  const clamp = (v: number) => Math.max(0, Math.min(25, v));
+  const breakdown = {
+    consentValidity: clamp(consentValidity),
+    easyRefusal: clamp(easyRefusal),
+    transparency: clamp(transparency),
+    cookieBehavior: clamp(cookieBehavior),
+  };
+
+  const total = Object.values(breakdown).reduce((a, b) => a + b, 0);
+
+  return {
+    total,
+    breakdown,
+    issues,
+    grade: scoreToGrade(total),
+  };
+}
+
+function scoreToGrade(score: number): "A" | "B" | "C" | "D" | "F" {
+  if (score >= 90) return "A";
+  if (score >= 75) return "B";
+  if (score >= 55) return "C";
+  if (score >= 35) return "D";
+  return "F";
+}
