@@ -20,7 +20,7 @@
   "main": "dist/index.js",
   "publishConfig": {
     "access": "public",
-    "registry": "https://npm.pkg.github.com"
+    "registry": "https://registry.npmjs.org"
   },
   "scripts": {
     "build": "tsc",

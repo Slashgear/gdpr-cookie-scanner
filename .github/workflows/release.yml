@@ -23,7 +23,7 @@ jobs:
         with:
           node-version: 22
           cache: pnpm
-          registry-url: https://npm.pkg.github.com
+          registry-url: https://registry.npmjs.org
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -31,7 +31,8 @@ jobs:
       - name: Build
         run: pnpm build
 
-      - name: Create release PR or publish
+      - name: Create release PR or publish to npm
+        id: changesets
         uses: changesets/action@v1
         with:
           publish: pnpm changeset publish
@@ -39,4 +40,17 @@ jobs:
           commit: "chore: release new version"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Configure registry for GitHub Packages
+        if: steps.changesets.outputs.published == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://npm.pkg.github.com
+
+      - name: Publish to GitHub Packages
+        if: steps.changesets.outputs.published == 'true'
+        run: npm publish
+        env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
