@@ -35,6 +35,41 @@ pnpm build
 - **Compliance rules** — refine scoring rules in `src/analyzers/compliance.ts`
 - **Report** — improve report rendering in `src/report/generator.ts`
 
+## Releasing
+
+Releases are handled by maintainers only. The process is:
+
+1. **Bump the version** in `package.json` following [semver](https://semver.org/):
+
+   ```bash
+   # patch: bug fixes (0.1.0 → 0.1.1)
+   npm version patch
+
+   # minor: new features, backwards-compatible (0.1.0 → 0.2.0)
+   npm version minor
+
+   # major: breaking changes (0.1.0 → 1.0.0)
+   npm version major
+   ```
+
+   This automatically creates a commit and a git tag (`vX.Y.Z`).
+
+2. **Push the commit and the tag:**
+
+   ```bash
+   git push && git push --tags
+   ```
+
+3. **Create a GitHub Release** from the tag at
+   [github.com/Slashgear/gdpr-report/releases/new](https://github.com/Slashgear/gdpr-report/releases/new):
+   - Select the tag `vX.Y.Z`
+   - Write release notes (breaking changes, new features, fixes)
+   - Publish the release
+
+4. **The CI publishes automatically** — the [release workflow](.github/workflows/release.yml)
+   triggers on release creation, builds the project, and publishes
+   `@slashgear/gdpr-cookie-scanner` to [GitHub Packages](https://github.com/Slashgear/gdpr-report/pkgs/npm/gdpr-cookie-scanner).
+
 ## Conventions
 
 - Local imports must include the `.js` extension (ESM NodeNext module)
