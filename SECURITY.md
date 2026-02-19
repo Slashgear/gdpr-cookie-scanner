@@ -1,15 +1,15 @@
-# Politique de sécurité
+# Security Policy
 
-## Signaler une vulnérabilité
+## Reporting a vulnerability
 
-Si tu découvres une vulnérabilité de sécurité, **ne pas ouvrir d'issue publique**.
+If you discover a security vulnerability, **do not open a public issue**.
 
-Envoie un rapport via [GitHub Security Advisories](https://github.com/Slashgear/gdpr-report/security/advisories/new) en incluant :
+Send a report via [GitHub Security Advisories](https://github.com/Slashgear/gdpr-report/security/advisories/new) including:
 
-- Une description de la vulnérabilité
-- Les étapes pour la reproduire
-- L'impact potentiel
+- A description of the vulnerability
+- Steps to reproduce it
+- The potential impact
 
-## Périmètre
+## Scope
 
-Cet outil fait tourner un navigateur Chromium contrôlé sur des URLs fournies par l'utilisateur. Il est conçu pour être exécuté en local ou en environnement CI maîtrisé — ne pas exposer la CLI comme service web sans isolation appropriée.
+This tool runs a controlled Chromium browser against URLs provided by the user. It is designed to be run locally or in a controlled CI environment — do not expose the CLI as a web service without appropriate isolation.

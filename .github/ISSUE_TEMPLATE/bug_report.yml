@@ -1,27 +1,27 @@
 name: Bug report
-description: Signaler un problème avec le scanner
+description: Report a problem with the scanner
 labels: [bug]
 body:
   - type: input
     id: url
     attributes:
-      label: URL scannée
-      description: L'URL qui a provoqué le problème (optionnel si sensible)
+      label: Scanned URL
+      description: The URL that caused the problem (optional if sensitive)
     validations:
       required: false
 
   - type: textarea
     id: description
     attributes:
-      label: Description du problème
-      description: Ce qui s'est passé vs ce qui était attendu
+      label: Problem description
+      description: What happened vs what was expected
     validations:
       required: true
 
   - type: textarea
     id: reproduce
     attributes:
-      label: Commande utilisée
+      label: Command used
       render: bash
       placeholder: node dist/cli.js scan https://...
     validations:
@@ -30,7 +30,7 @@ body:
   - type: textarea
     id: output
     attributes:
-      label: Sortie / erreur
+      label: Output / error
       render: text
     validations:
       required: false
@@ -38,7 +38,7 @@ body:
   - type: input
     id: version
     attributes:
-      label: Version de Node.js
-      placeholder: "ex: 22.0.0"
+      label: Node.js version
+      placeholder: "e.g. 22.0.0"
     validations:
       required: true

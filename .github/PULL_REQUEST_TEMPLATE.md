@@ -1,24 +1,24 @@
 ## Description
 
-<!-- Décris les changements apportés -->
+<!-- Describe the changes made -->
 
-## Type de changement
+## Type of change
 
-- [ ] Correction de bug
-- [ ] Nouvelle fonctionnalité
-- [ ] Nouveau tracker / pattern de cookie
-- [ ] Amélioration de la détection CMP
+- [ ] Bug fix
+- [ ] New feature
+- [ ] New tracker / cookie pattern
+- [ ] CMP detection improvement
 - [ ] Refactoring / performance
 - [ ] Documentation
 
 ## Checklist
 
-- [ ] `pnpm format:check` passe
-- [ ] `pnpm lint` passe
-- [ ] `pnpm typecheck` passe
-- [ ] `pnpm build` passe
-- [ ] Testé manuellement sur au moins un site
+- [ ] `pnpm format:check` passes
+- [ ] `pnpm lint` passes
+- [ ] `pnpm typecheck` passes
+- [ ] `pnpm build` passes
+- [ ] Manually tested on at least one site
 
-## Référence légale (si nouvelle règle)
+## Legal reference (if new rule)
 
-<!-- Ex: CNIL 2022, RGPD Art. 7, CEPD 03/2022 -->
+<!-- E.g. CNIL 2022, RGPD Art. 7, CEPD 03/2022 -->

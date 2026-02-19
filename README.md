@@ -1,17 +1,20 @@
 # gdpr-cookie-scanner
 
-CLI pour auditer automatiquement la conformité RGPD d'un site web : modale de consentement, dark patterns, cookies déposés avant/après interaction, trackers réseau. Produit un rapport Markdown détaillé.
+[![CI](https://github.com/Slashgear/gdpr-report/actions/workflows/ci.yml/badge.svg)](https://github.com/Slashgear/gdpr-report/actions/workflows/ci.yml)
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md)
+
+CLI tool to automatically audit the GDPR cookie consent compliance of a website: consent modal, dark patterns, cookies set before/after interaction, network trackers. Generates a detailed Markdown report.
 
 ## Installation
 
 ```bash
-# Installer les dépendances
+# Install dependencies
 pnpm install
 
-# Installer les navigateurs Playwright (uniquement au premier setup)
+# Install Playwright browsers (first-time setup only)
 npx playwright install chromium
 
-# Compiler
+# Build
 pnpm build
 ```
 
@@ -23,92 +26,103 @@ node dist/cli.js scan <url> [options]
 
 ### Options
 
-| Option                  | Défaut           | Description                            |
-| ----------------------- | ---------------- | -------------------------------------- |
-| `-o, --output <dir>`    | `./gdpr-reports` | Répertoire de sortie du rapport        |
-| `-t, --timeout <ms>`    | `30000`          | Timeout de navigation                  |
-| `--no-screenshots`      | —                | Désactive les captures d'écran         |
-| `-l, --locale <locale>` | `fr-FR`          | Locale du navigateur                   |
-| `-v, --verbose`         | —                | Affiche la stack trace en cas d'erreur |
+| Option                  | Default          | Description                     |
+| ----------------------- | ---------------- | ------------------------------- |
+| `-o, --output <dir>`    | `./gdpr-reports` | Output directory for the report |
+| `-t, --timeout <ms>`    | `30000`          | Navigation timeout              |
+| `--no-screenshots`      | —                | Disable screenshot capture      |
+| `-l, --locale <locale>` | `fr-FR`          | Browser locale                  |
+| `-v, --verbose`         | —                | Show full stack trace on error  |
 
-### Exemples
+### Examples
 
 ```bash
-# Scan basique
+# Basic scan
 node dist/cli.js scan https://example.com
 
-# Avec répertoire de sortie personnalisé
-node dist/cli.js scan https://example.com -o ./rapports
+# With custom output directory
+node dist/cli.js scan https://example.com -o ./reports
 
-# Scan en anglais, sans screenshots
+# Scan in English, without screenshots
 node dist/cli.js scan https://example.com --locale en-US --no-screenshots
 
-# Voir la base de trackers intégrée
+# Show the built-in tracker database
 node dist/cli.js list-trackers
 ```
 
-## Comment ça fonctionne
+## How it works
 
-Le scanner exécute **4 phases** avec un vrai navigateur Chromium (Playwright) :
+The scanner runs **4 phases** using a real Chromium browser (Playwright):
 
-1. **Chargement initial** — La page est chargée sans aucune interaction. Tous les cookies et requêtes réseau sont capturés (`before-interaction`).
-2. **Analyse de la modale** — La bannière de consentement est détectée (sélecteurs CSS des CMP connus + heuristiques DOM). Les boutons sont extraits avec leurs propriétés visuelles (taille, couleur, ratio de contraste).
-3. **Test du refus** — Le bouton « Refuser » est cliqué. Les cookies et requêtes sont capturés (`after-reject`).
-4. **Test de l'acceptation** — Une nouvelle session navigateur (état vierge) charge la page et clique « Accepter ». Les cookies et requêtes sont capturés (`after-accept`).
+1. **Initial load** — The page is loaded without any interaction. All cookies and network requests are captured (`before-interaction`).
+2. **Modal analysis** — The consent banner is detected (CSS selectors of known CMPs + DOM heuristics). Buttons are extracted with their visual properties (size, color, contrast ratio).
+3. **Reject test** — The "Reject" button is clicked. Cookies and requests are captured (`after-reject`).
+4. **Accept test** — A new browser session (clean state) loads the page and clicks "Accept". Cookies and requests are captured (`after-accept`).
 
-## Rapport généré
+## Generated report
 
-Le rapport Markdown contient :
+The Markdown report contains:
 
-- **Score global** (0–100) et **note** A/B/C/D/F
-- Résumé exécutif
-- Analyse de la modale : boutons, cases à cocher, taille de police, captures d'écran
-- Dark patterns détectés (bouton refus absent, asymétrie visuelle, cases pré-cochées, formulations trompeuses…)
-- Tableau des cookies avant interaction, après refus, après acceptation
-- Requêtes réseau trackers par phase
-- Recommandations ciblées
-- Références légales (RGPD, directive ePrivacy, lignes directrices CEPD, CNIL 2022)
+- **Global score** (0–100) and **grade** A/B/C/D/F
+- Executive summary
+- Modal analysis: buttons, checkboxes, font size, screenshots
+- Detected dark patterns (missing reject button, visual asymmetry, pre-ticked boxes, misleading wording…)
+- Cookie table before interaction, after reject, after accept
+- Network tracker requests by phase
+- Targeted recommendations
+- Legal references (RGPD, ePrivacy directive, CEPD guidelines, CNIL 2022)
 
-Le fichier est créé sous : `<output-dir>/gdpr-report-<domaine>-<date>.md`
+The file is created at: `<output-dir>/gdpr-report-<domain>-<date>.md`
 
 ## Scoring
 
-Le score est composé de 4 critères (25 points chacun) :
+The score is made up of 4 criteria (25 points each):
 
-| Critère                      | Ce qui est évalué                                                                                      |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------ |
-| **Validité du consentement** | Cases pré-cochées, formulations ambiguës, informations manquantes                                      |
-| **Facilité de refus**        | Bouton refus absent ou enterré, asymétrie de clics, asymétrie visuelle                                 |
-| **Transparence**             | Contrôles granulaires, mention des finalités / tiers / durée / droit de retrait                        |
-| **Comportement des cookies** | Cookies non essentiels avant consentement, cookies persistant après refus, trackers avant consentement |
+| Criterion            | What is evaluated                                                                              |
+| -------------------- | ---------------------------------------------------------------------------------------------- |
+| **Consent validity** | Pre-ticked boxes, ambiguous wording, missing information                                       |
+| **Easy refusal**     | Missing or buried reject button, click asymmetry, visual asymmetry                             |
+| **Transparency**     | Granular controls, mention of purposes / third parties / duration / right to withdraw          |
+| **Cookie behavior**  | Non-essential cookies before consent, cookies persisting after reject, trackers before consent |
 
-**Grille de notes :** A ≥ 90 · B ≥ 75 · C ≥ 55 · D ≥ 35 · F < 35
+**Grade scale:** A ≥ 90 · B ≥ 75 · C ≥ 55 · D ≥ 35 · F < 35
 
-Le processus termine avec le code de sortie `1` si la note est F, `2` en cas d'erreur de scan.
+The process exits with code `1` if the grade is F, `2` on scan error.
 
-## Dark patterns détectés
+## Detected dark patterns
 
-| Type                    | Sévérité               | Description                                             |
-| ----------------------- | ---------------------- | ------------------------------------------------------- |
-| `no-reject-button`      | Critique               | Aucune option de refus dans la modale                   |
-| `buried-reject`         | Critique               | Bouton refus absent au premier niveau                   |
-| `click-asymmetry`       | Critique               | Refuser nécessite plus de clics qu'accepter             |
-| `pre-ticked`            | Critique               | Cases pré-cochées (invalide selon RGPD Considérant 32)  |
-| `auto-consent`          | Critique               | Cookies/trackers non essentiels avant tout consentement |
-| `asymmetric-prominence` | Avertissement          | Bouton accepter nettement plus grand que refuser        |
-| `nudging`               | Avertissement          | Police du bouton accepter plus grande que refuser       |
-| `misleading-wording`    | Avertissement/Critique | Libellés ambigus (« OK », « Continuer »…)               |
-| `missing-info`          | Avertissement          | Informations obligatoires absentes du texte             |
+| Type                    | Severity         | Description                                           |
+| ----------------------- | ---------------- | ----------------------------------------------------- |
+| `no-reject-button`      | Critical         | No reject option in the modal                         |
+| `buried-reject`         | Critical         | Reject button not present at the first layer          |
+| `click-asymmetry`       | Critical         | Rejecting requires more clicks than accepting         |
+| `pre-ticked`            | Critical         | Pre-ticked checkboxes (invalid under RGPD Recital 32) |
+| `auto-consent`          | Critical         | Non-essential cookies/trackers before any consent     |
+| `asymmetric-prominence` | Warning          | Accept button significantly larger than reject        |
+| `nudging`               | Warning          | Accept button font larger than reject button font     |
+| `misleading-wording`    | Warning/Critical | Ambiguous labels ("OK", "Continue"…)                  |
+| `missing-info`          | Warning          | Mandatory information absent from the text            |
 
-## CMPs reconnues automatiquement
+## Automatically recognised CMPs
 
-Axeptio, Cookiebot, OneTrust, Didomi, Tarteaucitron, Usercentrics, et une vingtaine d'autres via leurs sélecteurs CSS spécifiques. Un fallback heuristique (élément fixe/sticky avec texte cookie-related) couvre les banières custom.
+Axeptio, Cookiebot, OneTrust, Didomi, Tarteaucitron, Usercentrics, and about twenty others via their specific CSS selectors. A heuristic fallback (fixed/sticky element with cookie-related text) covers custom banners.
 
-## Développement
+## Development
 
 ```bash
-pnpm dev          # Compilation en mode watch
-pnpm typecheck    # Vérification des types sans compilation
-pnpm lint         # ESLint
-pnpm test         # Jest
+pnpm dev          # Watch-mode compilation
+pnpm typecheck    # Type-check without compiling
+pnpm lint         # oxlint
+pnpm format       # oxfmt
 ```
+
+## Release
+
+Releases are published to [GitHub Packages](https://github.com/Slashgear/gdpr-report/pkgs/npm/gdpr-cookie-scanner) automatically when a GitHub Release is created. To release:
+
+1. Create a new GitHub Release with a tag matching `vX.Y.Z`
+2. The [release workflow](.github/workflows/release.yml) builds and publishes `@slashgear/gdpr-cookie-scanner` to GitHub Packages
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md). This project follows the [Contributor Covenant](CODE_OF_CONDUCT.md) code of conduct.

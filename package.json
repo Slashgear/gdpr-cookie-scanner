@@ -1,5 +1,5 @@
 {
-  "name": "gdpr-cookie-scanner",
+  "name": "@slashgear/gdpr-cookie-scanner",
   "version": "0.1.0",
   "description": "CLI tool to scan websites for GDPR cookie consent compliance",
   "keywords": [
@@ -18,6 +18,10 @@
   },
   "type": "module",
   "main": "dist/index.js",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://npm.pkg.github.com"
+  },
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",

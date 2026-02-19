@@ -1,12 +1,12 @@
-# Contribuer à gdpr-cookie-scanner
+# Contributing to gdpr-cookie-scanner
 
-## Prérequis
+## Prerequisites
 
 - Node.js ≥ 20
 - pnpm
-- Playwright : `npx playwright install chromium`
+- Playwright: `npx playwright install chromium`
 
-## Démarrage
+## Getting started
 
 ```bash
 git clone https://github.com/Slashgear/gdpr-report.git
@@ -17,26 +17,26 @@ pnpm build
 
 ## Workflow
 
-1. Fork le dépôt et crée une branche depuis `main`
-2. Effectue tes modifications
-3. Vérifie que la CI passe en local :
+1. Fork the repository and create a branch from `main`
+2. Make your changes
+3. Verify that CI passes locally:
    ```bash
    pnpm format:check
    pnpm lint
    pnpm typecheck
    pnpm build
    ```
-4. Ouvre une Pull Request vers `main`
+4. Open a Pull Request targeting `main`
 
-## Domaines où contribuer
+## Areas to contribute
 
-- **Classifiers** — ajouter des patterns de cookies ou des domaines trackers dans `src/classifiers/`
-- **Consent modal detection** — améliorer la détection des CMP dans `src/scanner/consent-modal.ts`
-- **Compliance rules** — affiner les règles de scoring dans `src/analyzers/compliance.ts`
-- **Report** — améliorer le rendu des rapports dans `src/report/generator.ts`
+- **Classifiers** — add cookie patterns or tracker domains in `src/classifiers/`
+- **Consent modal detection** — improve CMP detection in `src/scanner/consent-modal.ts`
+- **Compliance rules** — refine scoring rules in `src/analyzers/compliance.ts`
+- **Report** — improve report rendering in `src/report/generator.ts`
 
 ## Conventions
 
-- Les imports locaux doivent inclure l'extension `.js` (module ESM NodeNext)
-- Le formatage est géré par oxfmt (`pnpm format`), ne pas formater manuellement
-- Les messages de commit suivent la convention [Conventional Commits](https://www.conventionalcommits.org/)
+- Local imports must include the `.js` extension (ESM NodeNext module)
+- Formatting is handled by oxfmt (`pnpm format`), do not format manually
+- Commit messages follow the [Conventional Commits](https://www.conventionalcommits.org/) convention
