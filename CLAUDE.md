@@ -8,8 +8,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 pnpm build         # Compile TypeScript → dist/
 pnpm dev           # Watch mode compilation
 pnpm typecheck     # Type-check without emitting
-pnpm lint          # ESLint on src/
-pnpm test          # Run Jest (experimental VM modules)
+pnpm lint          # oxlint
+pnpm lint:fix      # oxlint --fix
+pnpm format        # oxfmt (auto-format)
+pnpm format:check  # oxfmt --check (used in CI)
 
 # Run the CLI after building
 node dist/cli.js scan <url>
@@ -17,7 +19,16 @@ node dist/cli.js scan <url> -o ./reports --locale fr-FR --verbose
 node dist/cli.js list-trackers
 ```
 
-No test files currently exist despite the test script being configured.
+There are no tests currently.
+
+## Release process
+
+This project uses [Changesets](https://github.com/changesets/changesets).
+
+- **Contributors**: run `pnpm changeset` before opening a PR to document the change (patch/minor/major + summary). Commit the generated `.changeset/*.md` file with your PR. Skip for docs/CI-only changes.
+- **Maintainers**: merging changesets into `main` triggers the release workflow, which opens a "chore: release new version" PR (bumps version + updates `CHANGELOG.md`). Merging that PR publishes to GitHub Packages and creates the GitHub Release automatically.
+
+Commits must follow [Conventional Commits](https://www.conventionalcommits.org/) (`feat:`, `fix:`, `chore:`, `docs:`, etc.).
 
 ## Architecture
 
@@ -45,7 +56,7 @@ Phase 3 and 4 require two separate browser sessions so cookie state is fully iso
 - **`src/classifiers/tracker-list.ts`** — Static database of tracker domains by category
 - **`src/analyzers/compliance.ts`** — Scores 4 dimensions (0–25 each) and surfaces `DarkPatternIssue` objects: consent validity, easy refusal, transparency, cookie behavior
 - **`src/analyzers/wording.ts`** — Text analysis of button labels and modal copy
-- **`src/report/generator.ts`** — Renders a Markdown report in French from `ScanResult`
+- **`src/report/generator.ts`** — Renders a Markdown report and checklist from `ScanResult`; runs `oxfmt` on generated files
 - **`src/types.ts`** — All shared TypeScript interfaces (`ScanResult`, `ScanOptions`, `ComplianceScore`, `ConsentModal`, etc.)
 
 ### Compliance scoring

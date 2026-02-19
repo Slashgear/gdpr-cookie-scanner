@@ -30,7 +30,8 @@
     "lint:fix": "oxlint --fix .",
     "format": "oxfmt .",
     "format:check": "oxfmt --check .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "changeset": "changeset"
   },
   "dependencies": {
     "chalk": "^5.3.0",
@@ -39,6 +40,7 @@
     "playwright": "^1.49.0"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.29.8",
     "@types/node": "^22.0.0",
     "oxfmt": "^0.33.0",
     "oxlint": "^1.48.0",

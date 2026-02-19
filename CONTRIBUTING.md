@@ -37,38 +37,37 @@ pnpm build
 
 ## Releasing
 
-Releases are handled by maintainers only. The process is:
+This project uses [Changesets](https://github.com/changesets/changesets) to manage versions and changelogs.
 
-1. **Bump the version** in `package.json` following [semver](https://semver.org/):
+### As a contributor — document your change
 
-   ```bash
-   # patch: bug fixes (0.1.0 → 0.1.1)
-   npm version patch
+Every PR that changes behaviour (bug fix, new feature, breaking change) must include a changeset:
 
-   # minor: new features, backwards-compatible (0.1.0 → 0.2.0)
-   npm version minor
+```bash
+pnpm changeset
+```
 
-   # major: breaking changes (0.1.0 → 1.0.0)
-   npm version major
-   ```
+The interactive prompt asks:
 
-   This automatically creates a commit and a git tag (`vX.Y.Z`).
+- **Which packages** are affected (only one here: `@slashgear/gdpr-cookie-scanner`)
+- **Bump type**: `patch` (bug fix) · `minor` (new feature) · `major` (breaking change)
+- **Summary**: one-line description that will appear in `CHANGELOG.md`
 
-2. **Push the commit and the tag:**
+This creates a file in `.changeset/` — commit it alongside your changes.
 
-   ```bash
-   git push && git push --tags
-   ```
+> PRs without a changeset are fine for docs, tests, or CI changes that don't affect the published package.
 
-3. **Create a GitHub Release** from the tag at
-   [github.com/Slashgear/gdpr-report/releases/new](https://github.com/Slashgear/gdpr-report/releases/new):
-   - Select the tag `vX.Y.Z`
-   - Write release notes (breaking changes, new features, fixes)
-   - Publish the release
+### As a maintainer — publish a release
 
-4. **The CI publishes automatically** — the [release workflow](.github/workflows/release.yml)
-   triggers on release creation, builds the project, and publishes
-   `@slashgear/gdpr-cookie-scanner` to [GitHub Packages](https://github.com/Slashgear/gdpr-report/pkgs/npm/gdpr-cookie-scanner).
+When changesets are merged into `main`, the [release workflow](.github/workflows/release.yml) automatically opens a **"chore: release new version"** PR that:
+
+- Bumps `package.json` version
+- Aggregates all changeset summaries into `CHANGELOG.md`
+
+Merging that PR triggers the workflow again, which:
+
+1. Publishes `@slashgear/gdpr-cookie-scanner` to [GitHub Packages](https://github.com/Slashgear/gdpr-report/pkgs/npm/gdpr-cookie-scanner)
+2. Creates the corresponding GitHub Release with the generated changelog
 
 ## Conventions
 
