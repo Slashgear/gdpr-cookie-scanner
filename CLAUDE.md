@@ -21,14 +21,26 @@ node dist/cli.js list-trackers
 
 There are no tests currently.
 
+## Commit checklist
+
+Before every commit, always run in order:
+
+```bash
+pnpm lint        # must show 0 errors (warnings tolerated if pre-existing)
+pnpm format      # auto-fix formatting — never commit with format issues
+pnpm typecheck   # must pass with 0 errors
+```
+
+Then create a changeset (see below) and commit everything together.
+
+Commits must follow [Conventional Commits](https://www.conventionalcommits.org/) (`feat:`, `fix:`, `chore:`, `docs:`, etc.).
+
 ## Release process
 
 This project uses [Changesets](https://github.com/changesets/changesets).
 
-- **Contributors**: run `pnpm changeset` before opening a PR to document the change (patch/minor/major + summary). Commit the generated `.changeset/*.md` file with your PR. Skip for docs/CI-only changes.
+- **Contributors**: write a `.changeset/<slug>.md` file manually (the interactive CLI doesn't work in non-TTY environments) before every meaningful commit. Use `patch` for bug fixes, `minor` for new features, `major` for breaking changes. The summary should explain *what* changed and *why* — not just restate the diff. Skip for docs/CI-only changes.
 - **Maintainers**: merging changesets into `main` triggers the release workflow, which opens a "chore: release new version" PR (bumps version + updates `CHANGELOG.md`). Merging that PR publishes to GitHub Packages and creates the GitHub Release automatically.
-
-Commits must follow [Conventional Commits](https://www.conventionalcommits.org/) (`feat:`, `fix:`, `chore:`, `docs:`, etc.).
 
 ## Architecture
 
@@ -56,7 +68,7 @@ Phase 3 and 4 require two separate browser sessions so cookie state is fully iso
 - **`src/classifiers/tracker-list.ts`** — Static database of tracker domains by category
 - **`src/analyzers/compliance.ts`** — Scores 4 dimensions (0–25 each) and surfaces `DarkPatternIssue` objects: consent validity, easy refusal, transparency, cookie behavior
 - **`src/analyzers/wording.ts`** — Text analysis of button labels and modal copy
-- **`src/report/generator.ts`** — Renders a Markdown report and checklist from `ScanResult`; runs `oxfmt` on generated files
+- **`src/report/generator.ts`** — Renders 3 Markdown files from `ScanResult`: the main compliance report (`gdpr-report-*.md`), the checklist (`gdpr-checklist-*.md`), and the cookie inventory (`gdpr-cookies-*.md`); runs `oxfmt` on all generated files
 - **`src/types.ts`** — All shared TypeScript interfaces (`ScanResult`, `ScanOptions`, `ComplianceScore`, `ConsentModal`, etc.)
 
 ### Compliance scoring

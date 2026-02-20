@@ -97,7 +97,7 @@ export class Scanner {
     await clearState(session2.context);
     const interceptor4 = createNetworkInterceptor(session2.page, "after-accept");
 
-    let cookiesAfterAccept = cookiesBeforeInteraction;
+    let cookiesAfterAccept: typeof cookiesBeforeInteraction = [];
     let networkAfterAccept: typeof networkBeforeInteraction = [];
 
     try {
@@ -105,8 +105,14 @@ export class Scanner {
         waitUntil: "networkidle",
         timeout: this.options.timeout,
       });
-      await session2.page.waitForTimeout(2000);
+    } catch (err) {
+      errors.push(`Accept phase navigation timeout: ${String(err)}`);
+    }
 
+    // Give a moment for late-loading scripts even if networkidle timed out
+    await session2.page.waitForTimeout(2000);
+
+    try {
       const modal2 = await detectConsentModal(session2.page, this.options);
       const acceptButton = modal2.buttons.find((b) => b.type === "accept");
 

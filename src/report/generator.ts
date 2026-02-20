@@ -36,6 +36,12 @@ export class ReportGenerator {
     await writeFile(checklistPath, checklist, "utf-8");
     await execFileAsync(oxfmtBin, [checklistPath]).catch(() => {});
 
+    const cookiesFilename = `gdpr-cookies-${hostname}-${date}.md`;
+    const cookiesPath = join(this.options.outputDir, cookiesFilename);
+    const cookiesInventory = this.buildCookiesInventory(result);
+    await writeFile(cookiesPath, cookiesInventory, "utf-8");
+    await execFileAsync(oxfmtBin, [cookiesPath]).catch(() => {});
+
     return outputPath;
   }
 
@@ -193,7 +199,7 @@ ${row("Cookie behavior", breakdown.cookieBehavior, 25)}
     const { modal } = r;
     const acceptBtn = modal.buttons.find((b) => b.type === "accept");
     const rejectBtn = modal.buttons.find((b) => b.type === "reject");
-    const prefBtn = modal.buttons.find((b) => b.type === "preferences");
+    const _prefBtn = modal.buttons.find((b) => b.type === "preferences");
 
     const preTicked = modal.checkboxes.filter((c) => c.isCheckedByDefault);
 
@@ -460,6 +466,131 @@ ${rows.join("\n")}
     return recs.join("\n\n");
   }
 
+  private buildCookiesInventory(r: ScanResult): string {
+    const hostname = new URL(r.url).hostname;
+    const scanDate = new Date(r.scanDate).toLocaleString("en-GB");
+
+    // Collect all cookies across all phases, keyed by name+domain
+    type CookieEntry = {
+      name: string;
+      domain: string;
+      category: string;
+      phases: Set<string>;
+      expires: number | null;
+      httpOnly: boolean;
+      secure: boolean;
+      requiresConsent: boolean;
+    };
+
+    const cookieMap = new Map<string, CookieEntry>();
+
+    const phaseLabel: Record<ScannedCookie["capturedAt"], string> = {
+      "before-interaction": "before consent",
+      "after-accept": "after acceptance",
+      "after-reject": "after rejection",
+    };
+
+    const allCookies = [
+      ...r.cookiesBeforeInteraction,
+      ...r.cookiesAfterAccept,
+      ...r.cookiesAfterReject,
+    ];
+
+    for (const c of allCookies) {
+      const key = `${c.name}||${c.domain}`;
+      if (!cookieMap.has(key)) {
+        cookieMap.set(key, {
+          name: c.name,
+          domain: c.domain,
+          category: c.category,
+          phases: new Set(),
+          expires: c.expires,
+          httpOnly: c.httpOnly,
+          secure: c.secure,
+          requiresConsent: c.requiresConsent,
+        });
+      }
+      cookieMap.get(key)!.phases.add(phaseLabel[c.capturedAt]);
+    }
+
+    const expires = (entry: CookieEntry): string => {
+      if (entry.expires === null) return "Session";
+      const days = Math.round((entry.expires * 1000 - Date.now()) / 86400000);
+      if (days < 0) return "Expired";
+      if (days === 0) return "< 1 day";
+      if (days < 30) return `${days} days`;
+      return `${Math.round(days / 30)} months`;
+    };
+
+    const categoryLabel: Record<string, string> = {
+      "strictly-necessary": "Strictly necessary",
+      analytics: "Analytics",
+      advertising: "Advertising",
+      social: "Social",
+      personalization: "Personalization",
+      unknown: "Unknown",
+    };
+
+    const entries = [...cookieMap.values()].sort((a, b) => {
+      // Sort: strictly-necessary first, then by category, then by name
+      const order = [
+        "strictly-necessary",
+        "analytics",
+        "advertising",
+        "social",
+        "personalization",
+        "unknown",
+      ];
+      const oa = order.indexOf(a.category);
+      const ob = order.indexOf(b.category);
+      if (oa !== ob) return oa - ob;
+      return a.name.localeCompare(b.name);
+    });
+
+    const lines: string[] = [];
+
+    lines.push(`# Cookie Inventory — ${hostname}`);
+    lines.push(`
+> **Scan date:** ${scanDate}
+> **Scanned URL:** ${r.url}
+> **Unique cookies detected:** ${entries.length}
+`);
+
+    lines.push(`## Instructions`);
+    lines.push(`
+This table lists all cookies detected during the scan, across all phases.
+The **Description / Purpose** column is to be filled in by the DPO or technical owner.
+
+- **Before consent** — cookie present from page load, before any interaction
+- **After acceptance** — cookie set or persisting after clicking "Accept all"
+- **After rejection** — cookie present after clicking "Reject all"
+`);
+
+    lines.push(`## Cookie table\n`);
+    lines.push(
+      `| Cookie | Domain | Category | Phases | Expiry | Consent required | Description / Purpose |`,
+    );
+    lines.push(
+      `|--------|--------|----------|--------|--------|------------------|-----------------------|`,
+    );
+
+    for (const entry of entries) {
+      const phases = [...entry.phases].join(", ");
+      const consent = entry.requiresConsent ? "⚠️ Yes" : "✅ No";
+      const cat = categoryLabel[entry.category] ?? entry.category;
+      lines.push(
+        `| \`${entry.name}\` | ${entry.domain} | ${cat} | ${phases} | ${expires(entry)} | ${consent} | <!-- fill in --> |`,
+      );
+    }
+
+    lines.push(`\n---`);
+    lines.push(
+      `\n_Automatically generated by gdpr-cookie-scanner. Categories marked "Unknown" could not be identified automatically and should be verified manually._\n`,
+    );
+
+    return lines.join("\n") + "\n";
+  }
+
   private buildChecklist(r: ScanResult): string {
     const hostname = new URL(r.url).hostname;
     const scanDate = new Date(r.scanDate).toLocaleString("en-GB");
@@ -485,7 +616,8 @@ ${rows.join("\n")}
     rows.push({
       category: "Consent",
       rule: "Consent modal detected",
-      reference: "RGPD Art. 7 · Dir. ePrivacy Art. 5(3)",
+      reference:
+        "[GDPR Art. 7](https://gdpr-info.eu/art-7-gdpr/) · [ePrivacy Dir. Art. 5(3)](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32002L0058)",
       status: r.modal.detected ? ok : ko,
       detail: r.modal.detected
         ? `Detected (\`${r.modal.selector}\`)`
@@ -496,7 +628,7 @@ ${rows.join("\n")}
     rows.push({
       category: "Consent",
       rule: "No pre-ticked checkboxes",
-      reference: "RGPD Recital 32",
+      reference: "[GDPR Recital 32](https://gdpr-info.eu/recitals/no-32/)",
       status: preTicked.length === 0 ? ok : ko,
       detail:
         preTicked.length === 0
@@ -509,7 +641,7 @@ ${rows.join("\n")}
     rows.push({
       category: "Consent",
       rule: "Accept button label is unambiguous",
-      reference: "RGPD Art. 4(11)",
+      reference: "[GDPR Art. 4(11)](https://gdpr-info.eu/art-4-gdpr/)",
       status:
         !r.modal.detected || !misleadingAccept
           ? ok
@@ -531,7 +663,8 @@ ${rows.join("\n")}
     rows.push({
       category: "Easy refusal",
       rule: "Reject button present at first layer",
-      reference: "CNIL Recommendation 2022",
+      reference:
+        "[CNIL Recommendation 2022](https://www.cnil.fr/fr/cookies-et-autres-traceurs/regles/cookies/recommandation-sur-les-cookies-et-autres-traceurs)",
       status: !r.modal.detected ? ko : noReject ? ko : ok,
       detail: !r.modal.detected
         ? "Modal not detected"
@@ -544,7 +677,8 @@ ${rows.join("\n")}
     rows.push({
       category: "Easy refusal",
       rule: "Rejecting requires no more clicks than accepting",
-      reference: "CNIL Recommendation 2022",
+      reference:
+        "[CNIL Recommendation 2022](https://www.cnil.fr/fr/cookies-et-autres-traceurs/regles/cookies/recommandation-sur-les-cookies-et-autres-traceurs)",
       status: !r.modal.detected ? ko : clickIssue ? ko : ok,
       detail: !r.modal.detected
         ? "Modal not detected"
@@ -559,7 +693,8 @@ ${rows.join("\n")}
     rows.push({
       category: "Easy refusal",
       rule: "Size symmetry between Accept and Reject",
-      reference: "CEPD Guidelines 03/2022",
+      reference:
+        "[EDPB Guidelines 03/2022](https://edpb.europa.eu/our-work-tools/our-documents/guidelines/guidelines-032022-dark-patterns-social-media-platform_en)",
       status: !r.modal.detected ? ko : sizeIssue ? warn : ok,
       detail: !r.modal.detected
         ? "Modal not detected"
@@ -572,7 +707,8 @@ ${rows.join("\n")}
     rows.push({
       category: "Easy refusal",
       rule: "Font symmetry between Accept and Reject",
-      reference: "CEPD Guidelines 03/2022",
+      reference:
+        "[EDPB Guidelines 03/2022](https://edpb.europa.eu/our-work-tools/our-documents/guidelines/guidelines-032022-dark-patterns-social-media-platform_en)",
       status: !r.modal.detected ? ko : nudgeIssue ? warn : ok,
       detail: !r.modal.detected
         ? "Modal not detected"
@@ -585,7 +721,8 @@ ${rows.join("\n")}
     rows.push({
       category: "Transparency",
       rule: "Granular controls available",
-      reference: "CEPD Guidelines 05/2020",
+      reference:
+        "[EDPB Guidelines 05/2020](https://edpb.europa.eu/our-work-tools/our-documents/guidelines/guidelines-052020-consent-under-regulation-2016679_en)",
       status: !r.modal.detected ? ko : r.modal.hasGranularControls ? ok : warn,
       detail: !r.modal.detected
         ? "Modal not detected"
@@ -595,21 +732,25 @@ ${rows.join("\n")}
     });
 
     const infoChecks: Array<{ key: string; label: string; ref: string }> = [
-      { key: "purposes", label: "Processing purposes mentioned", ref: "RGPD Art. 13-14" },
+      {
+        key: "purposes",
+        label: "Processing purposes mentioned",
+        ref: "[GDPR Art. 13-14](https://gdpr-info.eu/art-13-gdpr/)",
+      },
       {
         key: "third-parties",
         label: "Sub-processors / third parties mentioned",
-        ref: "RGPD Art. 13-14",
+        ref: "[GDPR Art. 13-14](https://gdpr-info.eu/art-13-gdpr/)",
       },
       {
         key: "duration",
         label: "Retention period mentioned",
-        ref: "RGPD Art. 13(2)(a)",
+        ref: "[GDPR Art. 13(2)(a)](https://gdpr-info.eu/art-13-gdpr/)",
       },
       {
         key: "withdrawal",
         label: "Right to withdraw consent mentioned",
-        ref: "RGPD Art. 7(3)",
+        ref: "[GDPR Art. 7(3)](https://gdpr-info.eu/art-7-gdpr/)",
       },
     ];
 
@@ -635,7 +776,8 @@ ${rows.join("\n")}
     rows.push({
       category: "Cookie behavior",
       rule: "No non-essential cookie before consent",
-      reference: "RGPD Art. 7 · Dir. ePrivacy Art. 5(3)",
+      reference:
+        "[GDPR Art. 7](https://gdpr-info.eu/art-7-gdpr/) · [ePrivacy Dir. Art. 5(3)](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32002L0058)",
       status: illegalPre.length === 0 ? ok : ko,
       detail:
         illegalPre.length === 0
@@ -649,7 +791,8 @@ ${rows.join("\n")}
     rows.push({
       category: "Cookie behavior",
       rule: "Non-essential cookies removed after rejection",
-      reference: "RGPD Art. 7 · CNIL Recommendation 2022",
+      reference:
+        "[GDPR Art. 7](https://gdpr-info.eu/art-7-gdpr/) · [CNIL Recommendation 2022](https://www.cnil.fr/fr/cookies-et-autres-traceurs/regles/cookies/recommandation-sur-les-cookies-et-autres-traceurs)",
       status: persistAfterReject.length === 0 ? ok : ko,
       detail:
         persistAfterReject.length === 0
@@ -663,7 +806,8 @@ ${rows.join("\n")}
     rows.push({
       category: "Cookie behavior",
       rule: "No network tracker before consent",
-      reference: "RGPD Art. 7 · Dir. ePrivacy Art. 5(3)",
+      reference:
+        "[GDPR Art. 7](https://gdpr-info.eu/art-7-gdpr/) · [ePrivacy Dir. Art. 5(3)](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32002L0058)",
       status: preTrackers.length === 0 ? ok : ko,
       detail:
         preTrackers.length === 0
