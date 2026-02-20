@@ -40,6 +40,8 @@
     "format": "oxfmt .",
     "format:check": "oxfmt --check .",
     "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "changeset": "changeset"
   },
   "dependencies": {
@@ -54,7 +56,8 @@
     "@types/node": "^22.0.0",
     "oxfmt": "^0.33.0",
     "oxlint": "^1.48.0",
-    "typescript": "^5.5.0"
+    "typescript": "^5.5.0",
+    "vitest": "^4.0.18"
   },
   "engines": {
     "node": ">=20.0.0"
