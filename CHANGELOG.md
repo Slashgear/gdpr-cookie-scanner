@@ -1,5 +1,14 @@
 # @slashgear/gdpr-cookie-scanner
 
+## 1.2.1
+
+### Patch Changes
+
+- 00fa85c: fix: update broken reference links in the compliance checklist
+
+  The CNIL cookie recommendation URL and the EDPB Guidelines 03/2022 on dark
+  patterns had both moved. Updated to the current working URLs.
+
 ## 1.2.0
 
 ### Minor Changes
