@@ -1,3 +1,4 @@
 # Files excluded from oxfmt formatting
 .changeset/
+CHANGELOG.md
 CLAUDE.md
