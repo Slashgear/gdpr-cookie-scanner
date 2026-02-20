@@ -807,7 +807,7 @@ The **Description / Purpose** column is to be filled in by the DPO or technical 
       category: "Easy refusal",
       rule: "Reject button present at first layer",
       reference:
-        "[CNIL Recommendation 2022](https://www.cnil.fr/fr/cookies-et-autres-traceurs/regles/cookies/recommandation-sur-les-cookies-et-autres-traceurs)",
+        "[CNIL Recommendation 2022](https://www.cnil.fr/fr/cookies-et-autres-traceurs/regles/cookies)",
       status: !r.modal.detected ? ko : noReject ? ko : ok,
       detail: !r.modal.detected
         ? "Modal not detected"
@@ -821,7 +821,7 @@ The **Description / Purpose** column is to be filled in by the DPO or technical 
       category: "Easy refusal",
       rule: "Rejecting requires no more clicks than accepting",
       reference:
-        "[CNIL Recommendation 2022](https://www.cnil.fr/fr/cookies-et-autres-traceurs/regles/cookies/recommandation-sur-les-cookies-et-autres-traceurs)",
+        "[CNIL Recommendation 2022](https://www.cnil.fr/fr/cookies-et-autres-traceurs/regles/cookies)",
       status: !r.modal.detected ? ko : clickIssue ? ko : ok,
       detail: !r.modal.detected
         ? "Modal not detected"
@@ -837,7 +837,7 @@ The **Description / Purpose** column is to be filled in by the DPO or technical 
       category: "Easy refusal",
       rule: "Size symmetry between Accept and Reject",
       reference:
-        "[EDPB Guidelines 03/2022](https://edpb.europa.eu/our-work-tools/our-documents/guidelines/guidelines-032022-dark-patterns-social-media-platform_en)",
+        "[EDPB Guidelines 03/2022](https://www.edpb.europa.eu/system/files/2022-03/edpb_03-2022_guidelines_on_dark_patterns_in_social_media_platform_interfaces_en.pdf)",
       status: !r.modal.detected ? ko : sizeIssue ? warn : ok,
       detail: !r.modal.detected
         ? "Modal not detected"
@@ -851,7 +851,7 @@ The **Description / Purpose** column is to be filled in by the DPO or technical 
       category: "Easy refusal",
       rule: "Font symmetry between Accept and Reject",
       reference:
-        "[EDPB Guidelines 03/2022](https://edpb.europa.eu/our-work-tools/our-documents/guidelines/guidelines-032022-dark-patterns-social-media-platform_en)",
+        "[EDPB Guidelines 03/2022](https://www.edpb.europa.eu/system/files/2022-03/edpb_03-2022_guidelines_on_dark_patterns_in_social_media_platform_interfaces_en.pdf)",
       status: !r.modal.detected ? ko : nudgeIssue ? warn : ok,
       detail: !r.modal.detected
         ? "Modal not detected"
@@ -935,7 +935,7 @@ The **Description / Purpose** column is to be filled in by the DPO or technical 
       category: "Cookie behavior",
       rule: "Non-essential cookies removed after rejection",
       reference:
-        "[GDPR Art. 7](https://gdpr-info.eu/art-7-gdpr/) · [CNIL Recommendation 2022](https://www.cnil.fr/fr/cookies-et-autres-traceurs/regles/cookies/recommandation-sur-les-cookies-et-autres-traceurs)",
+        "[GDPR Art. 7](https://gdpr-info.eu/art-7-gdpr/) · [CNIL Recommendation 2022](https://www.cnil.fr/fr/cookies-et-autres-traceurs/regles/cookies)",
       status: persistAfterReject.length === 0 ? ok : ko,
       detail:
         persistAfterReject.length === 0
