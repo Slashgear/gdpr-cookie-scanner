@@ -4,7 +4,7 @@ import type { ScanOptions, ScanResult } from "../types.js";
 import { createBrowser, clearState, closeBrowser } from "./browser.js";
 import { captureCookies } from "./cookies.js";
 import { createNetworkInterceptor } from "./network.js";
-import { detectConsentModal } from "./consent-modal.js";
+import { detectConsentModal, findPrivacyPolicyUrl } from "./consent-modal.js";
 import { analyzeCompliance } from "../analyzers/compliance.js";
 
 type PhaseCallback = (message: string) => void;
@@ -43,6 +43,9 @@ export class Scanner {
     const cookiesBeforeInteraction = await captureCookies(session1.context, "before-interaction");
     const networkBeforeInteraction = interceptor1.getRequests();
     interceptor1.stop();
+
+    // Look for a privacy policy link anywhere on the page (typically footer/nav)
+    const privacyPolicyUrl = await findPrivacyPolicyUrl(session1.page);
 
     // ────────────────────────────────────────────────────────────
     // Phase 2 — Detect and analyze the consent modal
@@ -142,6 +145,7 @@ export class Scanner {
     // ────────────────────────────────────────────────────────────
     const compliance = analyzeCompliance({
       modal,
+      privacyPolicyUrl,
       cookiesBeforeInteraction,
       cookiesAfterAccept,
       cookiesAfterReject,
@@ -155,6 +159,7 @@ export class Scanner {
       scanDate: new Date().toISOString(),
       duration: Date.now() - startTime,
       modal,
+      privacyPolicyUrl,
       cookiesBeforeInteraction,
       cookiesAfterAccept,
       cookiesAfterReject,

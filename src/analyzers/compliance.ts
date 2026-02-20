@@ -9,6 +9,7 @@ import { analyzeButtonWording, analyzeModalText } from "./wording.js";
 
 interface ComplianceInput {
   modal: ConsentModal;
+  privacyPolicyUrl: string | null;
   cookiesBeforeInteraction: ScannedCookie[];
   cookiesAfterAccept: ScannedCookie[];
   cookiesAfterReject: ScannedCookie[];
@@ -125,6 +126,28 @@ export function analyzeCompliance(input: ComplianceInput): ComplianceScore {
     if (wordingResult.missingInfo.length > 0) {
       transparency -= wordingResult.missingInfo.length * 3;
     }
+    // No privacy policy link in the modal
+    if (!input.modal.privacyPolicyUrl) {
+      issues.push({
+        type: "missing-info",
+        severity: "warning",
+        description: "No privacy policy link found in the consent modal",
+        evidence:
+          "GDPR Art. 13 requires the privacy policy to be accessible from the consent interface",
+      });
+      transparency -= 5;
+    }
+  }
+
+  // No privacy policy link anywhere on the page
+  if (!input.privacyPolicyUrl) {
+    issues.push({
+      type: "missing-info",
+      severity: "warning",
+      description: "No privacy policy link found on the page",
+      evidence: "A privacy policy must be accessible from every page (GDPR Art. 13)",
+    });
+    transparency -= 3;
   }
 
   // ── D. Cookie behavior (0-25) ─────────────────────────────────

@@ -74,6 +74,7 @@ export interface ConsentModal {
   hasGranularControls: boolean;
   layerCount: number; // number of clicks to reach full options
   screenshotPath: string | null;
+  privacyPolicyUrl: string | null; // link to the privacy policy found inside the modal
 }
 
 export interface DarkPatternIssue {
@@ -122,6 +123,7 @@ export interface ScanResult {
   scanDate: string;
   duration: number; // ms
   modal: ConsentModal;
+  privacyPolicyUrl: string | null; // link to the privacy policy found anywhere on the page
   cookiesBeforeInteraction: ScannedCookie[];
   cookiesAfterAccept: ScannedCookie[];
   cookiesAfterReject: ScannedCookie[];

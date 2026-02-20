@@ -45,6 +45,65 @@ const MODAL_SELECTORS = [
   "[role='alertdialog']",
 ];
 
+const PRIVACY_POLICY_URL_PATTERNS = [
+  "privacy[_-]?polic",
+  "politique[_-]?(de[_-])?confidentialit",
+  "politique[_-]?(de[_-])?vie[_-]?priv",
+  "confidentialit",
+  "vie[_-]?priv",
+  "mentions[_-]?l.gales",
+  "datenschutz",
+  "privacidad",
+  "data[_-]?protection",
+  "data[_-]?privacy",
+];
+
+const PRIVACY_POLICY_TEXT_PATTERNS = [
+  "privacy\\s+polic",
+  "politique\\s+(de\\s+)?confidentialit",
+  "politique\\s+(de\\s+)?vie\\s+priv",
+  "confidentialit",
+  "vie\\s+priv",
+  "mentions?\\s+l.gales?",
+  "datenschutz",
+  "privacidad",
+  "data\\s+protection",
+];
+
+/**
+ * Find a privacy policy link within a given scope (modal selector) or the full page.
+ * Returns the absolute URL of the first matching link, or null.
+ */
+export async function findPrivacyPolicyUrl(
+  page: Page,
+  scopeSelector?: string,
+): Promise<string | null> {
+  return page
+    .evaluate(
+      ({ scope, urlPats, textPats }) => {
+        const root: Element | Document = scope
+          ? (document.querySelector(scope) ?? document)
+          : document;
+        const links = root.querySelectorAll("a[href]");
+        for (const link of links) {
+          const href = (link as HTMLAnchorElement).href ?? "";
+          const text = (link.textContent ?? "").trim();
+          if (!href || href.startsWith("javascript:") || href === "#") continue;
+          const matchUrl = urlPats.some((p) => new RegExp(p, "i").test(href));
+          const matchText = textPats.some((p) => new RegExp(p, "i").test(text));
+          if (matchUrl || matchText) return href;
+        }
+        return null;
+      },
+      {
+        scope: scopeSelector ?? null,
+        urlPats: PRIVACY_POLICY_URL_PATTERNS,
+        textPats: PRIVACY_POLICY_TEXT_PATTERNS,
+      },
+    )
+    .catch(() => null);
+}
+
 const ACCEPT_PATTERNS = [
   /\b(accept|accepter|acceptez|tout accepter|accept all|j'accepte|i accept|agree|ok\b|d'accord|continuer|continue|valider|confirmer)\b/i,
 ];
@@ -109,6 +168,7 @@ export async function detectConsentModal(page: Page, options: ScanOptions): Prom
       hasGranularControls: false,
       layerCount: 0,
       screenshotPath: null,
+      privacyPolicyUrl: null,
     };
   }
 
@@ -125,6 +185,9 @@ export async function detectConsentModal(page: Page, options: ScanOptions): Prom
   const hasGranularControls =
     checkboxes.length > 0 || buttons.some((b) => b.type === "preferences");
 
+  // Look for a privacy policy link inside the modal
+  const privacyPolicyUrl = await findPrivacyPolicyUrl(page, foundSelector);
+
   return {
     detected: true,
     selector: foundSelector,
@@ -134,6 +197,7 @@ export async function detectConsentModal(page: Page, options: ScanOptions): Prom
     hasGranularControls,
     layerCount: hasGranularControls ? 2 : 1,
     screenshotPath: null,
+    privacyPolicyUrl,
   };
 }
 

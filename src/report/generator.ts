@@ -350,6 +350,9 @@ ${row("Cookie behavior", breakdown.cookieBehavior, 25)}
       `**CSS selector:** \`${modal.selector}\``,
       `**Granular controls:** ${modal.hasGranularControls ? "✅ Yes" : "❌ No"}`,
       `**Layer count:** ${modal.layerCount}`,
+      modal.privacyPolicyUrl
+        ? `**Privacy policy link:** ✅ [${modal.privacyPolicyUrl}](${modal.privacyPolicyUrl})`
+        : `**Privacy policy link:** ⚠️ Not found in the modal`,
       "",
       "### Detected buttons",
       "",
@@ -913,6 +916,28 @@ The **Description / Purpose** column is to be filled in by the DPO or technical 
             : "Mention found in the modal text",
       });
     }
+
+    rows.push({
+      category: "Transparency",
+      rule: "Privacy policy link present in the consent modal",
+      reference: "[GDPR Art. 13](https://gdpr-info.eu/art-13-gdpr/)",
+      status: !r.modal.detected ? ko : r.modal.privacyPolicyUrl ? ok : warn,
+      detail: !r.modal.detected
+        ? "Modal not detected"
+        : r.modal.privacyPolicyUrl
+          ? `Link found: ${r.modal.privacyPolicyUrl}`
+          : "No privacy policy link found inside the consent modal",
+    });
+
+    rows.push({
+      category: "Transparency",
+      rule: "Privacy policy accessible from the main page",
+      reference: "[GDPR Art. 13](https://gdpr-info.eu/art-13-gdpr/)",
+      status: r.privacyPolicyUrl ? ok : warn,
+      detail: r.privacyPolicyUrl
+        ? `Link found: ${r.privacyPolicyUrl}`
+        : "No privacy policy link found on the main page",
+    });
 
     // ── D. Cookie behavior ────────────────────────────────────────
     const illegalPre = r.cookiesBeforeInteraction.filter((c) => c.requiresConsent);
