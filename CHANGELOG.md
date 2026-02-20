@@ -1,5 +1,16 @@
 # @slashgear/gdpr-cookie-scanner
 
+## 1.1.0
+
+### Minor Changes
+
+- 730e4d2: feat: generate a merged PDF report alongside the Markdown files
+
+  A single `gdpr-report-{hostname}-{date}.pdf` is now produced at the end of
+  each scan, combining the main compliance report, the checklist, and the cookie
+  inventory into one A4 document. The PDF is rendered via the Playwright browser
+  already installed as a dependency. The CLI prints the PDF path on completion.
+
 ## 1.0.1
 
 ### Patch Changes
