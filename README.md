@@ -3,7 +3,16 @@
 [![CI](https://github.com/Slashgear/gdpr-report/actions/workflows/ci.yml/badge.svg)](https://github.com/Slashgear/gdpr-report/actions/workflows/ci.yml)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md)
 
-CLI tool to automatically audit the GDPR cookie consent compliance of a website: consent modal, dark patterns, cookies set before/after interaction, network trackers. Generates a detailed Markdown report.
+A CLI tool that **automates a subset of GDPR cookie consent checks** on any website — consent modal detection, dark patterns, cookie behaviour before/after interaction, and network trackers. It produces a scored report (0–100) with a per-rule checklist and a cookie inventory.
+
+> [!IMPORTANT]
+> **This tool is not a substitute for a full GDPR compliance audit.**
+> It automates the checks that _can_ be automated (observable browser behaviour), but GDPR compliance is broader: lawful basis, data retention policies, DPA agreements, privacy notices, subject rights, and more are **out of scope**.
+> A grade of **A does not mean your site is GDPR-compliant** — it means it passes the automated checks covered by this tool.
+
+### What problem does it solve?
+
+Manually verifying that a consent banner behaves correctly — no cookies dropped before consent, reject as easy as accept, no pre-ticked boxes, no trackers firing before interaction — is tedious and hard to do consistently across environments or over time. `gdpr-scan` makes these checks **repeatable, scriptable, and CI-friendly**, giving DPOs, developers, and privacy engineers a fast feedback loop on the most common consent implementation mistakes.
 
 ## Installation
 
