@@ -80,43 +80,43 @@ The scanner runs **4 phases** using a real Chromium browser (Playwright):
 
 ```mermaid
 flowchart TD
-    CLI["⌨️  gdpr-scan CLI\n─────────────────\nURL · options"]
+    CLI["⌨️ gdpr-scan CLI"]
 
     CLI --> B
 
-    subgraph B["🌐  Chromium browser — 4 sequential phases"]
+    subgraph B["🌐 Chromium browser — 4 sequential phases"]
         direction TB
-        P1["Phase 1 — Load page\nCapture cookies & network requests\n(before-interaction)"]
-        P2["Phase 2 — Detect consent modal\nCSS selectors · DOM heuristics\nExtract buttons, checkboxes, screenshots"]
-        P3["Phase 3 — Click Reject  (same session)\nCapture state  (after-reject)"]
-        P4["Phase 4 — Fresh session · Click Accept\nCapture state  (after-accept)"]
+        P1["Phase 1 — Load page<br/>cookies + network requests captured<br/><i>before-interaction</i>"]
+        P2["Phase 2 — Detect consent modal<br/>CSS selectors · DOM heuristics<br/>buttons, checkboxes, screenshots"]
+        P3["Phase 3 — Click Reject<br/>state captured <i>after-reject</i>"]
+        P4["Phase 4 — Fresh session · Click Accept<br/>state captured <i>after-accept</i>"]
         P1 --> P2 --> P3 --> P4
     end
 
     B --> C
 
-    subgraph C["🔎  Classifiers"]
+    subgraph C["🔎 Classifiers"]
         direction LR
-        CK["Cookie classifier\n─────────────\nPattern matching → category\n(analytics, ads, strictly-necessary…)"]
-        NK["Network classifier\n─────────────\nTracker DB lookup\nPixel pattern matching"]
+        CK["Cookie classifier<br/>name patterns → category<br/><i>analytics · ads · strictly-necessary…</i>"]
+        NK["Network classifier<br/>tracker DB lookup<br/>pixel pattern matching"]
     end
 
     C --> A
 
-    subgraph A["⚖️  Analyzers"]
+    subgraph A["⚖️ Analyzers"]
         direction LR
-        SC["Compliance scorer\n─────────────\n4 dimensions × 25 pts\n→ score 0–100, grade A–F"]
-        DP["Dark pattern detector\n─────────────\nPre-ticked boxes · asymmetry\nMissing reject · misleading wording"]
+        SC["Compliance scorer<br/>4 dimensions × 25 pts<br/>score 0–100 · grade A–F"]
+        DP["Dark pattern detector<br/>pre-ticked · asymmetry<br/>missing reject · misleading wording"]
     end
 
     A --> R
 
-    subgraph R["📄  Report generator"]
+    subgraph R["📄 Report generator"]
         direction LR
-        MD1["gdpr-report-*.md\nMain compliance report"]
-        MD2["gdpr-checklist-*.md\nPer-rule checklist\nwith legal references"]
-        MD3["gdpr-cookies-*.md\nDeduplicated cookie\ninventory"]
-        PDF["gdpr-report-*.pdf\nMerged PDF with TOC\n& embedded screenshots"]
+        MD1["gdpr-report-*.md<br/>main report"]
+        MD2["gdpr-checklist-*.md<br/>per-rule checklist"]
+        MD3["gdpr-cookies-*.md<br/>cookie inventory"]
+        PDF["gdpr-report-*.pdf<br/>merged PDF with TOC"]
     end
 ```
 
