@@ -69,21 +69,12 @@ gdpr-scan list-trackers
 
 ## How it works
 
-The scanner runs **4 phases** using a real Chromium browser (Playwright):
-
-1. **Initial load** — The page is loaded without any interaction. All cookies and network requests are captured (`before-interaction`).
-2. **Modal analysis** — The consent banner is detected (CSS selectors of known CMPs + DOM heuristics). Buttons are extracted with their visual properties (size, color, contrast ratio).
-3. **Reject test** — The "Reject" button is clicked. Cookies and requests are captured (`after-reject`).
-4. **Accept test** — A new browser session (clean state) loads the page and clicks "Accept". Cookies and requests are captured (`after-accept`).
-
-## Architecture
-
 ```mermaid
 flowchart LR
     URL([URL]) --> Chromium[Chromium] --> Classify[Classify] --> Score[Score] --> Report[Report]
 ```
 
-The tool runs a **real Chromium browser** (via Playwright) through 4 isolated phases to capture the site's behaviour before any interaction, on modal detection, after rejection, and after acceptance. Raw data is then classified (cookies by name pattern, network requests against a tracker database), scored across 4 compliance dimensions, and rendered into 3 Markdown files plus a self-contained PDF.
+A real Chromium browser loads the page, interacts with the consent modal (reject then accept in a fresh session), and captures cookies and network requests at each step. Results are classified, scored across 4 compliance dimensions, and rendered into Markdown and PDF reports.
 
 ## Generated report
 
