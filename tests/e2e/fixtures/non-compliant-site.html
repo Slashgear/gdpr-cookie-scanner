@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Non-Compliant Test Site</title>
+  </head>
+  <body>
+    <main>
+      <h1>Welcome</h1>
+      <p>This page has no reject button and sets analytics cookies immediately.</p>
+    </main>
+
+    <!-- Non-compliant: no reject button, no privacy policy link, cookie set before interaction -->
+    <div
+      id="cookie-banner"
+      style="
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: #333;
+        color: #fff;
+        padding: 20px;
+        z-index: 9999;
+      "
+    >
+      <p style="margin: 0 0 10px 0">
+        By continuing to browse this site, you accept the use of cookies.
+      </p>
+      <button
+        id="accept-btn"
+        style="
+          padding: 10px 24px;
+          background: #e53935;
+          color: #fff;
+          border: none;
+          cursor: pointer;
+          font-size: 16px;
+        "
+      >
+        OK
+      </button>
+    </div>
+
+    <script>
+      // Set analytics cookie before any interaction (non-compliant)
+      document.cookie = "_ga=GA1.2.123456789.1234567890; path=/; max-age=34560000";
+
+      document.getElementById("accept-btn").addEventListener("click", function () {
+        document.getElementById("cookie-banner").style.display = "none";
+      });
+    </script>
+  </body>
+</html>
