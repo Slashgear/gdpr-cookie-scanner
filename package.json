@@ -12,15 +12,15 @@
     "rgpd",
     "scanner"
   ],
-  "license": "MIT",
-  "author": "Antoine Caron <antoine@slashgear.dev> (https://slashgear.github.io)",
   "homepage": "https://github.com/Slashgear/gdpr-report#readme",
+  "bugs": {
+    "url": "https://github.com/Slashgear/gdpr-report/issues"
+  },
+  "license": "MIT",
+  "author": "Antoine Caron (https://slashgear.github.io)",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Slashgear/gdpr-report.git"
-  },
-  "bugs": {
-    "url": "https://github.com/Slashgear/gdpr-report/issues"
   },
   "bin": {
     "gdpr-scan": "dist/cli.js"
