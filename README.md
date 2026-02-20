@@ -1,6 +1,12 @@
 # gdpr-cookie-scanner
 
 [![CI](https://github.com/Slashgear/gdpr-report/actions/workflows/ci.yml/badge.svg)](https://github.com/Slashgear/gdpr-report/actions/workflows/ci.yml)
+[![npm version](https://img.shields.io/npm/v/@slashgear/gdpr-cookie-scanner?logo=npm)](https://www.npmjs.com/package/@slashgear/gdpr-cookie-scanner)
+[![npm downloads](https://img.shields.io/npm/dw/@slashgear/gdpr-cookie-scanner?logo=npm&label=downloads%2Fweek)](https://www.npmjs.com/package/@slashgear/gdpr-cookie-scanner)
+[![License: MIT](https://img.shields.io/npm/l/@slashgear/gdpr-cookie-scanner)](LICENSE)
+[![Node ≥ 20](https://img.shields.io/node/v/@slashgear/gdpr-cookie-scanner?logo=node.js)](https://nodejs.org)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
+[![Playwright](https://img.shields.io/badge/Playwright-✓-45ba4b?logo=playwright&logoColor=white)](https://playwright.dev)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md)
 
 A CLI tool that **automates a subset of GDPR cookie consent checks** on any website — consent modal detection, dark patterns, cookie behaviour before/after interaction, and network trackers. It produces a scored report (0–100) with a per-rule checklist and a cookie inventory.
