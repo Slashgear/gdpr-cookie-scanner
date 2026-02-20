@@ -61,6 +61,52 @@ The scanner runs **4 phases** using a real Chromium browser (Playwright):
 3. **Reject test** — The "Reject" button is clicked. Cookies and requests are captured (`after-reject`).
 4. **Accept test** — A new browser session (clean state) loads the page and clicks "Accept". Cookies and requests are captured (`after-accept`).
 
+## Architecture
+
+```mermaid
+flowchart TD
+    CLI["⌨️  gdpr-scan CLI\n─────────────────\nURL · options"]
+
+    CLI --> B
+
+    subgraph B["🌐  Chromium browser — 4 sequential phases"]
+        direction TB
+        P1["Phase 1 — Load page\nCapture cookies & network requests\n(before-interaction)"]
+        P2["Phase 2 — Detect consent modal\nCSS selectors · DOM heuristics\nExtract buttons, checkboxes, screenshots"]
+        P3["Phase 3 — Click Reject  (same session)\nCapture state  (after-reject)"]
+        P4["Phase 4 — Fresh session · Click Accept\nCapture state  (after-accept)"]
+        P1 --> P2 --> P3 --> P4
+    end
+
+    B --> C
+
+    subgraph C["🔎  Classifiers"]
+        direction LR
+        CK["Cookie classifier\n─────────────\nPattern matching → category\n(analytics, ads, strictly-necessary…)"]
+        NK["Network classifier\n─────────────\nTracker DB lookup\nPixel pattern matching"]
+    end
+
+    C --> A
+
+    subgraph A["⚖️  Analyzers"]
+        direction LR
+        SC["Compliance scorer\n─────────────\n4 dimensions × 25 pts\n→ score 0–100, grade A–F"]
+        DP["Dark pattern detector\n─────────────\nPre-ticked boxes · asymmetry\nMissing reject · misleading wording"]
+    end
+
+    A --> R
+
+    subgraph R["📄  Report generator"]
+        direction LR
+        MD1["gdpr-report-*.md\nMain compliance report"]
+        MD2["gdpr-checklist-*.md\nPer-rule checklist\nwith legal references"]
+        MD3["gdpr-cookies-*.md\nDeduplicated cookie\ninventory"]
+        PDF["gdpr-report-*.pdf\nMerged PDF with TOC\n& embedded screenshots"]
+    end
+```
+
+The tool runs a **real Chromium browser** (via Playwright) through 4 isolated phases to capture the site's behaviour before any interaction, on modal detection, after rejection, and after acceptance. Raw data is then classified (cookies by name pattern, network requests against a tracker database), scored across 4 compliance dimensions, and rendered into 3 Markdown files plus a self-contained PDF.
+
 ## Generated report
 
 The Markdown report contains:
@@ -120,7 +166,7 @@ pnpm format       # oxfmt
 
 ## Release
 
-Releases are published automatically to [npm](https://www.npmjs.com/package/@slashgear/gdpr-cookie-scanner) and [GitHub Packages](https://github.com/Slashgear/gdpr-report/pkgs/npm/gdpr-cookie-scanner) via [Changesets](https://github.com/changesets/changesets). See [CONTRIBUTING.md](CONTRIBUTING.md) for the release process.
+Releases are published automatically to [npm](https://www.npmjs.com/package/@slashgear/gdpr-cookie-scanner) via [Changesets](https://github.com/changesets/changesets). See [CONTRIBUTING.md](CONTRIBUTING.md) for the release process.
 
 ## Contributing
 
