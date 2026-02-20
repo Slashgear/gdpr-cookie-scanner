@@ -58,7 +58,7 @@ program
       console.log();
 
       const generator = new ReportGenerator(options);
-      const reportPath = await generator.generate(result);
+      const { reportPath, pdfPath } = await generator.generate(result);
 
       console.log(
         chalk.bold(
@@ -82,6 +82,7 @@ program
       }
 
       console.log(chalk.green(`  Report saved: ${reportPath}`));
+      console.log(chalk.green(`  PDF saved:    ${pdfPath}`));
       console.log();
 
       process.exit(result.compliance.grade === "F" ? 1 : 0);
