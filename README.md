@@ -79,45 +79,8 @@ The scanner runs **4 phases** using a real Chromium browser (Playwright):
 ## Architecture
 
 ```mermaid
-flowchart TD
-    CLI["⌨️ gdpr-scan CLI"]
-
-    CLI --> B
-
-    subgraph B["🌐 Chromium browser — 4 sequential phases"]
-        direction TB
-        P1["Phase 1 — Load page<br/>cookies + network requests captured<br/><i>before-interaction</i>"]
-        P2["Phase 2 — Detect consent modal<br/>CSS selectors · DOM heuristics<br/>buttons, checkboxes, screenshots"]
-        P3["Phase 3 — Click Reject<br/>state captured <i>after-reject</i>"]
-        P4["Phase 4 — Fresh session · Click Accept<br/>state captured <i>after-accept</i>"]
-        P1 --> P2 --> P3 --> P4
-    end
-
-    B --> C
-
-    subgraph C["🔎 Classifiers"]
-        direction LR
-        CK["Cookie classifier<br/>name patterns → category<br/><i>analytics · ads · strictly-necessary…</i>"]
-        NK["Network classifier<br/>tracker DB lookup<br/>pixel pattern matching"]
-    end
-
-    C --> A
-
-    subgraph A["⚖️ Analyzers"]
-        direction LR
-        SC["Compliance scorer<br/>4 dimensions × 25 pts<br/>score 0–100 · grade A–F"]
-        DP["Dark pattern detector<br/>pre-ticked · asymmetry<br/>missing reject · misleading wording"]
-    end
-
-    A --> R
-
-    subgraph R["📄 Report generator"]
-        direction LR
-        MD1["gdpr-report-*.md<br/>main report"]
-        MD2["gdpr-checklist-*.md<br/>per-rule checklist"]
-        MD3["gdpr-cookies-*.md<br/>cookie inventory"]
-        PDF["gdpr-report-*.pdf<br/>merged PDF with TOC"]
-    end
+flowchart LR
+    URL([URL]) --> Chromium[Chromium] --> Classify[Classify] --> Score[Score] --> Report[Report]
 ```
 
 The tool runs a **real Chromium browser** (via Playwright) through 4 isolated phases to capture the site's behaviour before any interaction, on modal detection, after rejection, and after acceptance. Raw data is then classified (cookies by name pattern, network requests against a tracker database), scored across 4 compliance dimensions, and rendered into 3 Markdown files plus a self-contained PDF.
