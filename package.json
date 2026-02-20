@@ -13,6 +13,15 @@
     "scanner"
   ],
   "license": "MIT",
+  "author": "Antoine Caron <antoine@slashgear.dev> (https://slashgear.github.io)",
+  "homepage": "https://github.com/Slashgear/gdpr-report#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Slashgear/gdpr-report.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Slashgear/gdpr-report/issues"
+  },
   "bin": {
     "gdpr-scan": "dist/cli.js"
   },
