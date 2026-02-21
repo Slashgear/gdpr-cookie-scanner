@@ -108,6 +108,8 @@ export interface ComplianceScore {
   grade: "A" | "B" | "C" | "D" | "F";
 }
 
+export type ReportFormat = "md" | "html" | "json" | "pdf";
+
 export interface ScanOptions {
   url: string;
   outputDir: string;
@@ -115,6 +117,7 @@ export interface ScanOptions {
   screenshots: boolean;
   locale: string;
   verbose: boolean;
+  formats: ReportFormat[];
   userAgent?: string;
 }
 

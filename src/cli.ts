@@ -5,7 +5,7 @@ import ora from "ora";
 import { join, resolve } from "path";
 import { Scanner } from "./scanner/index.js";
 import { ReportGenerator } from "./report/generator.js";
-import type { ScanOptions } from "./types.js";
+import type { ScanOptions, ReportFormat } from "./types.js";
 
 const program = new Command();
 
@@ -23,6 +23,11 @@ program
   .option("--no-screenshots", "Disable screenshot capture")
   .option("-l, --locale <locale>", "Browser locale for language detection", "fr-FR")
   .option("-v, --verbose", "Show detailed output", false)
+  .option(
+    "-f, --format <formats>",
+    "Output formats: md, html, json, pdf (comma-separated)",
+    "md,pdf",
+  )
   .action(async (url: string, opts) => {
     console.log();
     console.log(chalk.bold.blue("  GDPR Cookie Scanner"));
@@ -35,6 +40,17 @@ program
     console.log(chalk.gray(`  Output : ${outputDir}`));
     console.log();
 
+    const validFormats = new Set<ReportFormat>(["md", "html", "json", "pdf"]);
+    const formats = (opts.format as string)
+      .split(",")
+      .map((f) => f.trim().toLowerCase())
+      .filter((f): f is ReportFormat => validFormats.has(f as ReportFormat));
+
+    if (formats.length === 0) {
+      console.error(chalk.red("  Invalid --format value. Valid options: md, html, json, pdf"));
+      process.exit(2);
+    }
+
     const options: ScanOptions = {
       url: normalizedUrl,
       outputDir,
@@ -42,6 +58,7 @@ program
       screenshots: opts.screenshots !== false,
       locale: opts.locale,
       verbose: opts.verbose,
+      formats,
     };
 
     const spinner = ora("Launching browser...").start();
@@ -58,7 +75,7 @@ program
       console.log();
 
       const generator = new ReportGenerator(options);
-      const { reportPath, pdfPath } = await generator.generate(result);
+      const paths = await generator.generate(result);
 
       console.log(
         chalk.bold(
@@ -81,8 +98,15 @@ program
         console.log();
       }
 
-      console.log(chalk.green(`  Report saved: ${reportPath}`));
-      console.log(chalk.green(`  PDF saved:    ${pdfPath}`));
+      const labels: Record<string, string> = {
+        md: "Markdown",
+        html: "HTML",
+        json: "JSON",
+        pdf: "PDF",
+      };
+      for (const [fmt, path] of Object.entries(paths)) {
+        console.log(chalk.green(`  ${(labels[fmt] ?? fmt).padEnd(8)} ${path}`));
+      }
       console.log();
 
       process.exit(result.compliance.grade === "F" ? 1 : 0);
