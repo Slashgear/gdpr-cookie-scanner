@@ -1,6 +1,6 @@
 # gdpr-cookie-scanner
 
-[![CI](https://github.com/Slashgear/gdpr-report/actions/workflows/ci.yml/badge.svg)](https://github.com/Slashgear/gdpr-report/actions/workflows/ci.yml)
+[![CI](https://github.com/Slashgear/gdpr-cookie-scanner/actions/workflows/ci.yml/badge.svg)](https://github.com/Slashgear/gdpr-cookie-scanner/actions/workflows/ci.yml)
 [![npm version](https://img.shields.io/npm/v/@slashgear/gdpr-cookie-scanner?logo=npm)](https://www.npmjs.com/package/@slashgear/gdpr-cookie-scanner)
 [![npm downloads](https://img.shields.io/npm/dw/@slashgear/gdpr-cookie-scanner?logo=npm&label=downloads%2Fweek)](https://www.npmjs.com/package/@slashgear/gdpr-cookie-scanner)
 [![License: MIT](https://img.shields.io/npm/l/@slashgear/gdpr-cookie-scanner)](LICENSE)
@@ -43,13 +43,14 @@ gdpr-scan scan <url> [options]
 
 ### Options
 
-| Option                  | Default          | Description                     |
-| ----------------------- | ---------------- | ------------------------------- |
-| `-o, --output <dir>`    | `./gdpr-reports` | Output directory for the report |
-| `-t, --timeout <ms>`    | `30000`          | Navigation timeout              |
-| `--no-screenshots`      | —                | Disable screenshot capture      |
-| `-l, --locale <locale>` | `fr-FR`          | Browser locale                  |
-| `-v, --verbose`         | —                | Show full stack trace on error  |
+| Option                   | Default          | Description                                                   |
+| ------------------------ | ---------------- | ------------------------------------------------------------- |
+| `-o, --output <dir>`     | `./gdpr-reports` | Output directory for the report                               |
+| `-t, --timeout <ms>`     | `30000`          | Navigation timeout                                            |
+| `-f, --format <formats>` | `md,pdf`         | Output formats: `md`, `html`, `json`, `pdf` (comma-separated) |
+| `--no-screenshots`       | —                | Disable screenshot capture                                    |
+| `-l, --locale <locale>`  | `fr-FR`          | Browser locale                                                |
+| `-v, --verbose`          | —                | Show full stack trace on error                                |
 
 ### Examples
 
@@ -63,6 +64,12 @@ gdpr-scan scan https://example.com -o ./reports
 # Scan in English, without screenshots
 gdpr-scan scan https://example.com --locale en-US --no-screenshots
 
+# Generate only an HTML report
+gdpr-scan scan https://example.com -f html
+
+# Generate all formats at once
+gdpr-scan scan https://example.com -f md,html,json,pdf
+
 # Show the built-in tracker database
 gdpr-scan list-trackers
 ```
@@ -74,22 +81,28 @@ flowchart LR
     URL([URL]) --> Chromium[Chromium] --> Classify[Classify] --> Score[Score] --> Report[Report]
 ```
 
-A real Chromium browser loads the page, interacts with the consent modal (reject then accept in a fresh session), and captures cookies and network requests at each step. Results are classified, scored across 4 compliance dimensions, and rendered into Markdown and PDF reports.
+A real Chromium browser loads the page, interacts with the consent modal (reject then accept in a fresh session), and captures cookies and network requests at each step. Results are classified, scored across 4 compliance dimensions, and rendered into one or more report files depending on `--format`.
 
-## Generated report
+## Generated reports
 
-The Markdown report contains:
+Each scan produces up to 4 file types in `<output-dir>/<hostname>/`:
+
+| Format | Files                                                          | Description                                                                                                                                    |
+| ------ | -------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `md`   | `gdpr-report-*.md`, `gdpr-checklist-*.md`, `gdpr-cookies-*.md` | Main compliance report, per-rule checklist with legal references, and deduplicated cookie inventory                                            |
+| `html` | `gdpr-report-*.html`                                           | Self-contained styled report — grade badge, score cards, dark-pattern issues, cookie and tracker tables. Opens in any browser, no dependencies |
+| `json` | `gdpr-report-*.json`                                           | Full raw scan result for programmatic processing or CI integration                                                                             |
+| `pdf`  | `gdpr-report-*.pdf`                                            | PDF built from the Markdown reports via Playwright                                                                                             |
+
+All formats contain:
 
 - **Global score** (0–100) and **grade** A/B/C/D/F
-- Executive summary
 - Modal analysis: buttons, checkboxes, font size, screenshots
 - Detected dark patterns (missing reject button, visual asymmetry, pre-ticked boxes, misleading wording…)
 - Cookie table before interaction, after reject, after accept
 - Network tracker requests by phase
 - Targeted recommendations
 - Legal references (RGPD, ePrivacy directive, CEPD guidelines, CNIL 2022)
-
-The file is created at: `<output-dir>/gdpr-report-<domain>-<date>.md`
 
 ## Scoring
 
