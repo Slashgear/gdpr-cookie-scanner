@@ -5,6 +5,7 @@ import { promisify } from "util";
 import { fileURLToPath } from "url";
 import { Marked } from "marked";
 import { generatePdf } from "./pdf.js";
+import { generateHtmlReport } from "./html.js";
 
 const execFileAsync = promisify(execFile);
 const oxfmtBin = join(dirname(fileURLToPath(import.meta.url)), "../../node_modules/.bin/oxfmt");
@@ -20,39 +21,63 @@ import type { ScanOptions } from "../types.js";
 export class ReportGenerator {
   constructor(private readonly options: ScanOptions) {}
 
-  async generate(result: ScanResult): Promise<{ reportPath: string; pdfPath: string }> {
+  async generate(result: ScanResult): Promise<Record<string, string>> {
     await mkdir(this.options.outputDir, { recursive: true });
 
     const hostname = new URL(result.url).hostname.replace(/^www\./, "");
     const date = new Date(result.scanDate).toISOString().split("T")[0];
-    const filename = `gdpr-report-${hostname}-${date}.md`;
-    const outputPath = join(this.options.outputDir, filename);
+    const base = `gdpr-report-${hostname}-${date}`;
+    const formats = this.options.formats;
 
-    const markdown = this.buildMarkdown(result);
-    await writeFile(outputPath, markdown, "utf-8");
-    await execFileAsync(oxfmtBin, [outputPath]).catch(() => {});
+    const paths: Record<string, string> = {};
 
-    const checklistFilename = `gdpr-checklist-${hostname}-${date}.md`;
-    const checklistPath = join(this.options.outputDir, checklistFilename);
-    const checklist = this.buildChecklist(result);
-    await writeFile(checklistPath, checklist, "utf-8");
-    await execFileAsync(oxfmtBin, [checklistPath]).catch(() => {});
+    // ── Markdown ──────────────────────────────────────────────────
+    if (formats.includes("md")) {
+      const mdPath = join(this.options.outputDir, `${base}.md`);
+      await writeFile(mdPath, this.buildMarkdown(result), "utf-8");
+      await execFileAsync(oxfmtBin, [mdPath]).catch(() => {});
+      paths.md = mdPath;
 
-    const cookiesFilename = `gdpr-cookies-${hostname}-${date}.md`;
-    const cookiesPath = join(this.options.outputDir, cookiesFilename);
-    const cookiesInventory = this.buildCookiesInventory(result);
-    await writeFile(cookiesPath, cookiesInventory, "utf-8");
-    await execFileAsync(oxfmtBin, [cookiesPath]).catch(() => {});
+      const checklistPath = join(this.options.outputDir, `gdpr-checklist-${hostname}-${date}.md`);
+      await writeFile(checklistPath, this.buildChecklist(result), "utf-8");
+      await execFileAsync(oxfmtBin, [checklistPath]).catch(() => {});
 
-    const combined = [markdown, checklist, cookiesInventory].join("\n\n---\n\n");
-    const rawBody = await this.buildHtmlBody(combined);
-    const body = await this.inlineImages(rawBody, this.options.outputDir);
-    const html = this.wrapHtml(body, hostname);
-    const pdfFilename = `gdpr-report-${hostname}-${date}.pdf`;
-    const pdfPath = join(this.options.outputDir, pdfFilename);
-    await generatePdf(html, pdfPath);
+      const cookiesPath = join(this.options.outputDir, `gdpr-cookies-${hostname}-${date}.md`);
+      await writeFile(cookiesPath, this.buildCookiesInventory(result), "utf-8");
+      await execFileAsync(oxfmtBin, [cookiesPath]).catch(() => {});
+    }
 
-    return { reportPath: outputPath, pdfPath };
+    // ── HTML ──────────────────────────────────────────────────────
+    if (formats.includes("html")) {
+      const htmlPath = join(this.options.outputDir, `${base}.html`);
+      await writeFile(htmlPath, generateHtmlReport(result), "utf-8");
+      paths.html = htmlPath;
+    }
+
+    // ── JSON ──────────────────────────────────────────────────────
+    if (formats.includes("json")) {
+      const jsonPath = join(this.options.outputDir, `${base}.json`);
+      await writeFile(jsonPath, JSON.stringify(result, null, 2), "utf-8");
+      paths.json = jsonPath;
+    }
+
+    // ── PDF (via Markdown → HTML → Playwright) ────────────────────
+    if (formats.includes("pdf")) {
+      const markdown = paths.md
+        ? await import("fs/promises").then((m) => m.readFile(paths.md!, "utf-8"))
+        : this.buildMarkdown(result);
+      const checklist = this.buildChecklist(result);
+      const cookiesInventory = this.buildCookiesInventory(result);
+      const combined = [markdown, checklist, cookiesInventory].join("\n\n---\n\n");
+      const rawBody = await this.buildHtmlBody(combined);
+      const body = await this.inlineImages(rawBody, this.options.outputDir);
+      const html = this.wrapHtml(body, hostname);
+      const pdfPath = join(this.options.outputDir, `${base}.pdf`);
+      await generatePdf(html, pdfPath);
+      paths.pdf = pdfPath;
+    }
+
+    return paths;
   }
 
   private async buildHtmlBody(markdown: string): Promise<string> {
