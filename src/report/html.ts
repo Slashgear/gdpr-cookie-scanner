@@ -1,9 +1,4 @@
-import type {
-  ScanResult,
-  ScannedCookie,
-  DarkPatternIssue,
-  ConsentButton,
-} from "../types.js";
+import type { ScanResult, ScannedCookie, DarkPatternIssue, ConsentButton } from "../types.js";
 
 const GRADE_COLOR: Record<string, string> = {
   A: "#16a34a",
