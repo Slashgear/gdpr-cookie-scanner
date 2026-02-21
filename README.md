@@ -35,6 +35,20 @@ npx @slashgear/gdpr-cookie-scanner gdpr-scan scan https://example.com
 npx playwright install chromium
 ```
 
+## Docker
+
+No Node.js required — pull and run directly:
+
+```bash
+docker run --rm \
+  -v $(pwd)/reports:/reports \
+  ghcr.io/slashgear/gdpr-cookie-scanner \
+  scan https://example.com -o /reports
+```
+
+The image is published to [GitHub Container Registry](https://ghcr.io/slashgear/gdpr-cookie-scanner)
+on every release and supports `linux/amd64` and `linux/arm64`.
+
 ## Usage
 
 ```bash

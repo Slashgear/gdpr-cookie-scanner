@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.changeset/
+.claude/
+tests/
+gdpr-reports/
+*.log
+.DS_Store
+.nvmrc
