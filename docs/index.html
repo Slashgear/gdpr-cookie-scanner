@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>gdpr-cookie-scanner — GDPR compliance auditor for cookie consent</title>
+    <meta
+      name="description"
+      content="Open-source CLI that audits websites for GDPR/RGPD cookie consent compliance using Playwright. Detects dark patterns, scores 4 compliance dimensions, and generates Markdown reports."
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <!-- ── Header ── -->
+    <header>
+      <div class="container">
+        <a class="header-logo" href="#">
+          <span class="logo-icon">🍪</span>
+          gdpr-cookie-scanner
+        </a>
+        <nav class="header-nav">
+          <a href="#features">Features</a>
+          <a href="#reports">Live Reports</a>
+          <a href="#how-it-works">How it works</a>
+          <a href="https://github.com/Slashgear/gdpr-cookie-scanner">GitHub</a>
+          <a href="https://www.npmjs.com/package/@slashgear/gdpr-cookie-scanner">npm</a>
+        </nav>
+      </div>
+    </header>
+
+    <!-- ── Hero ── -->
+    <section class="hero">
+      <div class="container">
+        <h1>
+          Audit cookie consent<br />
+          <span class="accent">without the guesswork</span>
+        </h1>
+        <p class="hero-tagline">
+          Open-source CLI that scans any website for GDPR compliance — detects dark patterns, scores
+          4 regulatory dimensions, and generates ready-to-share Markdown reports.
+        </p>
+
+        <div class="install-block">
+          <div class="code-line">
+            <span class="prompt">$</span>
+            npx @slashgear/gdpr-cookie-scanner scan https://example.com
+          </div>
+          <div class="code-line">
+            <span class="prompt">$</span>
+            docker run --rm ghcr.io/slashgear/gdpr-cookie-scanner scan https://example.com
+          </div>
+        </div>
+
+        <div class="hero-links">
+          <a class="btn btn-primary" href="https://github.com/Slashgear/gdpr-cookie-scanner">
+            ★ View on GitHub
+          </a>
+          <a
+            class="btn btn-outline"
+            href="https://www.npmjs.com/package/@slashgear/gdpr-cookie-scanner"
+          >
+            npm package
+          </a>
+          <a
+            class="btn btn-outline"
+            href="https://github.com/Slashgear/gdpr-cookie-scanner/pkgs/container/gdpr-cookie-scanner"
+          >
+            Docker image
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Features ── -->
+    <section id="features">
+      <div class="container">
+        <h2 class="section-title">What it checks</h2>
+        <p class="section-subtitle">
+          Four compliance dimensions, each scored out of 25 — total 100 points.
+        </p>
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon">🎭</div>
+            <h3>Dark pattern detection</h3>
+            <p>
+              Catches pre-ticked boxes, buried reject buttons, asymmetric button sizing, misleading
+              wording, and click asymmetry.
+            </p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">📊</div>
+            <h3>Score 0–100</h3>
+            <p>
+              Grades A–F across consent validity, easy refusal, transparency, and cookie behaviour —
+              with per-issue deductions.
+            </p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">📄</div>
+            <h3>3 Markdown reports</h3>
+            <p>
+              Compliance report, per-rule checklist with legal references, and a deduplicated cookie
+              inventory — all rendered in GitHub.
+            </p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">⚙️</div>
+            <h3>CI-friendly</h3>
+            <p>
+              Exits with code 1 on grade F. Drop it into any pipeline to block non-compliant
+              deployments automatically.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Live Reports ── -->
+    <section id="reports">
+      <div class="container">
+        <h2 class="section-title">Live GDPR reports</h2>
+        <p class="section-subtitle">
+          Real scans run on 22 Feb 2026. Click to read the full Markdown report.
+        </p>
+        <div class="reports-grid">
+          <!-- reddit.com — 34/100 F -->
+          <div class="report-card">
+            <div class="report-header">
+              <div class="grade-badge grade-F">F</div>
+              <div class="report-meta">
+                <h3>reddit.com</h3>
+                <span class="score">34 / 100</span>
+              </div>
+            </div>
+            <p class="report-date">Scanned 22 Feb 2026</p>
+            <a
+              class="btn btn-outline"
+              href="https://github.com/Slashgear/gdpr-cookie-scanner/blob/main/docs/reports/reddit.com/gdpr-report-reddit.com-2026-02-22.md"
+              target="_blank"
+              rel="noopener"
+            >
+              View report →
+            </a>
+          </div>
+
+          <!-- github.com — 15/100 F -->
+          <div class="report-card">
+            <div class="report-header">
+              <div class="grade-badge grade-F">F</div>
+              <div class="report-meta">
+                <h3>github.com</h3>
+                <span class="score">15 / 100</span>
+              </div>
+            </div>
+            <p class="report-date">Scanned 22 Feb 2026</p>
+            <a
+              class="btn btn-outline"
+              href="https://github.com/Slashgear/gdpr-cookie-scanner/blob/main/docs/reports/github.com/gdpr-report-github.com-2026-02-22.md"
+              target="_blank"
+              rel="noopener"
+            >
+              View report →
+            </a>
+          </div>
+
+          <!-- gitlab.com — 50/100 D -->
+          <div class="report-card">
+            <div class="report-header">
+              <div class="grade-badge grade-D">D</div>
+              <div class="report-meta">
+                <h3>gitlab.com</h3>
+                <span class="score">50 / 100</span>
+              </div>
+            </div>
+            <p class="report-date">Scanned 22 Feb 2026</p>
+            <a
+              class="btn btn-outline"
+              href="https://github.com/Slashgear/gdpr-cookie-scanner/blob/main/docs/reports/gitlab.com/gdpr-report-gitlab.com-2026-02-22.md"
+              target="_blank"
+              rel="noopener"
+            >
+              View report →
+            </a>
+          </div>
+
+          <!-- stackoverflow.com — 66/100 C -->
+          <div class="report-card">
+            <div class="report-header">
+              <div class="grade-badge grade-C">C</div>
+              <div class="report-meta">
+                <h3>stackoverflow.com</h3>
+                <span class="score">66 / 100</span>
+              </div>
+            </div>
+            <p class="report-date">Scanned 22 Feb 2026</p>
+            <a
+              class="btn btn-outline"
+              href="https://github.com/Slashgear/gdpr-cookie-scanner/blob/main/docs/reports/stackoverflow.com/gdpr-report-stackoverflow.com-2026-02-22.md"
+              target="_blank"
+              rel="noopener"
+            >
+              View report →
+            </a>
+          </div>
+
+          <!-- npmjs.com — 25/100 F -->
+          <div class="report-card">
+            <div class="report-header">
+              <div class="grade-badge grade-F">F</div>
+              <div class="report-meta">
+                <h3>npmjs.com</h3>
+                <span class="score">25 / 100</span>
+              </div>
+            </div>
+            <p class="report-date">Scanned 22 Feb 2026</p>
+            <a
+              class="btn btn-outline"
+              href="https://github.com/Slashgear/gdpr-cookie-scanner/blob/main/docs/reports/npmjs.com/gdpr-report-npmjs.com-2026-02-22.md"
+              target="_blank"
+              rel="noopener"
+            >
+              View report →
+            </a>
+          </div>
+
+          <!-- afp.com — 47/100 D -->
+          <div class="report-card">
+            <div class="report-header">
+              <div class="grade-badge grade-D">D</div>
+              <div class="report-meta">
+                <h3>afp.com</h3>
+                <span class="score">47 / 100</span>
+              </div>
+            </div>
+            <p class="report-date">Scanned 22 Feb 2026</p>
+            <a
+              class="btn btn-outline"
+              href="https://github.com/Slashgear/gdpr-cookie-scanner/blob/main/docs/reports/www.afp.com/gdpr-report-afp.com-2026-02-22.md"
+              target="_blank"
+              rel="noopener"
+            >
+              View report →
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── How it works ── -->
+    <section id="how-it-works">
+      <div class="container">
+        <h2 class="section-title">How it works</h2>
+        <p class="section-subtitle">
+          4 sequential phases using real Chromium browsers via Playwright.
+        </p>
+        <div class="steps">
+          <div class="step">
+            <div class="step-number">1</div>
+            <h3>Load without interaction</h3>
+            <p>
+              Captures all cookies and network requests fired before any user action — the baseline
+              for tracking before consent.
+            </p>
+          </div>
+          <div class="step">
+            <div class="step-number">2</div>
+            <h3>Detect consent modal</h3>
+            <p>
+              Tries known CMP selectors, then falls back to DOM heuristics. Extracts buttons with
+              visual properties for dark-pattern analysis.
+            </p>
+          </div>
+          <div class="step">
+            <div class="step-number">3</div>
+            <h3>Reject &amp; capture</h3>
+            <p>
+              Clicks the reject button in the same session and records remaining cookies — checking
+              what persists after refusal.
+            </p>
+          </div>
+          <div class="step">
+            <div class="step-number">4</div>
+            <h3>Fresh session, accept</h3>
+            <p>
+              Opens a clean browser, accepts consent, and compares the cookie delta to validate that
+              consent actually changes behaviour.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Footer ── -->
+    <footer>
+      <div class="container">
+        <p class="footer-copy">
+          MIT License &copy; 2024–2026
+          <a href="https://github.com/Slashgear">Slashgear</a>
+        </p>
+        <nav class="footer-links">
+          <a href="https://github.com/Slashgear/gdpr-cookie-scanner">GitHub</a>
+          <a href="https://www.npmjs.com/package/@slashgear/gdpr-cookie-scanner">npm</a>
+          <a
+            href="https://github.com/Slashgear/gdpr-cookie-scanner/pkgs/container/gdpr-cookie-scanner"
+            >GHCR</a
+          >
+          <a href="https://github.com/Slashgear/gdpr-cookie-scanner/blob/main/CHANGELOG.md"
+            >Changelog</a
+          >
+        </nav>
+      </div>
+    </footer>
+  </body>
+</html>
