@@ -1,5 +1,13 @@
 # @slashgear/gdpr-cookie-scanner
 
+## 2.0.1
+
+### Patch Changes
+
+- 469c8e8: Fix Docker image not being published on release.
+
+  The `docker.yml` workflow was triggered on `release: published`, but GitHub Actions blocks workflows using `GITHUB_TOKEN` from cascading into other workflows, so the Docker build never ran. Merged the Docker build steps directly into `release.yml`, gated on `changesets/action` reporting `published == 'true'`.
+
 ## 2.0.0
 
 ### Major Changes
