@@ -1,5 +1,70 @@
 # @slashgear/gdpr-cookie-scanner
 
+## 2.0.0
+
+### Major Changes
+
+- 98880ac: feat!: require Node.js 24 LTS (breaking change for Node 20/22 users)
+
+  Node.js 24 became Active LTS in October 2025. This is a breaking change for
+  users running Node 20 or 22. A `.nvmrc` file is provided so `nvm use`
+  automatically selects the correct version when entering the project directory.
+
+### Minor Changes
+
+- bd769d6: Add GitHub Pages landing page with live GDPR reports
+
+  Adds a static landing page (`docs/`) hosted on GitHub Pages that showcases the tool
+  with real scan results for 6 tech sites (reddit.com, dev.to, github.com, gitlab.com,
+  stackoverflow.com, npmjs.com). The page is vanilla HTML/CSS with dark mode support
+  and links directly to the rendered Markdown reports on GitHub.
+
+  Also adds `.github/workflows/pages.yml` to automatically deploy `docs/` on every
+  push to `main` that touches that directory.
+
+- cf9c42a: feat: add Docker image for containerised usage
+
+  A `Dockerfile` is now included at the root of the repository, enabling
+  `gdpr-scan` to be run in any environment that supports Docker without
+  needing a local Node.js or Playwright installation.
+
+  The image uses a two-stage build:
+
+  - **Builder** (`node:24-slim`) — compiles TypeScript to `dist/`
+  - **Runtime** (`node:24-slim` + `playwright install chromium --with-deps`) —
+    installs only Chromium and its system dependencies instead of the full
+    official Playwright image (which bundles Chromium, Firefox and WebKit).
+    This keeps the final image around **400–600 MB** vs ~1.5–1.8 GB for the
+    unoptimised approach.
+
+  A `.dockerignore` is also included to exclude source files, Git history,
+  and dev artefacts from the build context.
+
+  Usage:
+
+  ```bash
+  # Build
+  docker build -t gdpr-scan .
+
+  # Run a scan (mount a local directory to retrieve the reports)
+  docker run --rm -v $(pwd)/reports:/reports gdpr-scan scan https://example.com -o /reports
+  ```
+
+- 5cba8a8: feat: add multi-format report output and a standalone HTML report
+
+  The CLI now accepts a `-f, --format <formats>` option (comma-separated, defaults
+  to `md,pdf`) that controls which report files are produced. Supported values:
+  `md`, `html`, `json`, `pdf`.
+
+  The new `html` format generates a self-contained, styled HTML report directly from
+  the scan result — no external dependencies, no network requests. It includes a
+  colour-coded grade badge, per-dimension score cards with progress bars,
+  dark-pattern issue cards, modal details, cookies by phase, network tracker tables,
+  recommendations, and a compliance checklist.
+
+  This makes the report easier to share (single file, opens in any browser) and
+  provides a better reading experience than the Markdown version.
+
 ## 1.4.0
 
 ### Minor Changes
