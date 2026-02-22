@@ -12,16 +12,23 @@ COPY src ./src
 RUN pnpm build
 
 # ── Stage 2: runtime ──────────────────────────────────────────────────────────
-# Playwright image ships all Chromium system libs + browsers pre-installed
-FROM mcr.microsoft.com/playwright:v1.49.0-noble
+# node:24-slim + Chromium only (~400-600 MB) vs the full Playwright image
+# (~1.5-1.8 GB with all 3 browser stacks).
+FROM node:24-slim
 WORKDIR /app
 ENV NODE_ENV=production
 
 RUN npm install -g pnpm@latest
 
-COPY --from=builder /app/dist ./dist
+# Install production dependencies first — playwright CLI is needed for browser install
 COPY package.json pnpm-lock.yaml ./
 RUN pnpm install --prod --frozen-lockfile
+
+# Install Chromium + its system dependencies, then clean up apt caches
+RUN pnpm exec playwright install chromium --with-deps \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=builder /app/dist ./dist
 
 VOLUME ["/reports"]
 

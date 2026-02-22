@@ -1,9 +1,13 @@
+.git
+.github
+.claude
+.changeset
 node_modules/
 dist/
-.changeset/
-.claude/
-tests/
+reports/
 gdpr-reports/
+tests/
+*.md
 *.log
 .DS_Store
 .nvmrc
