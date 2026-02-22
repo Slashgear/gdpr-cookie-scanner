@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { Command } from "commander";
-import chalk from "chalk";
-import ora from "ora";
+import { styleText } from "node:util";
+import { createSpinner } from "nanospinner";
 import { join, resolve } from "path";
 import { Scanner } from "./scanner/index.js";
 import { ReportGenerator } from "./report/generator.js";
@@ -30,14 +30,14 @@ program
   )
   .action(async (url: string, opts) => {
     console.log();
-    console.log(chalk.bold.blue("  GDPR Cookie Scanner"));
-    console.log(chalk.gray("  ─────────────────────────────────────"));
+    console.log(styleText(["bold", "blue"], "  GDPR Cookie Scanner"));
+    console.log(styleText("gray", "  ─────────────────────────────────────"));
     const normalizedUrl = normalizeUrl(url);
     const hostname = new URL(normalizedUrl).hostname;
     const outputDir = join(resolve(opts.output), hostname);
 
-    console.log(chalk.gray(`  Target : ${url}`));
-    console.log(chalk.gray(`  Output : ${outputDir}`));
+    console.log(styleText("gray", `  Target : ${url}`));
+    console.log(styleText("gray", `  Output : ${outputDir}`));
     console.log();
 
     const validFormats = new Set<ReportFormat>(["md", "html", "json", "pdf"]);
@@ -47,7 +47,9 @@ program
       .filter((f): f is ReportFormat => validFormats.has(f as ReportFormat));
 
     if (formats.length === 0) {
-      console.error(chalk.red("  Invalid --format value. Valid options: md, html, json, pdf"));
+      console.error(
+        styleText("red", "  Invalid --format value. Valid options: md, html, json, pdf"),
+      );
       process.exit(2);
     }
 
@@ -61,38 +63,43 @@ program
       formats,
     };
 
-    const spinner = ora("Launching browser...").start();
+    const spinner = createSpinner("Launching browser...").start();
 
     try {
       const scanner = new Scanner(options);
 
-      spinner.text = "Loading page (before interaction)...";
+      spinner.update({ text: "Loading page (before interaction)..." });
       const result = await scanner.run((phase) => {
-        spinner.text = phase;
+        spinner.update({ text: phase });
       });
 
-      spinner.succeed("Scan complete");
+      spinner.success({ text: "Scan complete" });
       console.log();
 
       const generator = new ReportGenerator(options);
       const paths = await generator.generate(result);
 
       console.log(
-        chalk.bold(
+        styleText(
+          "bold",
           `  Compliance score: ${formatScore(result.compliance.total)} ${result.compliance.grade}`,
         ),
       );
       console.log();
 
       if (result.compliance.issues.length > 0) {
-        console.log(chalk.yellow(`  ${result.compliance.issues.length} issue(s) detected:`));
+        console.log(styleText("yellow", `  ${result.compliance.issues.length} issue(s) detected:`));
         for (const issue of result.compliance.issues.slice(0, 5)) {
-          const icon = issue.severity === "critical" ? chalk.red("✗") : chalk.yellow("⚠");
+          const icon =
+            issue.severity === "critical" ? styleText("red", "✗") : styleText("yellow", "⚠");
           console.log(`    ${icon} ${issue.description}`);
         }
         if (result.compliance.issues.length > 5) {
           console.log(
-            chalk.gray(`    ... and ${result.compliance.issues.length - 5} more (see report)`),
+            styleText(
+              "gray",
+              `    ... and ${result.compliance.issues.length - 5} more (see report)`,
+            ),
           );
         }
         console.log();
@@ -105,16 +112,18 @@ program
         pdf: "PDF",
       };
       for (const [fmt, path] of Object.entries(paths)) {
-        console.log(chalk.green(`  ${(labels[fmt] ?? fmt).padEnd(8)} ${path}`));
+        console.log(styleText("green", `  ${(labels[fmt] ?? fmt).padEnd(8)} ${path}`));
       }
       console.log();
 
       process.exit(result.compliance.grade === "F" ? 1 : 0);
     } catch (err) {
-      spinner.fail("Scan failed");
-      console.error(chalk.red(`\n  Error: ${err instanceof Error ? err.message : String(err)}`));
+      spinner.error({ text: "Scan failed" });
+      console.error(
+        styleText("red", `\n  Error: ${err instanceof Error ? err.message : String(err)}`),
+      );
       if (opts.verbose && err instanceof Error && err.stack) {
-        console.error(chalk.gray(err.stack));
+        console.error(styleText("gray", err.stack));
       }
       process.exit(2);
     }
@@ -130,9 +139,9 @@ program
       const cat = entry.category;
       categories.set(cat, (categories.get(cat) ?? 0) + 1);
     }
-    console.log(chalk.bold("\n  Built-in tracker database:"));
+    console.log(styleText("bold", "\n  Built-in tracker database:"));
     for (const [cat, count] of categories.entries()) {
-      console.log(`    ${chalk.cyan(cat.padEnd(20))} ${count} domains`);
+      console.log(`    ${styleText("cyan", cat.padEnd(20))} ${count} domains`);
     }
     console.log(`\n  Total: ${Object.keys(TRACKER_DB).length} tracked domains\n`);
   });
@@ -149,11 +158,11 @@ function normalizeUrl(url: string): string {
 function formatScore(score: number): string {
   const colored =
     score >= 80
-      ? chalk.green(score)
+      ? styleText("green", String(score))
       : score >= 60
-        ? chalk.yellow(score)
+        ? styleText("yellow", String(score))
         : score >= 40
-          ? chalk.hex("#FFA500")(score)
-          : chalk.red(score);
+          ? styleText("yellowBright", String(score))
+          : styleText("red", String(score));
   return `${colored}/100`;
 }
