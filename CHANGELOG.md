@@ -1,5 +1,13 @@
 # @slashgear/gdpr-cookie-scanner
 
+## 2.0.3
+
+### Patch Changes
+
+- cc8b0dc: Fix Docker image tags using lowercase repository name.
+
+  `github.repository` can contain uppercase letters (e.g. `Slashgear/gdpr-cookie-scanner`), which is rejected by the OCI registry spec. The image name is now lowercased via `tr '[:upper:]' '[:lower:]'` before being passed to `docker/build-push-action`.
+
 ## 2.0.2
 
 ### Patch Changes
