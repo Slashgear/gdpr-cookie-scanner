@@ -1,5 +1,5 @@
 ---
-"gdpr-cookie-scanner": patch
+"@slashgear/gdpr-cookie-scanner": patch
 ---
 
 Fix Docker image not being published on release.
