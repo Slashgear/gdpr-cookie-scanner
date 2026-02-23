@@ -94,7 +94,8 @@ const COOKIE_PATTERNS: Array<{
 
   // ── Social ─────────────────────────────────────────────────────
   { pattern: /^(fbsr_|fbm_)/, category: "social", requiresConsent: true }, // Facebook login
-  { pattern: /^(yt-|VISITOR_INFO|YSC|GPS)$/i, category: "social", requiresConsent: true }, // YouTube
+  { pattern: /^(yt-|YSC|GPS)$/i, category: "social", requiresConsent: true }, // YouTube
+  { pattern: /^VISITOR_INFO/i, category: "social", requiresConsent: true }, // YouTube VISITOR_INFO1_LIVE etc.
 
   // ── Personalization ────────────────────────────────────────────
   {

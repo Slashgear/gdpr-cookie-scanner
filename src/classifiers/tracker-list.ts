@@ -26,7 +26,7 @@ export const TRACKER_DB: Record<string, TrackerEntry> = {
   // ── Meta / Facebook ───────────────────────────────────────────
   "connect.facebook.net": { name: "Facebook SDK", category: "social" },
   "graph.facebook.com": { name: "Facebook Graph API", category: "social" },
-  "facebook.com/tr": { name: "Meta Pixel", category: "advertising" },
+  "pixel.facebook.com": { name: "Meta Pixel", category: "advertising" },
   "fbcdn.net": { name: "Facebook CDN", category: "social" },
 
   // ── Microsoft ─────────────────────────────────────────────────
