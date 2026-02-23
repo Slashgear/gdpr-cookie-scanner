@@ -103,25 +103,52 @@ const emptyInputBase = {
 
 describe("analyzeCompliance", () => {
   describe("no consent modal detected", () => {
-    it("scores 0 on consentValidity, easyRefusal, and transparency", () => {
-      const result = analyzeCompliance({
+    describe("when non-essential cookies are present (consent required)", () => {
+      const inputWithCookies = {
         ...emptyInputBase,
+        cookiesAfterAccept: [makeCookie("_ga", "analytics", true, "after-accept")],
         modal: makeModal({ detected: false }),
+      };
+
+      it("scores 0 on consentValidity, easyRefusal, and transparency", () => {
+        const result = analyzeCompliance(inputWithCookies);
+
+        expect(result.breakdown.consentValidity).toBe(0);
+        expect(result.breakdown.easyRefusal).toBe(0);
+        expect(result.breakdown.transparency).toBe(0);
       });
 
-      expect(result.breakdown.consentValidity).toBe(0);
-      expect(result.breakdown.easyRefusal).toBe(0);
-      expect(result.breakdown.transparency).toBe(0);
+      it("issues a critical no-reject-button issue", () => {
+        const result = analyzeCompliance(inputWithCookies);
+        const issue = result.issues.find((i) => i.type === "no-reject-button");
+        expect(issue).toBeDefined();
+        expect(issue?.severity).toBe("critical");
+      });
     });
 
-    it("issues a critical no-reject-button issue", () => {
-      const result = analyzeCompliance({
-        ...emptyInputBase,
-        modal: makeModal({ detected: false }),
+    describe("when no non-essential cookies or trackers are present (consent not required)", () => {
+      it("scores full marks — no consent mechanism needed", () => {
+        const result = analyzeCompliance({
+          ...emptyInputBase,
+          modal: makeModal({ detected: false }),
+        });
+
+        expect(result.breakdown.consentValidity).toBe(25);
+        expect(result.breakdown.easyRefusal).toBe(25);
+        expect(result.breakdown.transparency).toBe(25);
+        expect(result.breakdown.cookieBehavior).toBe(25);
+        expect(result.total).toBe(100);
+        expect(result.grade).toBe("A");
       });
-      const issue = result.issues.find((i) => i.type === "no-reject-button");
-      expect(issue).toBeDefined();
-      expect(issue?.severity).toBe("critical");
+
+      it("raises no compliance issues", () => {
+        const result = analyzeCompliance({
+          ...emptyInputBase,
+          modal: makeModal({ detected: false }),
+        });
+
+        expect(result.issues).toHaveLength(0);
+      });
     });
   });
 

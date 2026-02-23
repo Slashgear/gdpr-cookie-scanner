@@ -320,10 +320,18 @@ ${row("Cookie behavior", breakdown.cookieBehavior, 25)}
 
     const lines: string[] = [];
 
-    if (!r.modal.detected) {
+    const consentRequired =
+      [...r.cookiesBeforeInteraction, ...r.cookiesAfterAccept].some((c) => c.requiresConsent) ||
+      [...r.networkBeforeInteraction, ...r.networkAfterAccept].some(
+        (n) => n.trackerCategory !== null && n.trackerCategory !== "cdn",
+      );
+
+    if (!r.modal.detected && consentRequired) {
       lines.push(
         "❌ **No consent modal detected.** The site sets cookies without requesting consent.",
       );
+    } else if (!r.modal.detected) {
+      lines.push("✅ No consent modal required — no non-essential cookies or trackers detected.");
     } else {
       lines.push(`✅ Consent modal detected (\`${r.modal.selector}\`).`);
     }
@@ -582,7 +590,13 @@ ${rows.join("\n")}
     const recs: string[] = [];
     const issues = r.compliance.issues;
 
-    if (!r.modal.detected) {
+    const needsConsent =
+      [...r.cookiesBeforeInteraction, ...r.cookiesAfterAccept].some((c) => c.requiresConsent) ||
+      [...r.networkBeforeInteraction, ...r.networkAfterAccept].some(
+        (n) => n.trackerCategory !== null && n.trackerCategory !== "cdn",
+      );
+
+    if (!r.modal.detected && needsConsent) {
       recs.push(
         "1. **Deploy a CMP solution** (e.g. Axeptio, Didomi, OneTrust, Cookiebot) that displays a consent modal before any non-essential cookie.",
       );
@@ -772,6 +786,17 @@ The **Description / Purpose** column is to be filled in by the DPO or technical 
     const ok = "✅ Compliant";
     const ko = "❌ Non-compliant";
     const warn = "⚠️ Warning";
+    const na = "➖ Not applicable";
+
+    const consentRequired =
+      [...r.cookiesBeforeInteraction, ...r.cookiesAfterAccept].some((c) => c.requiresConsent) ||
+      [...r.networkBeforeInteraction, ...r.networkAfterAccept].some(
+        (n) => n.trackerCategory !== null && n.trackerCategory !== "cdn",
+      );
+    const noModalStatus = consentRequired ? ko : na;
+    const noModalDetail = consentRequired
+      ? "No consent banner detected"
+      : "Not required — no non-essential cookies or trackers";
 
     type Row = {
       category: string;
@@ -789,10 +814,8 @@ The **Description / Purpose** column is to be filled in by the DPO or technical 
       rule: "Consent modal detected",
       reference:
         "[GDPR Art. 7](https://gdpr-info.eu/art-7-gdpr/) · [ePrivacy Dir. Art. 5(3)](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32002L0058)",
-      status: r.modal.detected ? ok : ko,
-      detail: r.modal.detected
-        ? `Detected (\`${r.modal.selector}\`)`
-        : "No consent banner detected",
+      status: r.modal.detected ? ok : noModalStatus,
+      detail: r.modal.detected ? `Detected (\`${r.modal.selector}\`)` : noModalDetail,
     });
 
     const preTicked = r.modal.checkboxes.filter((c) => c.isCheckedByDefault);
@@ -800,9 +823,10 @@ The **Description / Purpose** column is to be filled in by the DPO or technical 
       category: "Consent",
       rule: "No pre-ticked checkboxes",
       reference: "[GDPR Recital 32](https://gdpr-info.eu/recitals/no-32/)",
-      status: preTicked.length === 0 ? ok : ko,
-      detail:
-        preTicked.length === 0
+      status: !r.modal.detected ? (consentRequired ? ko : na) : preTicked.length === 0 ? ok : ko,
+      detail: !r.modal.detected
+        ? noModalDetail
+        : preTicked.length === 0
           ? "No pre-ticked checkbox detected"
           : `${preTicked.length} pre-ticked box(es): ${preTicked.map((c) => c.label || c.name).join(", ")}`,
     });
@@ -813,14 +837,17 @@ The **Description / Purpose** column is to be filled in by the DPO or technical 
       category: "Consent",
       rule: "Accept button label is unambiguous",
       reference: "[GDPR Art. 4(11)](https://gdpr-info.eu/art-4-gdpr/)",
-      status:
-        !r.modal.detected || !misleadingAccept
+      status: !r.modal.detected
+        ? consentRequired
+          ? ko
+          : na
+        : !misleadingAccept
           ? ok
           : misleadingAccept.severity === "critical"
             ? ko
             : warn,
       detail: !r.modal.detected
-        ? "Modal not detected"
+        ? noModalDetail
         : acceptBtn
           ? misleadingAccept
             ? `Ambiguous label: "${acceptBtn.text}"`
@@ -836,9 +863,9 @@ The **Description / Purpose** column is to be filled in by the DPO or technical 
       rule: "Reject button present at first layer",
       reference:
         "[CNIL Recommendation 2022](https://www.cnil.fr/fr/cookies-et-autres-traceurs/regles/cookies)",
-      status: !r.modal.detected ? ko : noReject ? ko : ok,
+      status: !r.modal.detected ? (consentRequired ? ko : na) : noReject ? ko : ok,
       detail: !r.modal.detected
-        ? "Modal not detected"
+        ? noModalDetail
         : rejectBtn
           ? `Detected: "${rejectBtn.text}"`
           : "No Reject button at first layer",
@@ -850,9 +877,9 @@ The **Description / Purpose** column is to be filled in by the DPO or technical 
       rule: "Rejecting requires no more clicks than accepting",
       reference:
         "[CNIL Recommendation 2022](https://www.cnil.fr/fr/cookies-et-autres-traceurs/regles/cookies)",
-      status: !r.modal.detected ? ko : clickIssue ? ko : ok,
+      status: !r.modal.detected ? (consentRequired ? ko : na) : clickIssue ? ko : ok,
       detail: !r.modal.detected
-        ? "Modal not detected"
+        ? noModalDetail
         : clickIssue
           ? clickIssue.evidence
           : acceptBtn && rejectBtn
@@ -866,9 +893,9 @@ The **Description / Purpose** column is to be filled in by the DPO or technical 
       rule: "Size symmetry between Accept and Reject",
       reference:
         "[EDPB Guidelines 03/2022](https://www.edpb.europa.eu/system/files/2022-03/edpb_03-2022_guidelines_on_dark_patterns_in_social_media_platform_interfaces_en.pdf)",
-      status: !r.modal.detected ? ko : sizeIssue ? warn : ok,
+      status: !r.modal.detected ? (consentRequired ? ko : na) : sizeIssue ? warn : ok,
       detail: !r.modal.detected
-        ? "Modal not detected"
+        ? noModalDetail
         : sizeIssue
           ? sizeIssue.evidence
           : "Button sizes are comparable",
@@ -880,9 +907,9 @@ The **Description / Purpose** column is to be filled in by the DPO or technical 
       rule: "Font symmetry between Accept and Reject",
       reference:
         "[EDPB Guidelines 03/2022](https://www.edpb.europa.eu/system/files/2022-03/edpb_03-2022_guidelines_on_dark_patterns_in_social_media_platform_interfaces_en.pdf)",
-      status: !r.modal.detected ? ko : nudgeIssue ? warn : ok,
+      status: !r.modal.detected ? (consentRequired ? ko : na) : nudgeIssue ? warn : ok,
       detail: !r.modal.detected
-        ? "Modal not detected"
+        ? noModalDetail
         : nudgeIssue
           ? nudgeIssue.evidence
           : "Font sizes are comparable",
@@ -894,9 +921,15 @@ The **Description / Purpose** column is to be filled in by the DPO or technical 
       rule: "Granular controls available",
       reference:
         "[EDPB Guidelines 05/2020](https://edpb.europa.eu/our-work-tools/our-documents/guidelines/guidelines-052020-consent-under-regulation-2016679_en)",
-      status: !r.modal.detected ? ko : r.modal.hasGranularControls ? ok : warn,
+      status: !r.modal.detected
+        ? consentRequired
+          ? ko
+          : na
+        : r.modal.hasGranularControls
+          ? ok
+          : warn,
       detail: !r.modal.detected
-        ? "Modal not detected"
+        ? noModalDetail
         : r.modal.hasGranularControls
           ? `${r.modal.checkboxes.length} checkbox(es) or preferences panel detected`
           : "No granular controls (checkboxes or panel) detected",
@@ -933,9 +966,9 @@ The **Description / Purpose** column is to be filled in by the DPO or technical 
         category: "Transparency",
         rule: label,
         reference: ref,
-        status: !r.modal.detected ? ko : missing ? warn : ok,
+        status: !r.modal.detected ? (consentRequired ? ko : na) : missing ? warn : ok,
         detail: !r.modal.detected
-          ? "Modal not detected"
+          ? noModalDetail
           : missing
             ? `Information absent from the modal text`
             : "Mention found in the modal text",
@@ -946,9 +979,15 @@ The **Description / Purpose** column is to be filled in by the DPO or technical 
       category: "Transparency",
       rule: "Privacy policy link present in the consent modal",
       reference: "[GDPR Art. 13](https://gdpr-info.eu/art-13-gdpr/)",
-      status: !r.modal.detected ? ko : r.modal.privacyPolicyUrl ? ok : warn,
+      status: !r.modal.detected
+        ? consentRequired
+          ? ko
+          : na
+        : r.modal.privacyPolicyUrl
+          ? ok
+          : warn,
       detail: !r.modal.detected
-        ? "Modal not detected"
+        ? noModalDetail
         : r.modal.privacyPolicyUrl
           ? `Link found: ${r.modal.privacyPolicyUrl}`
           : "No privacy policy link found inside the consent modal",
@@ -1012,6 +1051,7 @@ The **Description / Purpose** column is to be filled in by the DPO or technical 
     const conformeCount = rows.filter((r) => r.status === ok).length;
     const nonConformeCount = rows.filter((r) => r.status === ko).length;
     const avertissementCount = rows.filter((r) => r.status === warn).length;
+    const naCount = rows.filter((r) => r.status === na).length;
 
     const lines: string[] = [];
     lines.push(`# GDPR Compliance Checklist — ${hostname}`);
@@ -1020,9 +1060,13 @@ The **Description / Purpose** column is to be filled in by the DPO or technical 
 > **Scanned URL:** ${r.url}
 > **Global score:** ${r.compliance.total}/100 — Grade **${r.compliance.grade}**
 `);
-    lines.push(
-      `**${conformeCount} rule(s) compliant** · **${nonConformeCount} non-compliant** · **${avertissementCount} warning(s)**\n`,
-    );
+    const totalsSummary = [
+      `**${conformeCount} rule(s) compliant**`,
+      `**${nonConformeCount} non-compliant**`,
+      `**${avertissementCount} warning(s)**`,
+      ...(naCount > 0 ? [`**${naCount} not applicable**`] : []),
+    ].join(" · ");
+    lines.push(`${totalsSummary}\n`);
 
     const categories = [...new Set(rows.map((r) => r.category))];
     for (const category of categories) {

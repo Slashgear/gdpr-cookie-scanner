@@ -117,19 +117,16 @@ describe("Scanner E2E", { timeout: E2E_TIMEOUT }, () => {
       expect(result.privacyPolicyUrl).toBeTruthy();
     });
 
-    it("assigns grade F when no modal is detected", async () => {
+    it("assigns grade A — no consent mechanism needed for a tracking-free site", async () => {
       const scanner = new Scanner(makeOptions("no-modal-site.html"));
       const result = await scanner.run();
-      expect(result.compliance.grade).toBe("F");
+      expect(result.compliance.grade).toBe("A");
     });
 
-    it("raises a critical no-reject-button issue", async () => {
+    it("raises no compliance issues for a tracking-free site without a modal", async () => {
       const scanner = new Scanner(makeOptions("no-modal-site.html"));
       const result = await scanner.run();
-      const issue = result.compliance.issues.find(
-        (i) => i.type === "no-reject-button" && i.severity === "critical",
-      );
-      expect(issue).toBeDefined();
+      expect(result.compliance.issues).toHaveLength(0);
     });
   });
 });

@@ -21,10 +21,21 @@ interface ComplianceInput {
 export function analyzeCompliance(input: ComplianceInput): ComplianceScore {
   const issues: DarkPatternIssue[] = [];
 
+  // Determine whether a consent mechanism is actually required
+  const hasNonEssentialCookies = [
+    ...input.cookiesBeforeInteraction,
+    ...input.cookiesAfterAccept,
+  ].some((c) => c.requiresConsent);
+  const hasNonEssentialTrackers = [
+    ...input.networkBeforeInteraction,
+    ...input.networkAfterAccept,
+  ].some((r) => r.trackerCategory !== null && r.trackerCategory !== "cdn");
+  const consentRequired = hasNonEssentialCookies || hasNonEssentialTrackers;
+
   // ── A. Consent validity (0-25) ────────────────────────────────
   let consentValidity = 25;
 
-  if (!input.modal.detected) {
+  if (!input.modal.detected && consentRequired) {
     issues.push({
       type: "no-reject-button",
       severity: "critical",
@@ -32,7 +43,7 @@ export function analyzeCompliance(input: ComplianceInput): ComplianceScore {
       evidence: "A consent mechanism is required before depositing non-essential cookies",
     });
     consentValidity = 0;
-  } else {
+  } else if (input.modal.detected) {
     // Wording analysis
     const wordingResult = analyzeButtonWording(input.modal.buttons);
     const textResult = analyzeModalText(input.modal.text);
@@ -59,9 +70,9 @@ export function analyzeCompliance(input: ComplianceInput): ComplianceScore {
   // ── B. Easy refusal (0-25) ────────────────────────────────────
   let easyRefusal = 25;
 
-  if (!input.modal.detected) {
+  if (!input.modal.detected && consentRequired) {
     easyRefusal = 0;
-  } else {
+  } else if (input.modal.detected) {
     const acceptButton = input.modal.buttons.find((b) => b.type === "accept");
     const rejectButton = input.modal.buttons.find((b) => b.type === "reject");
 
@@ -115,9 +126,9 @@ export function analyzeCompliance(input: ComplianceInput): ComplianceScore {
   // ── C. Transparency (0-25) ────────────────────────────────────
   let transparency = 25;
 
-  if (!input.modal.detected) {
+  if (!input.modal.detected && consentRequired) {
     transparency = 0;
-  } else {
+  } else if (input.modal.detected) {
     if (!input.modal.hasGranularControls) {
       transparency -= 10;
     }
