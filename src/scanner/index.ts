@@ -6,6 +6,7 @@ import { captureCookies } from "./cookies.js";
 import { createNetworkInterceptor } from "./network.js";
 import { detectConsentModal, findPrivacyPolicyUrl } from "./consent-modal.js";
 import { analyzeCompliance } from "../analyzers/compliance.js";
+import { resolveLocale } from "../i18n/index.js";
 
 type PhaseCallback = (message: string) => void;
 
@@ -152,6 +153,7 @@ export class Scanner {
       networkBeforeInteraction,
       networkAfterAccept,
       networkAfterReject,
+      locale: resolveLocale(this.options.locale),
     });
 
     return {

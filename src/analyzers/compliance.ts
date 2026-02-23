@@ -6,6 +6,7 @@ import type {
   NetworkRequest,
 } from "../types.js";
 import { analyzeButtonWording, analyzeModalText } from "./wording.js";
+import { type Locale, t } from "../i18n/index.js";
 
 interface ComplianceInput {
   modal: ConsentModal;
@@ -16,9 +17,11 @@ interface ComplianceInput {
   networkBeforeInteraction: NetworkRequest[];
   networkAfterAccept: NetworkRequest[];
   networkAfterReject: NetworkRequest[];
+  locale: Locale;
 }
 
 export function analyzeCompliance(input: ComplianceInput): ComplianceScore {
+  const { locale } = input;
   const issues: DarkPatternIssue[] = [];
 
   // Determine whether a consent mechanism is actually required
@@ -39,14 +42,14 @@ export function analyzeCompliance(input: ComplianceInput): ComplianceScore {
     issues.push({
       type: "no-reject-button",
       severity: "critical",
-      description: "No cookie consent modal detected",
-      evidence: "A consent mechanism is required before depositing non-essential cookies",
+      description: t(locale, "ISSUE_NO_MODAL_DESC"),
+      evidence: t(locale, "ISSUE_NO_MODAL_EVIDENCE"),
     });
     consentValidity = 0;
   } else if (input.modal.detected) {
     // Wording analysis
-    const wordingResult = analyzeButtonWording(input.modal.buttons);
-    const textResult = analyzeModalText(input.modal.text);
+    const wordingResult = analyzeButtonWording(input.modal.buttons, locale);
+    const textResult = analyzeModalText(input.modal.text, locale);
     issues.push(...wordingResult.issues, ...textResult.issues);
 
     // Pre-ticked checkboxes
@@ -55,8 +58,10 @@ export function analyzeCompliance(input: ComplianceInput): ComplianceScore {
       issues.push({
         type: "pre-ticked",
         severity: "critical",
-        description: `${preTicked.length} checkbox(es) pre-ticked by default`,
-        evidence: `Pre-ticked boxes are invalid consent under RGPD Recital 32. Affected: ${preTicked.map((c) => c.label || c.name).join(", ")}`,
+        description: t(locale, "ISSUE_PRE_TICKED_DESC", { count: preTicked.length }),
+        evidence: t(locale, "ISSUE_PRE_TICKED_EVIDENCE", {
+          names: preTicked.map((c) => c.label || c.name).join(", "),
+        }),
       });
       consentValidity -= 10;
     }
@@ -80,16 +85,19 @@ export function analyzeCompliance(input: ComplianceInput): ComplianceScore {
       issues.push({
         type: "buried-reject",
         severity: "critical",
-        description: "No reject button on first layer",
-        evidence: "CNIL (2022) requires reject to require no more clicks than accept",
+        description: t(locale, "ISSUE_NO_REJECT_FIRST_DESC"),
+        evidence: t(locale, "ISSUE_NO_REJECT_FIRST_EVIDENCE"),
       });
       easyRefusal -= 15;
     } else if (rejectButton.clickDepth > (acceptButton?.clickDepth ?? 1)) {
       issues.push({
         type: "click-asymmetry",
         severity: "critical",
-        description: "Reject requires more clicks than accept",
-        evidence: `Accept: ${acceptButton?.clickDepth ?? 1} click(s), Reject: ${rejectButton.clickDepth} click(s)`,
+        description: t(locale, "ISSUE_CLICK_ASYMM_DESC"),
+        evidence: t(locale, "ISSUE_CLICK_ASYMM_EVIDENCE", {
+          a: acceptButton?.clickDepth ?? 1,
+          b: rejectButton.clickDepth,
+        }),
       });
       easyRefusal -= 15;
     }
@@ -102,8 +110,11 @@ export function analyzeCompliance(input: ComplianceInput): ComplianceScore {
         issues.push({
           type: "asymmetric-prominence",
           severity: "warning",
-          description: "Accept button is significantly larger than reject button",
-          evidence: `Accept area: ${Math.round(acceptArea)}px², Reject area: ${Math.round(rejectArea)}px²`,
+          description: t(locale, "ISSUE_BTN_AREA_DESC"),
+          evidence: t(locale, "ISSUE_BTN_AREA_EVIDENCE", {
+            acceptArea: Math.round(acceptArea),
+            rejectArea: Math.round(rejectArea),
+          }),
         });
         easyRefusal -= 5;
       }
@@ -115,8 +126,11 @@ export function analyzeCompliance(input: ComplianceInput): ComplianceScore {
         issues.push({
           type: "nudging",
           severity: "warning",
-          description: "Accept button font is significantly larger than reject button",
-          evidence: `Accept: ${acceptButton.fontSize}px, Reject: ${rejectButton.fontSize}px`,
+          description: t(locale, "ISSUE_FONT_ASYMM_DESC"),
+          evidence: t(locale, "ISSUE_FONT_ASYMM_EVIDENCE", {
+            acceptPx: acceptButton.fontSize,
+            rejectPx: rejectButton.fontSize,
+          }),
         });
         easyRefusal -= 5;
       }
@@ -133,7 +147,7 @@ export function analyzeCompliance(input: ComplianceInput): ComplianceScore {
       transparency -= 10;
     }
     // Already deducted in consentValidity for missing info
-    const wordingResult = analyzeModalText(input.modal.text);
+    const wordingResult = analyzeModalText(input.modal.text, locale);
     if (wordingResult.missingInfo.length > 0) {
       transparency -= wordingResult.missingInfo.length * 3;
     }
@@ -142,9 +156,8 @@ export function analyzeCompliance(input: ComplianceInput): ComplianceScore {
       issues.push({
         type: "missing-info",
         severity: "warning",
-        description: "No privacy policy link found in the consent modal",
-        evidence:
-          "GDPR Art. 13 requires the privacy policy to be accessible from the consent interface",
+        description: t(locale, "ISSUE_NO_PRIVACY_MODAL_DESC"),
+        evidence: t(locale, "ISSUE_NO_PRIVACY_MODAL_EVIDENCE"),
       });
       transparency -= 5;
     }
@@ -155,8 +168,8 @@ export function analyzeCompliance(input: ComplianceInput): ComplianceScore {
     issues.push({
       type: "missing-info",
       severity: "warning",
-      description: "No privacy policy link found on the page",
-      evidence: "A privacy policy must be accessible from every page (GDPR Art. 13)",
+      description: t(locale, "ISSUE_NO_PRIVACY_PAGE_DESC"),
+      evidence: t(locale, "ISSUE_NO_PRIVACY_PAGE_EVIDENCE"),
     });
     transparency -= 3;
   }
@@ -171,7 +184,9 @@ export function analyzeCompliance(input: ComplianceInput): ComplianceScore {
     issues.push({
       type: "auto-consent",
       severity: "critical",
-      description: `${illegalPreConsentCookies.length} non-essential cookie(s) deposited before any interaction`,
+      description: t(locale, "ISSUE_PRE_CONSENT_COOKIES_DESC", {
+        count: illegalPreConsentCookies.length,
+      }),
       evidence: illegalPreConsentCookies.map((c) => `${c.name} (${c.category})`).join(", "),
     });
     cookieBehavior -= Math.min(20, illegalPreConsentCookies.length * 4);
@@ -186,7 +201,9 @@ export function analyzeCompliance(input: ComplianceInput): ComplianceScore {
     issues.push({
       type: "auto-consent",
       severity: "critical",
-      description: `${consentCookiesAfterReject.length} non-essential cookie(s) persist after rejection`,
+      description: t(locale, "ISSUE_POST_REJECT_COOKIES_DESC", {
+        count: consentCookiesAfterReject.length,
+      }),
       evidence: consentCookiesAfterReject.map((c) => `${c.name} (${c.category})`).join(", "),
     });
     cookieBehavior -= Math.min(15, consentCookiesAfterReject.length * 3);
@@ -199,7 +216,7 @@ export function analyzeCompliance(input: ComplianceInput): ComplianceScore {
     issues.push({
       type: "auto-consent",
       severity: "critical",
-      description: `${preInteractionTrackers.length} tracker request(s) fired before any consent`,
+      description: t(locale, "ISSUE_PRE_TRACKERS_DESC", { count: preInteractionTrackers.length }),
       evidence: [...new Set(preInteractionTrackers.map((r) => r.trackerName ?? r.url))]
         .slice(0, 5)
         .join(", "),

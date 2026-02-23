@@ -83,6 +83,8 @@ export interface DarkPatternIssue {
   severity: "critical" | "warning" | "info";
   description: string;
   evidence: string;
+  /** Machine-readable key for missing-info issues (e.g. "purposes", "duration"). */
+  key?: string;
 }
 
 export type DarkPatternType =
