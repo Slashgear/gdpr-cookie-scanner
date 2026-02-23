@@ -113,7 +113,7 @@ export type ReportFormat = "md" | "html" | "json" | "pdf";
 
 export interface ScanOptions {
   url: string;
-  outputDir: string;
+  outputDir?: string;
   timeout: number; // ms
   screenshots: boolean;
   locale: string;
