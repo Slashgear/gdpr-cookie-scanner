@@ -1,0 +1,95 @@
+name: Update Tracker DB
+
+on:
+  schedule:
+    # 1st of every month at 04:00 UTC
+    - cron: "0 4 1 * *"
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Fetch & merge tracker lists
+        run: pnpm update-trackers
+
+      - name: Detect changes
+        id: diff
+        run: |
+          git diff --quiet src/classifiers/tracker-list.ts \
+            && echo "changed=false" >> "$GITHUB_OUTPUT" \
+            || echo "changed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Format
+        if: steps.diff.outputs.changed == 'true'
+        run: pnpm format
+
+      - name: Type-check
+        if: steps.diff.outputs.changed == 'true'
+        run: pnpm typecheck
+
+      - name: Create PR
+        if: steps.diff.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BRANCH="chore/tracker-db-$(date +%Y%m)"
+          DATE="$(date +%Y-%m-%d)"
+          SLUG="tracker-db-update-${DATE}"
+
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$BRANCH"
+
+          # Write changeset
+          cat > ".changeset/${SLUG}.md" << EOF
+          ---
+          "@slashgear/gdpr-cookie-scanner": patch
+          ---
+
+          chore: monthly tracker DB update from Disconnect.me and DuckDuckGo Tracker Radar
+          EOF
+
+          git add src/classifiers/tracker-list.ts ".changeset/${SLUG}.md"
+          git commit -m "chore: update tracker DB from Disconnect.me and DuckDuckGo Tracker Radar"
+          git push origin "$BRANCH"
+
+          gh pr create \
+            --title "chore: monthly tracker DB update ($(date +%B %Y))" \
+            --body "$(cat <<'BODY'
+          ## Summary
+
+          Automated monthly update of `src/classifiers/tracker-list.ts`.
+
+          - **Sources**: [Disconnect.me](https://github.com/disconnectme/disconnect-tracking-protection) · [DuckDuckGo Tracker Radar](https://github.com/duckduckgo/tracker-radar)
+          - Manually curated entries and `consentRequired: false` overrides are preserved unchanged.
+          - New entries are appended in the `AUTO-GENERATED` section (prevalence ≥ 0.1 %).
+
+          ## Test plan
+
+          - [ ] `pnpm typecheck` passes (validated by CI)
+          - [ ] Review the diff in `tracker-list.ts` for obviously incorrect category assignments
+          - [ ] Spot-check 2–3 new domains against their actual tracker type
+
+          🤖 Generated with [Claude Code](https://claude.com/claude-code)
+          BODY
+          )" \
+            --base main
