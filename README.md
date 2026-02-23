@@ -30,7 +30,7 @@ npx playwright install chromium
 Or run without installing:
 
 ```bash
-npx @slashgear/gdpr-cookie-scanner gdpr-scan scan https://example.com
+npx @slashgear/gdpr-cookie-scanner scan https://example.com
 # Playwright is still required the first time:
 npx playwright install chromium
 ```
@@ -61,7 +61,7 @@ gdpr-scan scan <url> [options]
 | ------------------------ | ---------------- | ------------------------------------------------------------- |
 | `-o, --output <dir>`     | `./gdpr-reports` | Output directory for the report                               |
 | `-t, --timeout <ms>`     | `30000`          | Navigation timeout                                            |
-| `-f, --format <formats>` | `md,pdf`         | Output formats: `md`, `html`, `json`, `pdf` (comma-separated) |
+| `-f, --format <formats>` | `html`           | Output formats: `md`, `html`, `json`, `pdf` (comma-separated) |
 | `--no-screenshots`       | —                | Disable screenshot capture                                    |
 | `-l, --locale <locale>`  | `fr-FR`          | Browser locale                                                |
 | `-v, --verbose`          | —                | Show full stack trace on error                                |
@@ -69,7 +69,7 @@ gdpr-scan scan <url> [options]
 ### Examples
 
 ```bash
-# Basic scan
+# Basic scan — produces an HTML report by default
 gdpr-scan scan https://example.com
 
 # With custom output directory
@@ -78,8 +78,8 @@ gdpr-scan scan https://example.com -o ./reports
 # Scan in English, without screenshots
 gdpr-scan scan https://example.com --locale en-US --no-screenshots
 
-# Generate only an HTML report
-gdpr-scan scan https://example.com -f html
+# Generate a Markdown report instead
+gdpr-scan scan https://example.com -f md
 
 # Generate all formats at once
 gdpr-scan scan https://example.com -f md,html,json,pdf

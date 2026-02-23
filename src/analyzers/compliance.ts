@@ -29,7 +29,7 @@ export function analyzeCompliance(input: ComplianceInput): ComplianceScore {
   const hasNonEssentialTrackers = [
     ...input.networkBeforeInteraction,
     ...input.networkAfterAccept,
-  ].some((r) => r.trackerCategory !== null && r.trackerCategory !== "cdn");
+  ].some((r) => r.requiresConsent);
   const consentRequired = hasNonEssentialCookies || hasNonEssentialTrackers;
 
   // ── A. Consent validity (0-25) ────────────────────────────────
@@ -150,8 +150,8 @@ export function analyzeCompliance(input: ComplianceInput): ComplianceScore {
     }
   }
 
-  // No privacy policy link anywhere on the page
-  if (!input.privacyPolicyUrl) {
+  // No privacy policy link anywhere on the page (only relevant when consent is required)
+  if (!input.privacyPolicyUrl && consentRequired) {
     issues.push({
       type: "missing-info",
       severity: "warning",
@@ -193,9 +193,7 @@ export function analyzeCompliance(input: ComplianceInput): ComplianceScore {
   }
 
   // Network trackers firing before interaction
-  const preInteractionTrackers = input.networkBeforeInteraction.filter(
-    (r) => r.trackerCategory !== null && r.trackerCategory !== "cdn",
-  );
+  const preInteractionTrackers = input.networkBeforeInteraction.filter((r) => r.requiresConsent);
 
   if (preInteractionTrackers.length > 0) {
     issues.push({

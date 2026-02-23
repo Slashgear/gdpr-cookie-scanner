@@ -30,6 +30,7 @@ export interface NetworkRequest {
   isThirdParty: boolean;
   trackerCategory: TrackerCategory | null;
   trackerName: string | null;
+  requiresConsent: boolean;
   capturedAt: "before-interaction" | "after-accept" | "after-reject";
   responseStatus: number | null;
   contentType: string | null;

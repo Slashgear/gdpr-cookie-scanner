@@ -32,6 +32,7 @@ export function createNetworkInterceptor(page: Page, phase: NetworkPhase) {
       isThirdParty: classification.isThirdParty,
       trackerCategory: classification.trackerCategory,
       trackerName: classification.trackerName,
+      requiresConsent: classification.requiresConsent,
       capturedAt: phase,
       responseStatus: meta?.status ?? null,
       contentType: meta?.contentType ?? null,

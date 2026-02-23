@@ -68,7 +68,7 @@ Phase 3 and 4 require two separate browser sessions so cookie state is fully iso
 - **`src/classifiers/tracker-list.ts`** — Static database of tracker domains by category
 - **`src/analyzers/compliance.ts`** — Scores 4 dimensions (0–25 each) and surfaces `DarkPatternIssue` objects: consent validity, easy refusal, transparency, cookie behavior
 - **`src/analyzers/wording.ts`** — Text analysis of button labels and modal copy
-- **`src/report/generator.ts`** — Renders 3 Markdown files from `ScanResult`: the main compliance report (`gdpr-report-*.md`), the checklist (`gdpr-checklist-*.md`), and the cookie inventory (`gdpr-cookies-*.md`); runs `oxfmt` on all generated files
+- **`src/report/generator.ts`** — Renders report files from `ScanResult` in the requested formats. The default output format is HTML. Markdown output produces 3 files: the main compliance report (`gdpr-report-*.md`), the checklist (`gdpr-checklist-*.md`), and the cookie inventory (`gdpr-cookies-*.md`); runs `oxfmt` on all generated Markdown files
 - **`src/types.ts`** — All shared TypeScript interfaces (`ScanResult`, `ScanOptions`, `ComplianceScore`, `ConsentModal`, etc.)
 
 ### Compliance scoring

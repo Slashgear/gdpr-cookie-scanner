@@ -314,17 +314,13 @@ ${row("Cookie behavior", breakdown.cookieBehavior, 25)}
     const warningCount = r.compliance.issues.filter((i) => i.severity === "warning").length;
     const illegalPreCookies = r.cookiesBeforeInteraction.filter((c) => c.requiresConsent);
     const persistAfterReject = r.cookiesAfterReject.filter((c) => c.requiresConsent);
-    const preInteractionTrackers = r.networkBeforeInteraction.filter(
-      (n) => n.trackerCategory !== null,
-    );
+    const preInteractionTrackers = r.networkBeforeInteraction.filter((n) => n.requiresConsent);
 
     const lines: string[] = [];
 
     const consentRequired =
       [...r.cookiesBeforeInteraction, ...r.cookiesAfterAccept].some((c) => c.requiresConsent) ||
-      [...r.networkBeforeInteraction, ...r.networkAfterAccept].some(
-        (n) => n.trackerCategory !== null && n.trackerCategory !== "cdn",
-      );
+      [...r.networkBeforeInteraction, ...r.networkAfterAccept].some((n) => n.requiresConsent);
 
     if (!r.modal.detected && consentRequired) {
       lines.push(
@@ -592,9 +588,7 @@ ${rows.join("\n")}
 
     const needsConsent =
       [...r.cookiesBeforeInteraction, ...r.cookiesAfterAccept].some((c) => c.requiresConsent) ||
-      [...r.networkBeforeInteraction, ...r.networkAfterAccept].some(
-        (n) => n.trackerCategory !== null && n.trackerCategory !== "cdn",
-      );
+      [...r.networkBeforeInteraction, ...r.networkAfterAccept].some((n) => n.requiresConsent);
 
     if (!r.modal.detected && needsConsent) {
       recs.push(
@@ -790,9 +784,7 @@ The **Description / Purpose** column is to be filled in by the DPO or technical 
 
     const consentRequired =
       [...r.cookiesBeforeInteraction, ...r.cookiesAfterAccept].some((c) => c.requiresConsent) ||
-      [...r.networkBeforeInteraction, ...r.networkAfterAccept].some(
-        (n) => n.trackerCategory !== null && n.trackerCategory !== "cdn",
-      );
+      [...r.networkBeforeInteraction, ...r.networkAfterAccept].some((n) => n.requiresConsent);
     const noModalStatus = consentRequired ? ko : na;
     const noModalDetail = consentRequired
       ? "No consent banner detected"
@@ -997,7 +989,7 @@ The **Description / Purpose** column is to be filled in by the DPO or technical 
       category: "Transparency",
       rule: "Privacy policy accessible from the main page",
       reference: "[GDPR Art. 13](https://gdpr-info.eu/art-13-gdpr/)",
-      status: r.privacyPolicyUrl ? ok : warn,
+      status: r.privacyPolicyUrl ? ok : consentRequired ? warn : na,
       detail: r.privacyPolicyUrl
         ? `Link found: ${r.privacyPolicyUrl}`
         : "No privacy policy link found on the main page",
@@ -1032,9 +1024,7 @@ The **Description / Purpose** column is to be filled in by the DPO or technical 
           : `${persistAfterReject.length} cookie(s) persisting: ${persistAfterReject.map((c) => `\`${c.name}\``).join(", ")}`,
     });
 
-    const preTrackers = r.networkBeforeInteraction.filter(
-      (req) => req.trackerCategory !== null && req.trackerCategory !== "cdn",
-    );
+    const preTrackers = r.networkBeforeInteraction.filter((req) => req.requiresConsent);
     rows.push({
       category: "Cookie behavior",
       rule: "No network tracker before consent",

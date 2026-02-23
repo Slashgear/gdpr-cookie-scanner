@@ -3,6 +3,7 @@ import type { TrackerCategory } from "../types.js";
 interface TrackerEntry {
   name: string;
   category: TrackerCategory;
+  consentRequired?: boolean; // absent = true by default
 }
 
 /**
@@ -89,6 +90,13 @@ export const TRACKER_DB: Record<string, TrackerEntry> = {
   "optimizely.com": { name: "Optimizely", category: "analytics" },
   "vwo.com": { name: "VWO", category: "analytics" },
   "app.convert.com": { name: "Convert", category: "analytics" },
+
+  // ── Consent-exempt analytics (CNIL ePrivacy exemption) ───────
+  "plausible.io": {
+    name: "Plausible Analytics",
+    category: "analytics",
+    consentRequired: false,
+  },
 };
 
 /**

@@ -74,6 +74,7 @@ function makeRequest(
   url: string,
   trackerCategory: NetworkRequest["trackerCategory"],
   capturedAt: NetworkRequest["capturedAt"],
+  requiresConsent?: boolean,
 ): NetworkRequest {
   return {
     url,
@@ -83,6 +84,7 @@ function makeRequest(
     isThirdParty: trackerCategory !== null,
     trackerCategory,
     trackerName: trackerCategory ? "Tracker" : null,
+    requiresConsent: requiresConsent ?? (trackerCategory !== null && trackerCategory !== "cdn"),
     capturedAt,
     responseStatus: 200,
     contentType: null,
@@ -319,12 +321,14 @@ describe("analyzeCompliance", () => {
   });
 
   describe("missing privacy policy link on page", () => {
-    it("deducts 3 from transparency and raises a missing-info warning", () => {
+    it("deducts 3 from transparency and raises a missing-info warning when consent is required", () => {
       // hasGranularControls: true so only -3 deduction (no -10 for granular)
+      // A non-essential cookie is present so consentRequired = true → deduction applies
       const result = analyzeCompliance({
         ...emptyInputBase,
         privacyPolicyUrl: null,
         modal: makeModal({ hasGranularControls: true }),
+        cookiesAfterAccept: [makeCookie("_ga", "analytics", true, "after-accept")],
       });
 
       // 25 - 3 (no page privacy link) = 22
@@ -333,6 +337,21 @@ describe("analyzeCompliance", () => {
         (i) => i.type === "missing-info" && i.description.includes("page"),
       );
       expect(issue).toBeDefined();
+    });
+
+    it("does not deduct when no consent is required (tracking-free site)", () => {
+      const result = analyzeCompliance({
+        ...emptyInputBase,
+        privacyPolicyUrl: null,
+        modal: makeModal({ hasGranularControls: true }),
+      });
+
+      // No non-essential cookies/trackers → consentRequired = false → no deduction
+      expect(result.breakdown.transparency).toBe(25);
+      const issue = result.issues.find(
+        (i) => i.type === "missing-info" && i.description.includes("page"),
+      );
+      expect(issue).toBeUndefined();
     });
   });
 
@@ -482,6 +501,46 @@ describe("analyzeCompliance", () => {
         cookiesBeforeInteraction: illegalCookies,
       });
       expect(result.grade).toBe("F");
+    });
+  });
+
+  describe("consent-exempt tracker (Plausible-like)", () => {
+    const plausibleRequest = makeRequest(
+      "https://plausible.io/api/event",
+      "analytics",
+      "before-interaction",
+      false, // requiresConsent: false — CNIL ePrivacy exemption
+    );
+
+    it("does not deduct from cookieBehavior when a pre-interaction tracker is consent-exempt", () => {
+      const result = analyzeCompliance({
+        ...emptyInputBase,
+        modal: makeModal({ hasGranularControls: true }),
+        networkBeforeInteraction: [plausibleRequest],
+      });
+
+      expect(result.breakdown.cookieBehavior).toBe(25);
+      const autoConsentIssue = result.issues.find((i) => i.type === "auto-consent");
+      expect(autoConsentIssue).toBeUndefined();
+    });
+
+    it("consentRequired is false when only a consent-exempt tracker is present", () => {
+      // No modal, only Plausible → should score full marks (no consent needed)
+      const result = analyzeCompliance({
+        ...emptyInputBase,
+        modal: makeModal({ detected: false }),
+        networkBeforeInteraction: [plausibleRequest],
+        networkAfterAccept: [
+          makeRequest("https://plausible.io/api/event", "analytics", "after-accept", false),
+        ],
+      });
+
+      expect(result.breakdown.consentValidity).toBe(25);
+      expect(result.breakdown.easyRefusal).toBe(25);
+      expect(result.breakdown.transparency).toBe(25);
+      expect(result.breakdown.cookieBehavior).toBe(25);
+      expect(result.total).toBe(100);
+      expect(result.grade).toBe("A");
     });
   });
 });

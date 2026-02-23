@@ -5,6 +5,7 @@ interface NetworkClassification {
   isThirdParty: boolean;
   trackerCategory: TrackerCategory | null;
   trackerName: string | null;
+  requiresConsent: boolean;
 }
 
 export function classifyNetworkRequest(url: string, resourceType: string): NetworkClassification {
@@ -13,7 +14,12 @@ export function classifyNetworkRequest(url: string, resourceType: string): Netwo
   try {
     hostname = new URL(url).hostname.replace(/^www\./, "");
   } catch {
-    return { isThirdParty: false, trackerCategory: null, trackerName: null };
+    return {
+      isThirdParty: false,
+      trackerCategory: null,
+      trackerName: null,
+      requiresConsent: false,
+    };
   }
 
   // Check tracker database (exact match or suffix match)
@@ -23,6 +29,7 @@ export function classifyNetworkRequest(url: string, resourceType: string): Netwo
         isThirdParty: true,
         trackerCategory: entry.category,
         trackerName: entry.name,
+        requiresConsent: entry.consentRequired !== false && entry.category !== "cdn",
       };
     }
   }
@@ -33,6 +40,7 @@ export function classifyNetworkRequest(url: string, resourceType: string): Netwo
       isThirdParty: true,
       trackerCategory: "pixel",
       trackerName: "Tracking Pixel",
+      requiresConsent: true,
     };
   }
 
@@ -42,6 +50,7 @@ export function classifyNetworkRequest(url: string, resourceType: string): Netwo
       isThirdParty: true,
       trackerCategory: "pixel",
       trackerName: "Tracking Pixel (image)",
+      requiresConsent: true,
     };
   }
 
@@ -49,6 +58,7 @@ export function classifyNetworkRequest(url: string, resourceType: string): Netwo
     isThirdParty: false,
     trackerCategory: null,
     trackerName: null,
+    requiresConsent: false,
   };
 }
 

@@ -61,6 +61,7 @@ describe("classifyNetworkRequest", () => {
       expect(result.isThirdParty).toBe(false);
       expect(result.trackerCategory).toBeNull();
       expect(result.trackerName).toBeNull();
+      expect(result.requiresConsent).toBe(false);
     });
 
     it("does not flag CDN requests for known CDN domains", () => {
@@ -78,6 +79,7 @@ describe("classifyNetworkRequest", () => {
       expect(result.isThirdParty).toBe(false);
       expect(result.trackerCategory).toBeNull();
       expect(result.trackerName).toBeNull();
+      expect(result.requiresConsent).toBe(false);
     });
   });
 
@@ -86,6 +88,31 @@ describe("classifyNetworkRequest", () => {
       const result = classifyNetworkRequest("https://www.google-analytics.com/collect", "xhr");
       expect(result.isThirdParty).toBe(true);
       expect(result.trackerCategory).toBe("analytics");
+    });
+  });
+
+  describe("requiresConsent field", () => {
+    it("Plausible Analytics (/api/event) is classified as analytics but does not require consent", () => {
+      const result = classifyNetworkRequest("https://plausible.io/api/event", "xhr");
+      expect(result.isThirdParty).toBe(true);
+      expect(result.trackerCategory).toBe("analytics");
+      expect(result.trackerName).toBe("Plausible Analytics");
+      expect(result.requiresConsent).toBe(false);
+    });
+
+    it("Google Analytics requires consent", () => {
+      const result = classifyNetworkRequest(
+        "https://www.google-analytics.com/j/collect?v=1&t=event",
+        "xhr",
+      );
+      expect(result.requiresConsent).toBe(true);
+    });
+
+    it("CDN domain (akamaized.net) does not require consent", () => {
+      const result = classifyNetworkRequest("https://assets.akamaized.net/bundle.js", "script");
+      expect(result.isThirdParty).toBe(true);
+      expect(result.trackerCategory).toBe("cdn");
+      expect(result.requiresConsent).toBe(false);
     });
   });
 });

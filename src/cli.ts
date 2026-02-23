@@ -23,11 +23,7 @@ program
   .option("--no-screenshots", "Disable screenshot capture")
   .option("-l, --locale <locale>", "Browser locale for language detection", "fr-FR")
   .option("-v, --verbose", "Show detailed output", false)
-  .option(
-    "-f, --format <formats>",
-    "Output formats: md, html, json, pdf (comma-separated)",
-    "md,pdf",
-  )
+  .option("-f, --format <formats>", "Output formats: md, html, json, pdf (comma-separated)", "html")
   .action(async (url: string, opts) => {
     console.log();
     console.log(styleText(["bold", "blue"], "  GDPR Cookie Scanner"));
