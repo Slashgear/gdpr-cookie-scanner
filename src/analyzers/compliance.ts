@@ -121,6 +121,40 @@ export function analyzeCompliance(input: ComplianceInput): ComplianceScore {
         easyRefusal -= 5;
       }
     }
+
+    // Contrast ratio: reject button must meet minimum legibility
+    if (rejectButton && rejectButton.contrastRatio !== null) {
+      const ratio = rejectButton.contrastRatio;
+      if (ratio < 3.0) {
+        issues.push({
+          type: "asymmetric-prominence",
+          severity: "critical",
+          description: "Reject button has critically low contrast ratio",
+          evidence: `Contrast ratio ${ratio}:1 — WCAG AA requires 4.5:1 for normal text (${rejectButton.backgroundColor ?? "?"} / ${rejectButton.textColor ?? "?"})`,
+        });
+        easyRefusal -= 10;
+      } else if (ratio < 4.5) {
+        issues.push({
+          type: "asymmetric-prominence",
+          severity: "warning",
+          description: "Reject button contrast ratio is below WCAG AA threshold",
+          evidence: `Contrast ratio ${ratio}:1 — WCAG AA requires 4.5:1 for normal text (${rejectButton.backgroundColor ?? "?"} / ${rejectButton.textColor ?? "?"})`,
+        });
+        easyRefusal -= 5;
+      }
+
+      // Relative contrast asymmetry: accept visually pops, reject is muted
+      const acceptContrast = acceptButton?.contrastRatio ?? null;
+      if (acceptContrast !== null && acceptContrast >= rejectButton.contrastRatio * 1.5) {
+        issues.push({
+          type: "asymmetric-prominence",
+          severity: "warning",
+          description: "Accept button has significantly higher contrast than reject button",
+          evidence: `Accept: ${acceptContrast}:1, Reject: ${rejectButton.contrastRatio}:1`,
+        });
+        easyRefusal -= 3;
+      }
+    }
   }
 
   // ── C. Transparency (0-25) ────────────────────────────────────
