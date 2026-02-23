@@ -1,5 +1,67 @@
 # @slashgear/gdpr-cookie-scanner
 
+## 3.1.0
+
+### Minor Changes
+
+- 305c80d: Add programmatic API (`scan()` function and public exports)
+
+  Exposes a `scan(url, options?)` convenience function and re-exports `Scanner`, `ReportGenerator`, and all public TypeScript types from the package entry point (`dist/index.js`).
+
+  This allows using the scanner as a library without going through the CLI:
+
+  ```ts
+  import { scan, ReportGenerator } from "@slashgear/gdpr-cookie-scanner";
+
+  const result = await scan("https://example.com", { locale: "fr-FR" });
+  console.log(result.compliance.grade);
+
+  // Optionally generate a report
+  const generator = new ReportGenerator({
+    outputDir: "./reports",
+    formats: ["html"],
+    ...result,
+  });
+  const paths = await generator.generate(result);
+  ```
+
+  `ScanOptions.outputDir` is now optional: it is only required when screenshots or report generation is needed. `ReportGenerator.generate()` throws a clear error if called without `outputDir`.
+
+- cd4d616: feat: add automated tracker DB update script
+
+  Adds `scripts/update-trackers.ts`, a maintenance script that fetches
+  Disconnect.me and DuckDuckGo Tracker Radar and merges new tracker entries
+  into `src/classifiers/tracker-list.ts`. Manually curated entries (including
+  `consentRequired: false` overrides like Plausible) are preserved as-is; only
+  previously unknown domains are appended in a clearly delimited auto-generated
+  section.
+
+  Also adds a monthly GitHub Actions workflow (`.github/workflows/update-trackers.yml`)
+  that runs the script automatically and opens a PR when new trackers are found.
+
+### Patch Changes
+
+- 578a778: Wire `contrastRatio` into compliance scoring (section B — Easy Refusal).
+
+  The contrast ratio was already computed and displayed in reports but had no effect on the score. A "Refuser" button rendered in grey on white would silently pass. Now:
+
+  - Reject button contrast < 3.0 → critical issue, −10 pts
+  - Reject button contrast < 4.5 (WCAG AA) → warning, −5 pts
+  - Accept contrast ≥ 1.5× reject contrast → relative asymmetry warning, −3 pts
+
+- 6113643: Add unit test suite (224 tests) and fix two classifier bugs
+
+  Introduces a full vitest test suite covering the four pure-function modules:
+  `cookie-classifier`, `network-classifier`, `wording` analyzer, and `compliance` analyzer.
+
+  Two production bugs were discovered and fixed in the process:
+
+  - **`cookie-classifier`**: the YouTube pattern `^(yt-|VISITOR_INFO|YSC|GPS)$` used a `$` anchor
+    that prevented `VISITOR_INFO1_LIVE` (the real cookie name) from matching. Split into two
+    entries so `VISITOR_INFO` is matched as a prefix.
+  - **`tracker-list`**: the entry `"facebook.com/tr"` included a URL path, making it unmatchable
+    by the hostname-only classifier. Replaced with the dedicated `pixel.facebook.com` hostname.
+
 ## 3.0.0
 
 ### Major Changes
