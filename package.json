@@ -49,7 +49,9 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "changeset": "changeset"
+    "changeset": "changeset",
+    "update-trackers": "node --experimental-strip-types scripts/update-trackers.ts",
+    "update-trackers:dry": "node --experimental-strip-types scripts/update-trackers.ts --dry-run"
   },
   "dependencies": {
     "commander": "^14.0.3",
