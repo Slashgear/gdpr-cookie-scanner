@@ -88,6 +88,79 @@ gdpr-scan scan https://example.com -f md,html,json,pdf
 gdpr-scan list-trackers
 ```
 
+## Programmatic API
+
+The package can be used as a Node.js library — no CLI required.
+
+```bash
+npm install @slashgear/gdpr-cookie-scanner
+npx playwright install chromium
+```
+
+### Quick scan
+
+```ts
+import { scan } from "@slashgear/gdpr-cookie-scanner";
+
+const result = await scan("https://example.com");
+console.log(result.compliance.grade); // 'A' | 'B' | 'C' | 'D' | 'F'
+console.log(result.compliance.totalScore); // 0–100
+console.log(result.compliance.issues); // DarkPatternIssue[]
+```
+
+All fields of `ScanResult` — cookies, network requests, modal analysis, compliance score — are available in the returned object.
+
+### Options
+
+```ts
+const result = await scan("https://example.com", {
+  locale: "fr-FR", // browser locale, also controls report language
+  timeout: 60_000, // navigation timeout in ms (default: 30 000)
+  screenshots: true, // capture screenshots (requires outputDir)
+  outputDir: "./reports", // where to save screenshots
+  verbose: false, // log scanner phases to stdout
+});
+```
+
+### Generating reports
+
+Pass the result to `ReportGenerator` to write files in one or more formats:
+
+```ts
+import { scan, ReportGenerator } from "@slashgear/gdpr-cookie-scanner";
+
+const result = await scan("https://example.com", { locale: "fr-FR" });
+
+const generator = new ReportGenerator({
+  url: result.url,
+  outputDir: "./reports",
+  formats: ["html", "json"], // 'md' | 'html' | 'json' | 'pdf'
+  locale: "fr-FR",
+  timeout: 30_000,
+  screenshots: false,
+  verbose: false,
+});
+
+const paths = await generator.generate(result);
+console.log(paths.html); // './reports/example.com/gdpr-report-example.com-2024-01-01.html'
+```
+
+### TypeScript types
+
+All interfaces are exported from the package root:
+
+```ts
+import type {
+  ScanResult,
+  ScanOptions,
+  ComplianceScore,
+  DarkPatternIssue,
+  ScannedCookie,
+  NetworkRequest,
+  ConsentModal,
+} from "@slashgear/gdpr-cookie-scanner";
+```
+
 ## How it works
 
 ```mermaid
