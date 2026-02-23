@@ -1,5 +1,45 @@
 # @slashgear/gdpr-cookie-scanner
 
+## 3.0.0
+
+### Major Changes
+
+- db3e538: Change the default output format from `md,pdf` to `html`.
+
+  Previously running `gdpr-scan scan <url>` with no `--format` flag produced both a Markdown bundle (3 files) and a PDF — requiring a full Playwright PDF render on every invocation. The HTML report is self-contained, opens in any browser without extra tooling, and is faster to generate, making it a better default for first-time users and CI pipelines alike. Pipelines that relied on the implicit `md` or `pdf` output must now pass `--format md,pdf` explicitly.
+
+  Also fixes the erroneous `npx` invocation in the README (issue #22): the correct command is `npx @slashgear/gdpr-cookie-scanner scan <url>`, not `npx @slashgear/gdpr-cookie-scanner gdpr-scan scan <url>`.
+
+### Minor Changes
+
+- db3e538: Add `requiresConsent` field to `NetworkRequest`, mark Plausible Analytics as consent-exempt, and fix scoring for tracking-free sites.
+
+  Two related issues are fixed:
+
+  1. **Plausible Analytics false positive** — Plausible is cookieless and exempt from ePrivacy consent under CNIL guidance, but requests to `plausible.io/api/event` were matching the generic pixel pattern and penalising the score. A `requiresConsent: boolean` field is added to `NetworkRequest` (mirroring the same field on `ScannedCookie`). A new optional `consentRequired` flag on `TrackerEntry` lets known-exempt services opt out of the default consent requirement. All compliance and report logic now uses `requiresConsent` instead of testing `trackerCategory !== "cdn"` directly. Plausible Analytics is added to `TRACKER_DB` with `consentRequired: false`.
+
+  2. **Tracking-free sites capped at 97** — The "no privacy policy link on page" check deducted 3 points unconditionally, even when no consent was required. A site with no non-essential cookies or trackers now correctly scores 100/100.
+
+### Patch Changes
+
+- 5f0e14e: Fix false non-compliance for sites with no cookies or trackers
+
+  A site with no consent modal but also no non-essential cookies and no
+  third-party trackers was previously scored 0/75 and graded F, because
+  the three consent-related dimensions (consent validity, easy refusal,
+  transparency) were zeroed out whenever no modal was detected.
+
+  GDPR and the ePrivacy Directive only require a consent mechanism when
+  the site actually uses cookies or trackers that need consent. A
+  tracking-free site has no such obligation and must now correctly receive
+  a full score (grade A) and raise no compliance issues.
+
+  The fix adds a `consentRequired` guard in `analyzeCompliance`: the
+  three modal-related dimensions are only penalised when non-essential
+  cookies or non-CDN trackers are present. The report generator
+  (executive summary, recommendations, checklist) is updated to reflect
+  the same distinction. Unit and E2E tests are updated accordingly.
+
 ## 2.0.4
 
 ### Patch Changes
