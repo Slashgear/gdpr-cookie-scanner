@@ -22,7 +22,12 @@ export class ReportGenerator {
   constructor(private readonly options: ScanOptions) {}
 
   async generate(result: ScanResult): Promise<Record<string, string>> {
-    await mkdir(this.options.outputDir, { recursive: true });
+    const outputDir = this.options.outputDir;
+    if (!outputDir) {
+      throw new Error("ReportGenerator: outputDir is required to generate reports");
+    }
+
+    await mkdir(outputDir, { recursive: true });
 
     const hostname = new URL(result.url).hostname.replace(/^www\./, "");
     const date = new Date(result.scanDate).toISOString().split("T")[0];
@@ -33,30 +38,30 @@ export class ReportGenerator {
 
     // ── Markdown ──────────────────────────────────────────────────
     if (formats.includes("md")) {
-      const mdPath = join(this.options.outputDir, `${base}.md`);
+      const mdPath = join(outputDir, `${base}.md`);
       await writeFile(mdPath, this.buildMarkdown(result), "utf-8");
       await execFileAsync(oxfmtBin, [mdPath]).catch(() => {});
       paths.md = mdPath;
 
-      const checklistPath = join(this.options.outputDir, `gdpr-checklist-${hostname}-${date}.md`);
+      const checklistPath = join(outputDir, `gdpr-checklist-${hostname}-${date}.md`);
       await writeFile(checklistPath, this.buildChecklist(result), "utf-8");
       await execFileAsync(oxfmtBin, [checklistPath]).catch(() => {});
 
-      const cookiesPath = join(this.options.outputDir, `gdpr-cookies-${hostname}-${date}.md`);
+      const cookiesPath = join(outputDir, `gdpr-cookies-${hostname}-${date}.md`);
       await writeFile(cookiesPath, this.buildCookiesInventory(result), "utf-8");
       await execFileAsync(oxfmtBin, [cookiesPath]).catch(() => {});
     }
 
     // ── HTML ──────────────────────────────────────────────────────
     if (formats.includes("html")) {
-      const htmlPath = join(this.options.outputDir, `${base}.html`);
+      const htmlPath = join(outputDir, `${base}.html`);
       await writeFile(htmlPath, generateHtmlReport(result), "utf-8");
       paths.html = htmlPath;
     }
 
     // ── JSON ──────────────────────────────────────────────────────
     if (formats.includes("json")) {
-      const jsonPath = join(this.options.outputDir, `${base}.json`);
+      const jsonPath = join(outputDir, `${base}.json`);
       await writeFile(jsonPath, JSON.stringify(result, null, 2), "utf-8");
       paths.json = jsonPath;
     }
@@ -70,9 +75,9 @@ export class ReportGenerator {
       const cookiesInventory = this.buildCookiesInventory(result);
       const combined = [markdown, checklist, cookiesInventory].join("\n\n---\n\n");
       const rawBody = await this.buildHtmlBody(combined);
-      const body = await this.inlineImages(rawBody, this.options.outputDir);
+      const body = await this.inlineImages(rawBody, outputDir);
       const html = this.wrapHtml(body, hostname);
-      const pdfPath = join(this.options.outputDir, `${base}.pdf`);
+      const pdfPath = join(outputDir, `${base}.pdf`);
       await generatePdf(html, pdfPath);
       paths.pdf = pdfPath;
     }

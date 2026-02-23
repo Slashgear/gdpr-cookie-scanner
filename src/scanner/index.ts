@@ -17,7 +17,7 @@ export class Scanner {
     const screenshotPaths: string[] = [];
     const errors: string[] = [];
 
-    if (this.options.screenshots) {
+    if (this.options.screenshots && this.options.outputDir) {
       await mkdir(this.options.outputDir, { recursive: true });
     }
 
@@ -53,7 +53,7 @@ export class Scanner {
     onPhase("Phase 2/4 — Analyzing consent modal...");
     const modal = await detectConsentModal(session1.page, this.options);
 
-    if (this.options.screenshots && modal.detected) {
+    if (this.options.screenshots && this.options.outputDir && modal.detected) {
       const screenshotPath = join(this.options.outputDir, "modal-initial.png");
       await session1.page.screenshot({ path: screenshotPath, fullPage: false });
       screenshotPaths.push(screenshotPath);
@@ -84,7 +84,7 @@ export class Scanner {
     }
     interceptor3.stop();
 
-    if (this.options.screenshots) {
+    if (this.options.screenshots && this.options.outputDir) {
       const screenshotPath = join(this.options.outputDir, "after-reject.png");
       await session1.page.screenshot({ path: screenshotPath, fullPage: false });
       screenshotPaths.push(screenshotPath);
@@ -132,7 +132,7 @@ export class Scanner {
     }
     interceptor4.stop();
 
-    if (this.options.screenshots) {
+    if (this.options.screenshots && this.options.outputDir) {
       const screenshotPath = join(this.options.outputDir, "after-accept.png");
       await session2.page.screenshot({ path: screenshotPath, fullPage: false });
       screenshotPaths.push(screenshotPath);
