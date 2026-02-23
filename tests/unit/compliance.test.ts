@@ -92,6 +92,7 @@ function makeRequest(
 }
 
 const emptyInputBase = {
+  locale: "en" as const,
   cookiesBeforeInteraction: [],
   cookiesAfterAccept: [],
   cookiesAfterReject: [],
