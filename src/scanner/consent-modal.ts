@@ -87,8 +87,17 @@ export async function findPrivacyPolicyUrl(
         const links = root.querySelectorAll("a[href]");
         for (const link of links) {
           const href = (link as HTMLAnchorElement).href ?? "";
+          const normalizedHref = href.toLowerCase();
           const text = (link.textContent ?? "").trim();
-          if (!href || href.startsWith("javascript:") || href === "#") continue;
+          if (
+            !href ||
+            normalizedHref.startsWith("javascript:") ||
+            normalizedHref.startsWith("data:") ||
+            normalizedHref.startsWith("vbscript:") ||
+            href === "#"
+          ) {
+            continue;
+          }
           const matchUrl = urlPats.some((p) => new RegExp(p, "i").test(href));
           const matchText = textPats.some((p) => new RegExp(p, "i").test(text));
           if (matchUrl || matchText) return href;
