@@ -95,6 +95,4 @@ Patterns that are explicitly listed in CNIL/EDPB guidelines but not yet detected
 
 ## Infrastructure
 
-- **Node version consistency** — CI runs Node 24 but the release workflow runs Node 22. Align to a single version across all workflows.
-
 - **Pre-built GitHub Action** — a dedicated `uses: slashgear/gdpr-cookie-scanner-action@v1` action would make the GitHub Actions integration one step instead of running the Docker container manually. The action wrapper would handle artifact upload and PR comments automatically.
