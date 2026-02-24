@@ -91,9 +91,37 @@ export const TRACKER_DB: Record<string, TrackerEntry> = {
   "vwo.com": { name: "VWO", category: "analytics" },
   "app.convert.com": { name: "Convert", category: "analytics" },
 
-  // ── Consent-exempt analytics (CNIL ePrivacy exemption) ───────
+  // ── Consent-exempt analytics ──────────────────────────────────
+  // These tools are cookieless, collect no personal data, and do not
+  // cross-reference with other processing — meeting the CNIL conditions
+  // for analytics tools exempt from the ePrivacy consent requirement.
   "plausible.io": {
     name: "Plausible Analytics",
+    category: "analytics",
+    consentRequired: false,
+  },
+  "cdn.usefathom.com": {
+    name: "Fathom Analytics",
+    category: "analytics",
+    consentRequired: false,
+  },
+  "scripts.simpleanalyticscdn.com": {
+    name: "Simple Analytics",
+    category: "analytics",
+    consentRequired: false,
+  },
+  "api.simpleanalytics.io": {
+    name: "Simple Analytics",
+    category: "analytics",
+    consentRequired: false,
+  },
+  "scripts.withcabin.com": {
+    name: "Cabin Analytics",
+    category: "analytics",
+    consentRequired: false,
+  },
+  "api.pirsch.io": {
+    name: "Pirsch Analytics",
     category: "analytics",
     consentRequired: false,
   },
