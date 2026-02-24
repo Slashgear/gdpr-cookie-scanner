@@ -109,7 +109,7 @@ const ACCEPT_PATTERNS = [
 ];
 
 const REJECT_PATTERNS = [
-  /\b(refus|refuse|refuser|reject|deny|decline|tout refuser|reject all|non merci|no thanks|continuer sans accepter|skip)\b/i,
+  /\b(refus|refuse|refuser|tout refuser|rejet|rejeter|tout rejeter|reject|reject all|deny|decline|non merci|no thanks|continuer sans accepter|skip)\b/i,
 ];
 
 const PREFERENCES_PATTERNS = [
