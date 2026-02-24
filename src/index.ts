@@ -38,10 +38,11 @@ export type {
   TrackerCategory,
   ConsentButtonType,
   ReportFormat,
+  ViewportPreset,
 } from "./types.js";
 
 import { Scanner } from "./scanner/index.js";
-import type { ScanResult } from "./types.js";
+import type { ScanResult, ViewportPreset } from "./types.js";
 
 /**
  * Options for the `scan()` convenience function.
@@ -58,6 +59,8 @@ export interface ScanApiOptions {
   locale?: string;
   /** Log verbose scanner output. Default: false. */
   verbose?: boolean;
+  /** Viewport preset. desktop=1280×900, tablet=768×1024, mobile=390×844. Default: 'desktop'. */
+  viewport?: ViewportPreset;
 }
 
 /**
@@ -81,6 +84,7 @@ export async function scan(url: string, options: ScanApiOptions = {}): Promise<S
     locale: options.locale ?? "en-US",
     verbose: options.verbose ?? false,
     formats: [],
+    viewport: options.viewport ?? "desktop",
   });
 
   return scanner.run();

@@ -5,7 +5,7 @@ import { createSpinner } from "nanospinner";
 import { join, resolve } from "path";
 import { Scanner } from "./scanner/index.js";
 import { ReportGenerator } from "./report/generator.js";
-import type { ScanOptions, ReportFormat } from "./types.js";
+import type { ScanOptions, ReportFormat, ViewportPreset } from "./types.js";
 
 const program = new Command();
 
@@ -25,6 +25,11 @@ program
   .option("-v, --verbose", "Show detailed output", false)
   .option("-f, --format <formats>", "Output formats: md, html, json, pdf (comma-separated)", "html")
   .option(
+    "--viewport <preset>",
+    "Viewport preset: desktop (1280×900), tablet (768×1024), mobile (390×844)",
+    "desktop",
+  )
+  .option(
     "--fail-on <threshold>",
     "Exit with code 1 if grade is below this letter (A/B/C/D/F) or score is below this number",
     "F",
@@ -37,8 +42,18 @@ program
     const hostname = new URL(normalizedUrl).hostname;
     const outputDir = join(resolve(opts.output), hostname);
 
-    console.log(styleText("gray", `  Target : ${url}`));
-    console.log(styleText("gray", `  Output : ${outputDir}`));
+    const validViewports = new Set<ViewportPreset>(["desktop", "tablet", "mobile"]);
+    const viewport = (opts.viewport as string).toLowerCase();
+    if (!validViewports.has(viewport as ViewportPreset)) {
+      console.error(
+        styleText("red", "  Invalid --viewport value. Valid options: desktop, tablet, mobile"),
+      );
+      process.exit(2);
+    }
+
+    console.log(styleText("gray", `  Target   : ${url}`));
+    console.log(styleText("gray", `  Output   : ${outputDir}`));
+    console.log(styleText("gray", `  Viewport : ${viewport}`));
     console.log();
 
     const validFormats = new Set<ReportFormat>(["md", "html", "json", "pdf"]);
@@ -62,6 +77,7 @@ program
       locale: opts.locale,
       verbose: opts.verbose,
       formats,
+      viewport: viewport as ViewportPreset,
     };
 
     const spinner = createSpinner("Launching browser...").start();

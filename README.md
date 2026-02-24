@@ -68,6 +68,7 @@ gdpr-scan scan <url> [options]
 | `-o, --output <dir>`     | `./gdpr-reports` | Output directory for the report                                                                              |
 | `-t, --timeout <ms>`     | `30000`          | Navigation timeout                                                                                           |
 | `-f, --format <formats>` | `html`           | Output formats: `md`, `html`, `json`, `pdf` (comma-separated)                                                |
+| `--viewport <preset>`    | `desktop`        | Viewport preset: `desktop` (1280×900), `tablet` (768×1024), `mobile` (390×844)                               |
 | `--fail-on <threshold>`  | `F`              | Exit with code 1 if grade is below this letter (`A`/`B`/`C`/`D`/`F`) or score is below this number (`0–100`) |
 | `--no-screenshots`       | —                | Disable screenshot capture                                                                                   |
 | `-l, --locale <locale>`  | `fr-FR`          | Browser locale                                                                                               |
@@ -90,6 +91,12 @@ gdpr-scan scan https://example.com -f md
 
 # Generate all formats at once
 gdpr-scan scan https://example.com -f md,html,json,pdf
+
+# Scan with a mobile viewport (390×844, iPhone UA)
+gdpr-scan scan https://example.com --viewport mobile
+
+# Scan with a tablet viewport (768×1024, iPad UA)
+gdpr-scan scan https://example.com --viewport tablet
 
 # Fail (exit 1) if the site is graded below B — useful in CI
 gdpr-scan scan https://example.com --fail-on B
@@ -201,6 +208,7 @@ const result = await scan("https://example.com", {
   screenshots: true, // capture screenshots (requires outputDir)
   outputDir: "./reports", // where to save screenshots
   verbose: false, // log scanner phases to stdout
+  viewport: "mobile", // 'desktop' (default) | 'tablet' | 'mobile'
 });
 ```
 

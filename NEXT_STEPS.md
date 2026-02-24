@@ -53,8 +53,6 @@ Patterns that are explicitly listed in CNIL/EDPB guidelines but not yet detected
 
 - **Configurable wait times** — the `waitForTimeout(2000)` / `waitForTimeout(3000)` values in `scanner/index.ts` are hardcoded. Some pages need more time (heavy SPAs); others waste time. Expose them as `ScanOptions` fields with sensible defaults.
 
-- **Mobile viewport** — all scans use a 1280×900 desktop viewport. Many consent banners have different layouts on mobile (bottom sheets, full-screen overlays). A `--viewport mobile|tablet|desktop` option would let users test the responsive behaviour.
-
 - **Multi-page scanning** — run the scan across several URLs of the same domain (home page + one inner page) and merge results. Useful for detecting banners that only appear on the first visit, or trackers that fire on specific pages.
 
 - **Batch mode** — accept a list of URLs (file or `--url` repeated) and produce a summary report alongside individual reports. Useful for agencies auditing multiple client sites.

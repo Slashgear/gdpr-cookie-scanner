@@ -111,6 +111,8 @@ export interface ComplianceScore {
 
 export type ReportFormat = "md" | "html" | "json" | "pdf";
 
+export type ViewportPreset = "desktop" | "tablet" | "mobile";
+
 export interface ScanOptions {
   url: string;
   outputDir?: string;
@@ -120,6 +122,7 @@ export interface ScanOptions {
   verbose: boolean;
   formats: ReportFormat[];
   userAgent?: string;
+  viewport?: ViewportPreset;
 }
 
 export interface ScanResult {
