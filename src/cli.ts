@@ -34,6 +34,11 @@ program
     "Exit with code 1 if grade is below this letter (A/B/C/D/F) or score is below this number",
     "F",
   )
+  .option(
+    "--json-summary",
+    "Emit a JSON summary line to stdout after the scan (machine-readable)",
+    false,
+  )
   .action(async (url: string, opts) => {
     console.log();
     console.log(styleText(["bold", "blue"], "  GDPR Cookie Scanner"));
@@ -144,6 +149,31 @@ program
         );
         console.log();
       }
+
+      if (opts.jsonSummary) {
+        process.stdout.write(
+          JSON.stringify({
+            url: result.url,
+            scanDate: result.scanDate,
+            score: result.compliance.total,
+            grade: result.compliance.grade,
+            passed: !failed,
+            threshold: threshold.toUpperCase(),
+            breakdown: result.compliance.breakdown,
+            issues: {
+              total: result.compliance.issues.length,
+              critical: result.compliance.issues.filter((i) => i.severity === "critical").length,
+              items: result.compliance.issues.map((i) => ({
+                type: i.type,
+                severity: i.severity,
+                description: i.description,
+              })),
+            },
+            reportPaths: paths,
+          }) + "\n",
+        );
+      }
+
       process.exit(failed ? 1 : 0);
     } catch (err) {
       spinner.error({ text: "Scan failed" });

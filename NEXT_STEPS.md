@@ -77,8 +77,6 @@ Patterns that are explicitly listed in CNIL/EDPB guidelines but not yet detected
 
 - **Historical comparison** — if a previous JSON report for the same hostname exists in the output directory, surface a diff (score delta, issues resolved/introduced). Useful for tracking progress over time.
 
-- **Structured exit summary** — when `--fail-on` causes an exit 1, emit a machine-readable summary to stdout (JSON lines) so CI systems can parse it without reading the full report file.
-
 ---
 
 ## Testing

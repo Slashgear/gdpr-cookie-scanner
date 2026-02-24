@@ -70,6 +70,7 @@ gdpr-scan scan <url> [options]
 | `-f, --format <formats>` | `html`           | Output formats: `md`, `html`, `json`, `pdf` (comma-separated)                                                |
 | `--viewport <preset>`    | `desktop`        | Viewport preset: `desktop` (1280×900), `tablet` (768×1024), `mobile` (390×844)                               |
 | `--fail-on <threshold>`  | `F`              | Exit with code 1 if grade is below this letter (`A`/`B`/`C`/`D`/`F`) or score is below this number (`0–100`) |
+| `--json-summary`         | —                | Emit a machine-readable JSON line to stdout after the scan (parseable by `jq`)                               |
 | `--no-screenshots`       | —                | Disable screenshot capture                                                                                   |
 | `-l, --locale <locale>`  | `fr-FR`          | Browser locale                                                                                               |
 | `-v, --verbose`          | —                | Show full stack trace on error                                                                               |
@@ -164,6 +165,42 @@ gdpr-scan:
   rules:
     - if: $CI_PIPELINE_SOURCE == "schedule"
     - if: $CI_PIPELINE_SOURCE == "web"
+```
+
+### Machine-readable output
+
+Add `--json-summary` to get a single JSON line on stdout after the scan — useful when
+you need to parse results in a script or post them to a webhook without reading the full
+report file.
+
+```bash
+gdpr-scan scan https://example.com --fail-on B --json-summary 2>/dev/null \
+  | grep '^{' | jq '{grade: .grade, score: .score, passed: .passed}'
+```
+
+The JSON line is always emitted (pass or fail) and contains:
+
+```jsonc
+{
+  "url": "https://example.com",
+  "scanDate": "2026-01-01T00:00:00.000Z",
+  "score": 62,
+  "grade": "C",
+  "passed": false,
+  "threshold": "B",
+  "breakdown": {
+    "consentValidity": 20,
+    "easyRefusal": 12,
+    "transparency": 15,
+    "cookieBehavior": 15,
+  },
+  "issues": {
+    "total": 4,
+    "critical": 2,
+    "items": [{ "type": "buried-reject", "severity": "critical", "description": "..." }],
+  },
+  "reportPaths": { "html": "./gdpr-reports/example.com/gdpr-report-example.com-2026-01-01.html" },
+}
 ```
 
 ### Threshold reference
