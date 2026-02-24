@@ -8,6 +8,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![Playwright](https://img.shields.io/badge/Playwright-✓-45ba4b?logo=playwright&logoColor=white)](https://playwright.dev)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md)
+[![Docker image](https://img.shields.io/badge/docker%20image-~500%20MB-2496ed?logo=docker&logoColor=white)](https://ghcr.io/slashgear/gdpr-cookie-scanner)
 
 A CLI tool that **automates a subset of GDPR cookie consent checks** on any website — consent modal detection, dark patterns, cookie behaviour before/after interaction, and network trackers. It produces a scored report (0–100) with a per-rule checklist and a cookie inventory.
 
@@ -48,6 +49,11 @@ docker run --rm \
 
 The image is published to [GitHub Container Registry](https://ghcr.io/slashgear/gdpr-cookie-scanner)
 on every release and supports `linux/amd64` and `linux/arm64`.
+
+> [!NOTE]
+> The image is ~500 MB compressed (~1.2 GB unpacked). This is inherent to shipping a full Chromium
+> browser — significantly smaller than the official Playwright image (~1.8 GB) which bundles all
+> three browser stacks. No browser installation step is needed when using Docker.
 
 ## Usage
 

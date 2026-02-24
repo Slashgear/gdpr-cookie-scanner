@@ -20,14 +20,14 @@ Currently only French and English patterns are covered. A lot of EU sites served
 
 Languages to add at minimum (ordered by EU population / GDPR enforcement activity):
 
-| Locale | Reject examples | Accept examples |
-|--------|----------------|-----------------|
-| `de-DE` | Ablehnen, Alle ablehnen | Alle akzeptieren, Zustimmen |
-| `es-ES` | Rechazar, Rechazar todo | Aceptar, Aceptar todo |
-| `it-IT` | Rifiuta, Rifiuta tutto | Accetta, Accetta tutto |
-| `nl-NL` | Weigeren, Alles weigeren | Accepteren, Alles accepteren |
+| Locale  | Reject examples          | Accept examples                  |
+| ------- | ------------------------ | -------------------------------- |
+| `de-DE` | Ablehnen, Alle ablehnen  | Alle akzeptieren, Zustimmen      |
+| `es-ES` | Rechazar, Rechazar todo  | Aceptar, Aceptar todo            |
+| `it-IT` | Rifiuta, Rifiuta tutto   | Accetta, Accetta tutto           |
+| `nl-NL` | Weigeren, Alles weigeren | Accepteren, Alles accepteren     |
 | `pl-PL` | Odrzuć, Odrzuć wszystkie | Zaakceptuj, Zaakceptuj wszystkie |
-| `pt-PT` | Rejeitar, Rejeitar tudo | Aceitar, Aceitar tudo |
+| `pt-PT` | Rejeitar, Rejeitar tudo  | Aceitar, Aceitar tudo            |
 
 The patterns live in `src/scanner/consent-modal.ts`. A locale-aware pattern map keyed by BCP 47 tag would be cleaner than one giant regex.
 
@@ -100,7 +100,5 @@ Patterns that are explicitly listed in CNIL/EDPB guidelines but not yet detected
 ## Infrastructure
 
 - **Node version consistency** — CI runs Node 24 but the release workflow runs Node 22. Align to a single version across all workflows.
-
-- **Docker image size** — the image ships Chromium only (~400–600 MB). Documenting the exact size in the README and adding a size badge would set expectations for users pulling it in CI.
 
 - **Pre-built GitHub Action** — a dedicated `uses: slashgear/gdpr-cookie-scanner-action@v1` action would make the GitHub Actions integration one step instead of running the Docker container manually. The action wrapper would handle artifact upload and PR comments automatically.
