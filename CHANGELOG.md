@@ -1,5 +1,67 @@
 # @slashgear/gdpr-cookie-scanner
 
+## 3.3.0
+
+### Minor Changes
+
+- 7c128b9: Add `--json-summary` flag to emit a machine-readable JSON line on stdout after the scan.
+
+  CI pipelines that use `--fail-on` previously had to parse the full report file to extract
+  score, grade, and issue details programmatically. With `--json-summary`, a single JSON line
+  is written to stdout at the end of every scan (pass or fail), containing the URL, score,
+  grade, pass/fail status, threshold, score breakdown, and issue list.
+
+  ```bash
+  gdpr-scan scan https://example.com --fail-on B --json-summary \
+    | grep '^{' | jq '{grade: .grade, passed: .passed}'
+  ```
+
+- faa6da8: Add `--strict` flag: treat unrecognised cookies and unknown third-party requests as requiring consent.
+
+  By default, cookies and network requests that do not match any known pattern are assumed
+  to be first-party and consent-free (conservative). This avoids false positives but lets
+  obfuscated or emerging tracking cookies slip through undetected.
+
+  With `--strict`, the classifier falls back to `requiresConsent: true` for anything
+  unrecognised, making the scan more aggressive. Use this when auditing sites where you
+  suspect custom tracking solutions not yet in the pattern database.
+
+  CLI: `gdpr-scan scan https://example.com --strict`
+
+  Programmatic API: `await scan(url, { strict: true })`
+
+- df30f31: Add `--viewport` option to scan with desktop, tablet, or mobile browser dimensions.
+
+  All scans previously used a fixed 1280×900 desktop viewport. Many consent banners
+  have different layouts on mobile (bottom sheets, full-screen overlays) that can only
+  be tested with the correct viewport and user-agent.
+
+  Three presets are available:
+
+  | Preset    | Dimensions | User-agent       |
+  | --------- | ---------- | ---------------- |
+  | `desktop` | 1280×900   | Chrome on macOS  |
+  | `tablet`  | 768×1024   | Safari on iPad   |
+  | `mobile`  | 390×844    | Safari on iPhone |
+
+  CLI: `gdpr-scan scan https://example.com --viewport mobile`
+
+  Programmatic API: `await scan(url, { viewport: 'mobile' })`
+
+  Default is `desktop` — no change to existing behaviour.
+
+### Patch Changes
+
+- 6eb4c3d: Add Fathom, Simple Analytics, Cabin, and Pirsch to the consent-exempt analytics list.
+
+  These tools are cookieless, collect no personal data, and do not cross-reference data
+  with other processing — meeting the CNIL conditions for analytics exempt from the
+  ePrivacy consent requirement. Only Plausible was previously listed; sites using any
+  of these four tools were incorrectly flagged as loading trackers before consent.
+
+  Domains added: `cdn.usefathom.com`, `scripts.simpleanalyticscdn.com`,
+  `api.simpleanalytics.io`, `scripts.withcabin.com`, `api.pirsch.io`.
+
 ## 3.2.2
 
 ### Patch Changes
