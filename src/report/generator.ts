@@ -17,9 +17,14 @@ import type {
   ConsentButton,
 } from "../types.js";
 import type { ScanOptions } from "../types.js";
+import { resolveLocale, t as i18nT, type TranslationKey } from "../i18n/index.js";
 
 export class ReportGenerator {
   constructor(private readonly options: ScanOptions) {}
+
+  private t(key: TranslationKey, vars?: Record<string, string | number>): string {
+    return i18nT(resolveLocale(this.options.locale), key, vars);
+  }
 
   async generate(result: ScanResult): Promise<Record<string, string>> {
     const outputDir = this.options.outputDir;
@@ -55,7 +60,11 @@ export class ReportGenerator {
     // ── HTML ──────────────────────────────────────────────────────
     if (formats.includes("html")) {
       const htmlPath = join(outputDir, `${base}.html`);
-      await writeFile(htmlPath, generateHtmlReport(result), "utf-8");
+      await writeFile(
+        htmlPath,
+        generateHtmlReport(result, resolveLocale(this.options.locale), this.options.locale),
+        "utf-8",
+      );
       paths.html = htmlPath;
     }
 
@@ -126,7 +135,7 @@ export class ReportGenerator {
       .join("\n");
 
     const toc = `<nav class="toc">
-<p class="toc-title">Table of Contents</p>
+<p class="toc-title">${this.t("HTML_TOC_TITLE")}</p>
 <ul>
 ${tocItems}
 </ul>
@@ -171,11 +180,12 @@ ${tocItems}
   }
 
   private wrapHtml(body: string, hostname: string): string {
+    const lang = resolveLocale(this.options.locale);
     return `<!DOCTYPE html>
-<html lang="en">
+<html lang="${lang}">
 <head>
   <meta charset="UTF-8">
-  <title>GDPR Report — ${hostname}</title>
+  <title>${this.t("REPORT_TITLE")} — ${hostname}</title>
   <style>
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
            font-size: 11pt; line-height: 1.6; color: #1a1a1a; max-width: 900px;
@@ -220,7 +230,7 @@ ${tocItems}
 
   private buildMarkdown(r: ScanResult): string {
     const hostname = new URL(r.url).hostname;
-    const scanDate = new Date(r.scanDate).toLocaleString("en-GB");
+    const scanDate = new Date(r.scanDate).toLocaleString(this.options.locale);
     const durationSec = (r.duration / 1000).toFixed(1);
     const grade = r.compliance.grade;
     const score = r.compliance.total;
@@ -230,59 +240,59 @@ ${tocItems}
     const sections: string[] = [];
 
     // ── Header ────────────────────────────────────────────────────
-    sections.push(`# GDPR Compliance Report — ${hostname}`);
+    sections.push(`# ${this.t("REPORT_TITLE")} — ${hostname}`);
     sections.push(`
-> **Scan date:** ${scanDate}
-> **Scanned URL:** ${r.url}
-> **Scan duration:** ${durationSec}s
-> **Tool:** gdpr-cookie-scanner v0.1.0
+> **${this.t("REPORT_SCAN_DATE")}:** ${scanDate}
+> **${this.t("REPORT_SCANNED_URL")}:** ${r.url}
+> **${this.t("REPORT_SCAN_DURATION")}:** ${durationSec}s
+> **${this.t("REPORT_TOOL")}:** gdpr-cookie-scanner v0.1.0
 `);
 
     // ── Global score ──────────────────────────────────────────────
-    sections.push(`## Global Compliance Score\n`);
-    sections.push(`### ${gradeEmoji} ${score}/100 — Grade ${grade}\n`);
+    sections.push(`## ${this.t("SCORE_GLOBAL_LABEL")}\n`);
+    sections.push(`### ${gradeEmoji} ${score}/100 — ${this.t("SCORE_GRADE")} ${grade}\n`);
     sections.push(this.buildScoreTable(r));
 
     // ── Executive summary ─────────────────────────────────────────
-    sections.push(`## Executive Summary\n`);
+    sections.push(`## ${this.t("SECTION_EXEC_SUMMARY")}\n`);
     sections.push(this.buildExecutiveSummary(r));
 
     // ── Consent modal ─────────────────────────────────────────────
-    sections.push(`## 1. Consent Modal\n`);
+    sections.push(`## ${this.t("SECTION_CONSENT_MODAL")}\n`);
     sections.push(this.buildModalSection(r));
 
     // ── Dark patterns ─────────────────────────────────────────────
-    sections.push(`## 2. Dark Patterns and Detected Issues\n`);
+    sections.push(`## ${this.t("SECTION_DARK_PATTERNS")}\n`);
     sections.push(this.buildIssuesSection(r.compliance.issues));
 
     // ── Cookies before interaction ────────────────────────────────
-    sections.push(`## 3. Cookies Set Before Any Interaction\n`);
+    sections.push(`## ${this.t("SECTION_COOKIES_BEFORE")}\n`);
     sections.push(this.buildCookiesTable(r.cookiesBeforeInteraction, "before-interaction"));
 
     // ── Cookies after reject ──────────────────────────────────────
-    sections.push(`## 4. Cookies After Consent Rejection\n`);
+    sections.push(`## ${this.t("SECTION_COOKIES_AFTER_REJECT")}\n`);
     sections.push(this.buildCookiesAfterRejectSection(r));
 
     // ── Cookies after accept ──────────────────────────────────────
-    sections.push(`## 5. Cookies After Consent Acceptance\n`);
+    sections.push(`## ${this.t("SECTION_COOKIES_AFTER_ACCEPT")}\n`);
     sections.push(this.buildCookiesTable(r.cookiesAfterAccept, "after-accept"));
 
     // ── Network tracker requests ──────────────────────────────────
-    sections.push(`## 6. Network Requests — Detected Trackers\n`);
+    sections.push(`## ${this.t("SECTION_NETWORK")}\n`);
     sections.push(this.buildNetworkSection(r));
 
     // ── Recommendations ───────────────────────────────────────────
-    sections.push(`## 7. Recommendations\n`);
+    sections.push(`## ${this.t("SECTION_RECOMMENDATIONS")}\n`);
     sections.push(this.buildRecommendations(r));
 
     // ── Scan errors ───────────────────────────────────────────────
     if (r.errors.length > 0) {
-      sections.push(`## Scan Errors and Warnings\n`);
+      sections.push(`## ${this.t("SECTION_ERRORS")}\n`);
       sections.push(r.errors.map((e) => `- ⚠️ ${e}`).join("\n"));
     }
 
     // ── Legal references ──────────────────────────────────────────
-    sections.push(`## Legal References\n`);
+    sections.push(`## ${this.t("SECTION_LEGAL")}\n`);
     sections.push(`
 - **RGPD Art. 7** — Conditions for consent
 - **RGPD Recital 32** — Consent must result from an unambiguous positive action
@@ -304,13 +314,13 @@ ${tocItems}
       return `| ${label} | ${score}/${max} | ${bar} | ${status} |`;
     };
 
-    return `| Criterion | Score | Progress | Status |
+    return `| ${this.t("SCORE_CRITERION")} | ${this.t("SCORE_SCORE")} | ${this.t("SCORE_PROGRESS")} | ${this.t("SCORE_STATUS")} |
 |-----------|-------|----------|--------|
-${row("Consent validity", breakdown.consentValidity, 25)}
-${row("Easy refusal", breakdown.easyRefusal, 25)}
-${row("Transparency", breakdown.transparency, 25)}
-${row("Cookie behavior", breakdown.cookieBehavior, 25)}
-| **TOTAL** | **${r.compliance.total}/100** | | **${r.compliance.grade}** |
+${row(this.t("SCORE_CONSENT_VALIDITY"), breakdown.consentValidity, 25)}
+${row(this.t("SCORE_EASY_REFUSAL"), breakdown.easyRefusal, 25)}
+${row(this.t("SCORE_TRANSPARENCY"), breakdown.transparency, 25)}
+${row(this.t("SCORE_COOKIE_BEHAVIOR"), breakdown.cookieBehavior, 25)}
+| **${this.t("SCORE_TOTAL")}** | **${r.compliance.total}/100** | | **${r.compliance.grade}** |
 `;
   }
 
@@ -328,49 +338,39 @@ ${row("Cookie behavior", breakdown.cookieBehavior, 25)}
       [...r.networkBeforeInteraction, ...r.networkAfterAccept].some((n) => n.requiresConsent);
 
     if (!r.modal.detected && consentRequired) {
-      lines.push(
-        "❌ **No consent modal detected.** The site sets cookies without requesting consent.",
-      );
+      lines.push(`❌ ${this.t("EXEC_NO_MODAL_DETECTED")}`);
     } else if (!r.modal.detected) {
-      lines.push("✅ No consent modal required — no non-essential cookies or trackers detected.");
+      lines.push(`✅ ${this.t("EXEC_NO_MODAL_REQUIRED")}`);
     } else {
-      lines.push(`✅ Consent modal detected (\`${r.modal.selector}\`).`);
+      lines.push(`✅ ${this.t("EXEC_MODAL_DETECTED", { selector: r.modal.selector ?? "" })}`);
     }
 
     if (illegalPreCookies.length > 0) {
-      lines.push(
-        `❌ **${illegalPreCookies.length} non-essential cookie(s)** set before any interaction (RGPD violation).`,
-      );
+      lines.push(`❌ ${this.t("EXEC_ILLEGAL_PRE_COOKIES", { count: illegalPreCookies.length })}`);
     } else {
-      lines.push("✅ No non-essential cookie set before interaction.");
+      lines.push(`✅ ${this.t("EXEC_NO_ILLEGAL_PRE_COOKIES")}`);
     }
 
     if (persistAfterReject.length > 0) {
-      lines.push(
-        `❌ **${persistAfterReject.length} non-essential cookie(s)** persisting after rejection (RGPD violation).`,
-      );
+      lines.push(`❌ ${this.t("EXEC_PERSIST_AFTER_REJECT", { count: persistAfterReject.length })}`);
     } else {
-      lines.push("✅ Non-essential cookies are correctly removed after rejection.");
+      lines.push(`✅ ${this.t("EXEC_NO_PERSIST_AFTER_REJECT")}`);
     }
 
     if (preInteractionTrackers.length > 0) {
-      lines.push(
-        `❌ **${preInteractionTrackers.length} tracker request(s)** fired before consent.`,
-      );
+      lines.push(`❌ ${this.t("EXEC_PRE_TRACKERS", { count: preInteractionTrackers.length })}`);
     } else {
-      lines.push("✅ No tracker requests before consent.");
+      lines.push(`✅ ${this.t("EXEC_NO_PRE_TRACKERS")}`);
     }
 
-    lines.push(
-      `\n**${criticalCount} critical issue(s)** and **${warningCount} warning(s)** identified.`,
-    );
+    lines.push(`\n${this.t("EXEC_SUMMARY_COUNTS", { criticalCount, warningCount })}`);
 
     return lines.join("\n");
   }
 
   private buildModalSection(r: ScanResult): string {
     if (!r.modal.detected) {
-      return "_No consent modal detected on the page._\n";
+      return `${this.t("MODAL_NOT_DETECTED")}\n`;
     }
 
     const { modal } = r;
@@ -381,33 +381,33 @@ ${row("Cookie behavior", breakdown.cookieBehavior, 25)}
     const preTicked = modal.checkboxes.filter((c) => c.isCheckedByDefault);
 
     const lines: string[] = [
-      `**CSS selector:** \`${modal.selector}\``,
-      `**Granular controls:** ${modal.hasGranularControls ? "✅ Yes" : "❌ No"}`,
-      `**Layer count:** ${modal.layerCount}`,
+      `**${this.t("MODAL_SELECTOR")}:** \`${modal.selector}\``,
+      `**${this.t("MODAL_GRANULAR_CONTROLS")}:** ${modal.hasGranularControls ? "✅ Yes" : "❌ No"}`,
+      `**${this.t("MODAL_LAYER_COUNT")}:** ${modal.layerCount}`,
       modal.privacyPolicyUrl
-        ? `**Privacy policy link:** ✅ [${modal.privacyPolicyUrl}](${modal.privacyPolicyUrl})`
-        : `**Privacy policy link:** ⚠️ Not found in the modal`,
+        ? `**${this.t("MODAL_PRIVACY_LINK")}:** ✅ [${modal.privacyPolicyUrl}](${modal.privacyPolicyUrl})`
+        : `**${this.t("MODAL_PRIVACY_LINK")}:** ⚠️ ${this.t("MODAL_PRIVACY_LINK_NOT_FOUND")}`,
       "",
-      "### Detected buttons",
+      `### ${this.t("MODAL_DETECTED_BUTTONS")}`,
       "",
-      "| Button | Text | Visible | Font size | Contrast ratio |",
+      `| ${this.t("BTN_HEADER_TYPE")} | ${this.t("BTN_HEADER_LABEL")} | ${this.t("BTN_HEADER_VISIBLE")} | ${this.t("BTN_HEADER_FONT_SIZE")} | ${this.t("BTN_HEADER_CONTRAST")} |`,
       "|--------|------|---------|-----------|----------------|",
       ...modal.buttons.map((b) => this.buildButtonRow(b)),
       "",
     ];
 
     if (acceptBtn && rejectBtn) {
-      lines.push("### Comparative analysis: Accept / Reject\n");
+      lines.push(`### ${this.t("MODAL_BTN_COMPARISON")}\n`);
       if (
         acceptBtn.fontSize &&
         rejectBtn.fontSize &&
         acceptBtn.fontSize > rejectBtn.fontSize * 1.2
       ) {
         lines.push(
-          `⚠️ The **Accept** button (${acceptBtn.fontSize}px) is larger than the **Reject** button (${rejectBtn.fontSize}px).`,
+          `⚠️ ${this.t("MODAL_BTN_SIZE_WARN", { acceptPx: acceptBtn.fontSize, rejectPx: rejectBtn.fontSize })}`,
         );
       } else {
-        lines.push("✅ Accept / Reject button sizes are comparable.");
+        lines.push(`✅ ${this.t("MODAL_BTN_SIZE_OK")}`);
       }
 
       const acceptArea = acceptBtn.boundingBox
@@ -418,14 +418,14 @@ ${row("Cookie behavior", breakdown.cookieBehavior, 25)}
         : 0;
       if (acceptArea > rejectArea * 2) {
         lines.push(
-          `⚠️ **Accept** button area (${Math.round(acceptArea)}px²) is significantly larger than **Reject** (${Math.round(rejectArea)}px²).`,
+          `⚠️ ${this.t("MODAL_BTN_AREA_WARN", { acceptArea: Math.round(acceptArea), rejectArea: Math.round(rejectArea) })}`,
         );
       }
     }
 
     if (preTicked.length > 0) {
-      lines.push("\n### Pre-ticked checkboxes (RGPD violation)\n");
-      lines.push("| Name | Label |");
+      lines.push(`\n### ${this.t("MODAL_PRE_TICKED")}\n`);
+      lines.push(`| ${this.t("COOKIE_NAME")} | ${this.t("BTN_HEADER_LABEL")} |`);
       lines.push("|------|-------|");
       for (const cb of preTicked) {
         lines.push(`| \`${cb.name}\` | ${cb.label} |`);
@@ -433,11 +433,11 @@ ${row("Cookie behavior", breakdown.cookieBehavior, 25)}
     }
 
     if (modal.screenshotPath) {
-      lines.push(`\n### Screenshot\n`);
-      lines.push(`![Consent modal](${basename(modal.screenshotPath)})`);
+      lines.push(`\n### ${this.t("MODAL_SCREENSHOT")}\n`);
+      lines.push(`![${this.t("SECTION_CONSENT_MODAL")}](${basename(modal.screenshotPath)})`);
     }
 
-    lines.push("\n### Modal text excerpt\n");
+    lines.push(`\n### ${this.t("MODAL_TEXT_EXCERPT")}\n`);
     lines.push(`> ${modal.text.substring(0, 500)}${modal.text.length > 500 ? "..." : ""}`);
 
     return lines.join("\n");
@@ -448,18 +448,18 @@ ${row("Cookie behavior", breakdown.cookieBehavior, 25)}
     const fontSize = b.fontSize ? `${b.fontSize}px` : "—";
     const contrast = b.contrastRatio !== null ? `${b.contrastRatio}:1` : "—";
     const typeLabel = {
-      accept: "🟢 Accept",
-      reject: "🔴 Reject",
-      preferences: "⚙️ Preferences",
-      close: "✕ Close",
-      unknown: "❓ Unknown",
+      accept: `🟢 ${this.t("BTN_ACCEPT")}`,
+      reject: `🔴 ${this.t("BTN_REJECT")}`,
+      preferences: `⚙️ ${this.t("BTN_PREFERENCES")}`,
+      close: `✕ ${this.t("BTN_CLOSE")}`,
+      unknown: `❓ ${this.t("BTN_UNKNOWN")}`,
     }[b.type];
     return `| ${typeLabel} | ${b.text.substring(0, 30)} | ${visible} | ${fontSize} | ${contrast} |`;
   }
 
   private buildIssuesSection(issues: DarkPatternIssue[]): string {
     if (issues.length === 0) {
-      return "✅ No dark pattern or compliance issue detected.\n";
+      return `✅ ${this.t("ISSUES_NONE")}\n`;
     }
 
     const critical = issues.filter((i) => i.severity === "critical");
@@ -469,7 +469,7 @@ ${row("Cookie behavior", breakdown.cookieBehavior, 25)}
     const lines: string[] = [];
 
     if (critical.length > 0) {
-      lines.push("### ❌ Critical issues\n");
+      lines.push(`### ❌ ${this.t("ISSUES_CRITICAL")}\n`);
       for (const issue of critical) {
         lines.push(`**${issue.description}**`);
         lines.push(`> ${issue.evidence}\n`);
@@ -477,7 +477,7 @@ ${row("Cookie behavior", breakdown.cookieBehavior, 25)}
     }
 
     if (warnings.length > 0) {
-      lines.push("### ⚠️ Warnings\n");
+      lines.push(`### ⚠️ ${this.t("ISSUES_WARNINGS")}\n`);
       for (const issue of warnings) {
         lines.push(`**${issue.description}**`);
         lines.push(`> ${issue.evidence}\n`);
@@ -485,7 +485,7 @@ ${row("Cookie behavior", breakdown.cookieBehavior, 25)}
     }
 
     if (infos.length > 0) {
-      lines.push("### ℹ️ Information\n");
+      lines.push(`### ℹ️ ${this.t("ISSUES_INFO")}\n`);
       for (const issue of infos) {
         lines.push(`- ${issue.description}`);
       }
@@ -498,25 +498,25 @@ ${row("Cookie behavior", breakdown.cookieBehavior, 25)}
     const filtered = cookies.filter((c) => c.capturedAt === phase);
 
     if (filtered.length === 0) {
-      return "_No cookies detected._\n";
+      return `${this.t("COOKIE_NONE_DETECTED")}\n`;
     }
 
     const consent = (c: ScannedCookie) => (c.requiresConsent ? "⚠️ Yes" : "✅ No");
 
     const expires = (c: ScannedCookie) => {
-      if (c.expires === null) return "Session";
+      if (c.expires === null) return this.t("EXPIRY_SESSION");
       const days = Math.round((c.expires * 1000 - Date.now()) / 86400000);
-      if (days < 0) return "Expired";
-      if (days === 0) return "< 1 day";
-      if (days < 30) return `${days} days`;
-      return `${Math.round(days / 30)} months`;
+      if (days < 0) return this.t("EXPIRY_EXPIRED");
+      if (days === 0) return this.t("EXPIRY_LESS_THAN_1_DAY");
+      if (days < 30) return this.t("EXPIRY_DAYS", { count: days });
+      return this.t("EXPIRY_MONTHS", { count: Math.round(days / 30) });
     };
 
     const rows = filtered.map(
       (c) => `| \`${c.name}\` | ${c.domain} | ${c.category} | ${expires(c)} | ${consent(c)} |`,
     );
 
-    return `| Name | Domain | Category | Expiry | Consent required |
+    return `| ${this.t("COOKIE_NAME")} | ${this.t("COOKIE_DOMAIN")} | ${this.t("COOKIE_CATEGORY")} | ${this.t("COOKIE_EXPIRY")} | ${this.t("COOKIE_CONSENT_REQUIRED")} |
 |------|--------|----------|--------|------------------|
 ${rows.join("\n")}
 `;
@@ -529,9 +529,9 @@ ${rows.join("\n")}
     const lines: string[] = [];
 
     if (violating.length > 0) {
-      lines.push(`❌ **${violating.length} non-essential cookie(s)** detected after rejection:\n`);
+      lines.push(`❌ **${this.t("EXEC_PERSIST_AFTER_REJECT", { count: violating.length })}**\n`);
     } else {
-      lines.push("✅ No non-essential cookie detected after rejection.\n");
+      lines.push(`✅ ${this.t("EXEC_NO_PERSIST_AFTER_REJECT")}\n`);
     }
 
     lines.push(this.buildCookiesTable(r.cookiesAfterReject, "after-reject"));
@@ -547,30 +547,34 @@ ${rows.join("\n")}
     ].filter((req) => req.trackerCategory !== null);
 
     if (allRequests.length === 0) {
-      return "_No known network tracker detected._\n";
+      return `${this.t("NETWORK_NONE")}\n`;
     }
 
-    const phases: Array<{ label: string; requests: NetworkRequest[] }> = [
+    const phases: Array<{ labelKey: TranslationKey; requests: NetworkRequest[] }> = [
       {
-        label: "Before interaction",
+        labelKey: "HTML_COOKIES_BEFORE",
         requests: r.networkBeforeInteraction.filter((r) => r.trackerCategory !== null),
       },
       {
-        label: "After acceptance",
+        labelKey: "HTML_COOKIES_AFTER_ACCEPT",
         requests: r.networkAfterAccept.filter((r) => r.trackerCategory !== null),
       },
       {
-        label: "After rejection",
+        labelKey: "HTML_COOKIES_AFTER_REJECT",
         requests: r.networkAfterReject.filter((r) => r.trackerCategory !== null),
       },
     ];
 
     const lines: string[] = [];
 
-    for (const { label, requests } of phases) {
+    for (const { labelKey, requests } of phases) {
       if (requests.length === 0) continue;
-      lines.push(`### ${label} (${requests.length} tracker(s))\n`);
-      lines.push("| Tracker | Category | URL | Type |");
+      lines.push(
+        `### ${this.t(labelKey)} (${this.t("NETWORK_TRACKERS_COUNT", { count: requests.length })})\n`,
+      );
+      lines.push(
+        `| ${this.t("NETWORK_TRACKER")} | ${this.t("NETWORK_CATEGORY")} | ${this.t("NETWORK_URL")} | ${this.t("NETWORK_TYPE")} |`,
+      );
       lines.push("|---------|-----------|-----|------|");
       for (const req of requests.slice(0, 20)) {
         const url = req.url.length > 60 ? req.url.substring(0, 57) + "..." : req.url;
@@ -596,55 +600,39 @@ ${rows.join("\n")}
       [...r.networkBeforeInteraction, ...r.networkAfterAccept].some((n) => n.requiresConsent);
 
     if (!r.modal.detected && needsConsent) {
-      recs.push(
-        "1. **Deploy a CMP solution** (e.g. Axeptio, Didomi, OneTrust, Cookiebot) that displays a consent modal before any non-essential cookie.",
-      );
+      recs.push(this.t("REC_NO_MODAL"));
     }
 
     if (issues.some((i) => i.type === "pre-ticked")) {
-      recs.push(
-        "1. **Remove pre-ticked checkboxes.** Consent must result from an explicit positive action (RGPD Recital 32).",
-      );
+      recs.push(this.t("REC_PRE_TICKED"));
     }
 
     if (issues.some((i) => i.type === "no-reject-button" || i.type === "buried-reject")) {
-      recs.push(
-        '1. **Add a "Reject all" button** at the first layer of the modal, requiring no more clicks than "Accept all" (CNIL 2022).',
-      );
+      recs.push(this.t("REC_NO_REJECT"));
     }
 
     if (issues.some((i) => i.type === "click-asymmetry")) {
-      recs.push(
-        "1. **Balance the number of clicks** to accept and reject. Rejection must not require more steps than acceptance.",
-      );
+      recs.push(this.t("REC_CLICK_ASYMMETRY"));
     }
 
     if (issues.some((i) => i.type === "asymmetric-prominence" || i.type === "nudging")) {
-      recs.push(
-        "1. **Equalise the styling** of the Accept / Reject buttons: same size, same colour, same level of visibility.",
-      );
+      recs.push(this.t("REC_VISUAL_ASYMMETRY"));
     }
 
     if (issues.some((i) => i.type === "auto-consent")) {
-      recs.push(
-        "1. **Do not set any non-essential cookie before consent.** Gate the initialisation of third-party scripts on acceptance.",
-      );
+      recs.push(this.t("REC_AUTO_CONSENT"));
     }
 
     if (issues.some((i) => i.type === "missing-info")) {
-      recs.push(
-        "1. **Complete the modal information**: purposes, identity of sub-processors, retention period, right to withdraw.",
-      );
+      recs.push(this.t("REC_MISSING_INFO"));
     }
 
     if (r.cookiesAfterReject.filter((c) => c.requiresConsent).length > 0) {
-      recs.push(
-        "1. **Remove or block non-essential cookies** after rejection, and verify consent handling server-side.",
-      );
+      recs.push(this.t("REC_PERSIST_AFTER_REJECT"));
     }
 
     if (recs.length === 0) {
-      recs.push("✅ No critical recommendation. Conduct regular audits to maintain compliance.");
+      recs.push(`✅ ${this.t("REC_NONE")}`);
     }
 
     return recs.join("\n\n");
@@ -652,7 +640,7 @@ ${rows.join("\n")}
 
   private buildCookiesInventory(r: ScanResult): string {
     const hostname = new URL(r.url).hostname;
-    const scanDate = new Date(r.scanDate).toLocaleString("en-GB");
+    const scanDate = new Date(r.scanDate).toLocaleString(this.options.locale);
 
     // Collect all cookies across all phases, keyed by name+domain
     type CookieEntry = {
@@ -669,9 +657,9 @@ ${rows.join("\n")}
     const cookieMap = new Map<string, CookieEntry>();
 
     const phaseLabel: Record<ScannedCookie["capturedAt"], string> = {
-      "before-interaction": "before consent",
-      "after-accept": "after acceptance",
-      "after-reject": "after rejection",
+      "before-interaction": this.t("PHASE_BEFORE_CONSENT"),
+      "after-accept": this.t("PHASE_AFTER_ACCEPTANCE"),
+      "after-reject": this.t("PHASE_AFTER_REJECTION"),
     };
 
     const allCookies = [
@@ -698,21 +686,21 @@ ${rows.join("\n")}
     }
 
     const expires = (entry: CookieEntry): string => {
-      if (entry.expires === null) return "Session";
+      if (entry.expires === null) return this.t("EXPIRY_SESSION");
       const days = Math.round((entry.expires * 1000 - Date.now()) / 86400000);
-      if (days < 0) return "Expired";
-      if (days === 0) return "< 1 day";
-      if (days < 30) return `${days} days`;
-      return `${Math.round(days / 30)} months`;
+      if (days < 0) return this.t("EXPIRY_EXPIRED");
+      if (days === 0) return this.t("EXPIRY_LESS_THAN_1_DAY");
+      if (days < 30) return this.t("EXPIRY_DAYS", { count: days });
+      return this.t("EXPIRY_MONTHS", { count: Math.round(days / 30) });
     };
 
     const categoryLabel: Record<string, string> = {
-      "strictly-necessary": "Strictly necessary",
-      analytics: "Analytics",
-      advertising: "Advertising",
-      social: "Social",
-      personalization: "Personalization",
-      unknown: "Unknown",
+      "strictly-necessary": this.t("CAT_STRICTLY_NECESSARY"),
+      analytics: this.t("CAT_ANALYTICS"),
+      advertising: this.t("CAT_ADVERTISING"),
+      social: this.t("CAT_SOCIAL"),
+      personalization: this.t("CAT_PERSONALIZATION"),
+      unknown: this.t("CAT_UNKNOWN"),
     };
 
     const entries = [...cookieMap.values()].sort((a, b) => {
@@ -733,26 +721,19 @@ ${rows.join("\n")}
 
     const lines: string[] = [];
 
-    lines.push(`# Cookie Inventory — ${hostname}`);
+    lines.push(`# ${this.t("INV_TITLE")} — ${hostname}`);
     lines.push(`
-> **Scan date:** ${scanDate}
-> **Scanned URL:** ${r.url}
-> **Unique cookies detected:** ${entries.length}
+> **${this.t("REPORT_SCAN_DATE")}:** ${scanDate}
+> **${this.t("REPORT_SCANNED_URL")}:** ${r.url}
+> **${this.t("INV_UNIQUE_COOKIES")}:** ${entries.length}
 `);
 
-    lines.push(`## Instructions`);
-    lines.push(`
-This table lists all cookies detected during the scan, across all phases.
-The **Description / Purpose** column is to be filled in by the DPO or technical owner.
+    lines.push(`## ${this.t("INV_INSTRUCTIONS_HEADING")}`);
+    lines.push(`\n${this.t("INV_INSTRUCTIONS_TEXT")}\n`);
 
-- **Before consent** — cookie present from page load, before any interaction
-- **After acceptance** — cookie set or persisting after clicking "Accept all"
-- **After rejection** — cookie present after clicking "Reject all"
-`);
-
-    lines.push(`## Cookie table\n`);
+    lines.push(`## ${this.t("INV_COOKIE_TABLE")}\n`);
     lines.push(
-      `| Cookie | Domain | Category | Phases | Expiry | Consent required | Description / Purpose |`,
+      `| ${this.t("COOKIE_NAME")} | ${this.t("COOKIE_DOMAIN")} | ${this.t("COOKIE_CATEGORY")} | ${this.t("COOKIE_PHASES")} | ${this.t("COOKIE_EXPIRY")} | ${this.t("COOKIE_CONSENT_REQUIRED")} | ${this.t("INV_DESCRIPTION")} |`,
     );
     lines.push(
       `|--------|--------|----------|--------|--------|------------------|-----------------------|`,
@@ -768,32 +749,30 @@ The **Description / Purpose** column is to be filled in by the DPO or technical 
     }
 
     lines.push(`\n---`);
-    lines.push(
-      `\n_Automatically generated by gdpr-cookie-scanner. Categories marked "Unknown" could not be identified automatically and should be verified manually._\n`,
-    );
+    lines.push(`\n${this.t("INV_FOOTER")}\n`);
 
     return lines.join("\n") + "\n";
   }
 
   private buildChecklist(r: ScanResult): string {
     const hostname = new URL(r.url).hostname;
-    const scanDate = new Date(r.scanDate).toLocaleString("en-GB");
+    const scanDate = new Date(r.scanDate).toLocaleString(this.options.locale);
     const issues = r.compliance.issues;
     const hasIssue = (type: string) => issues.some((i) => i.type === type);
     const getIssue = (type: string) => issues.find((i) => i.type === type);
 
-    const ok = "✅ Compliant";
-    const ko = "❌ Non-compliant";
-    const warn = "⚠️ Warning";
-    const na = "➖ Not applicable";
+    const ok = this.t("CHECKLIST_STATUS_OK");
+    const ko = this.t("CHECKLIST_STATUS_KO");
+    const warn = this.t("CHECKLIST_STATUS_WARN");
+    const na = this.t("CHECKLIST_STATUS_NA");
 
     const consentRequired =
       [...r.cookiesBeforeInteraction, ...r.cookiesAfterAccept].some((c) => c.requiresConsent) ||
       [...r.networkBeforeInteraction, ...r.networkAfterAccept].some((n) => n.requiresConsent);
     const noModalStatus = consentRequired ? ko : na;
     const noModalDetail = consentRequired
-      ? "No consent banner detected"
-      : "Not required — no non-essential cookies or trackers";
+      ? this.t("DETAIL_NO_CONSENT_BANNER")
+      : this.t("DETAIL_NOT_REQUIRED");
 
     type Row = {
       category: string;
@@ -807,32 +786,37 @@ The **Description / Purpose** column is to be filled in by the DPO or technical 
 
     // ── A. Consent presence and validity ─────────────────────────
     rows.push({
-      category: "Consent",
-      rule: "Consent modal detected",
+      category: this.t("CHECKLIST_CAT_CONSENT"),
+      rule: this.t("CHECKLIST_RULE_MODAL_DETECTED"),
       reference:
         "[GDPR Art. 7](https://gdpr-info.eu/art-7-gdpr/) · [ePrivacy Dir. Art. 5(3)](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32002L0058)",
       status: r.modal.detected ? ok : noModalStatus,
-      detail: r.modal.detected ? `Detected (\`${r.modal.selector}\`)` : noModalDetail,
+      detail: r.modal.detected
+        ? this.t("DETAIL_MODAL_DETECTED", { selector: r.modal.selector ?? "" })
+        : noModalDetail,
     });
 
     const preTicked = r.modal.checkboxes.filter((c) => c.isCheckedByDefault);
     rows.push({
-      category: "Consent",
-      rule: "No pre-ticked checkboxes",
+      category: this.t("CHECKLIST_CAT_CONSENT"),
+      rule: this.t("CHECKLIST_RULE_NO_PRE_TICKED"),
       reference: "[GDPR Recital 32](https://gdpr-info.eu/recitals/no-32/)",
       status: !r.modal.detected ? (consentRequired ? ko : na) : preTicked.length === 0 ? ok : ko,
       detail: !r.modal.detected
         ? noModalDetail
         : preTicked.length === 0
-          ? "No pre-ticked checkbox detected"
-          : `${preTicked.length} pre-ticked box(es): ${preTicked.map((c) => c.label || c.name).join(", ")}`,
+          ? this.t("DETAIL_NO_PRE_TICKED")
+          : this.t("DETAIL_PRE_TICKED", {
+              count: preTicked.length,
+              names: preTicked.map((c) => c.label || c.name).join(", "),
+            }),
     });
 
     const misleadingAccept = getIssue("misleading-wording");
     const acceptBtn = r.modal.buttons.find((b) => b.type === "accept");
     rows.push({
-      category: "Consent",
-      rule: "Accept button label is unambiguous",
+      category: this.t("CHECKLIST_CAT_CONSENT"),
+      rule: this.t("CHECKLIST_RULE_ACCEPT_LABEL"),
       reference: "[GDPR Art. 4(11)](https://gdpr-info.eu/art-4-gdpr/)",
       status: !r.modal.detected
         ? consentRequired
@@ -847,31 +831,31 @@ The **Description / Purpose** column is to be filled in by the DPO or technical 
         ? noModalDetail
         : acceptBtn
           ? misleadingAccept
-            ? `Ambiguous label: "${acceptBtn.text}"`
-            : `Clear label: "${acceptBtn.text}"`
-          : "No Accept button detected",
+            ? this.t("DETAIL_ACCEPT_AMBIGUOUS", { text: acceptBtn.text })
+            : this.t("DETAIL_ACCEPT_CLEAR", { text: acceptBtn.text })
+          : this.t("DETAIL_NO_ACCEPT_BTN"),
     });
 
     // ── B. Easy refusal ───────────────────────────────────────────
     const rejectBtn = r.modal.buttons.find((b) => b.type === "reject");
     const noReject = hasIssue("no-reject-button") || hasIssue("buried-reject");
     rows.push({
-      category: "Easy refusal",
-      rule: "Reject button present at first layer",
+      category: this.t("CHECKLIST_CAT_EASY_REFUSAL"),
+      rule: this.t("CHECKLIST_RULE_REJECT_BTN"),
       reference:
         "[CNIL Recommendation 2022](https://www.cnil.fr/fr/cookies-et-autres-traceurs/regles/cookies)",
       status: !r.modal.detected ? (consentRequired ? ko : na) : noReject ? ko : ok,
       detail: !r.modal.detected
         ? noModalDetail
         : rejectBtn
-          ? `Detected: "${rejectBtn.text}"`
-          : "No Reject button at first layer",
+          ? this.t("DETAIL_REJECT_DETECTED", { text: rejectBtn.text })
+          : this.t("DETAIL_NO_REJECT_FIRST"),
     });
 
     const clickIssue = getIssue("click-asymmetry");
     rows.push({
-      category: "Easy refusal",
-      rule: "Rejecting requires no more clicks than accepting",
+      category: this.t("CHECKLIST_CAT_EASY_REFUSAL"),
+      rule: this.t("CHECKLIST_RULE_CLICK_PARITY"),
       reference:
         "[CNIL Recommendation 2022](https://www.cnil.fr/fr/cookies-et-autres-traceurs/regles/cookies)",
       status: !r.modal.detected ? (consentRequired ? ko : na) : clickIssue ? ko : ok,
@@ -880,14 +864,17 @@ The **Description / Purpose** column is to be filled in by the DPO or technical 
         : clickIssue
           ? clickIssue.evidence
           : acceptBtn && rejectBtn
-            ? `Accept: ${acceptBtn.clickDepth} click(s) · Reject: ${rejectBtn.clickDepth} click(s)`
-            : "Cannot verify (missing buttons)",
+            ? this.t("DETAIL_CLICK_PARITY", {
+                a: acceptBtn.clickDepth,
+                b: rejectBtn.clickDepth,
+              })
+            : this.t("DETAIL_CANNOT_VERIFY"),
     });
 
     const sizeIssue = getIssue("asymmetric-prominence");
     rows.push({
-      category: "Easy refusal",
-      rule: "Size symmetry between Accept and Reject",
+      category: this.t("CHECKLIST_CAT_EASY_REFUSAL"),
+      rule: this.t("CHECKLIST_RULE_SIZE_SYMMETRY"),
       reference:
         "[EDPB Guidelines 03/2022](https://www.edpb.europa.eu/system/files/2022-03/edpb_03-2022_guidelines_on_dark_patterns_in_social_media_platform_interfaces_en.pdf)",
       status: !r.modal.detected ? (consentRequired ? ko : na) : sizeIssue ? warn : ok,
@@ -895,13 +882,13 @@ The **Description / Purpose** column is to be filled in by the DPO or technical 
         ? noModalDetail
         : sizeIssue
           ? sizeIssue.evidence
-          : "Button sizes are comparable",
+          : this.t("DETAIL_BTN_SIZES_OK"),
     });
 
     const nudgeIssue = getIssue("nudging");
     rows.push({
-      category: "Easy refusal",
-      rule: "Font symmetry between Accept and Reject",
+      category: this.t("CHECKLIST_CAT_EASY_REFUSAL"),
+      rule: this.t("CHECKLIST_RULE_FONT_SYMMETRY"),
       reference:
         "[EDPB Guidelines 03/2022](https://www.edpb.europa.eu/system/files/2022-03/edpb_03-2022_guidelines_on_dark_patterns_in_social_media_platform_interfaces_en.pdf)",
       status: !r.modal.detected ? (consentRequired ? ko : na) : nudgeIssue ? warn : ok,
@@ -909,13 +896,13 @@ The **Description / Purpose** column is to be filled in by the DPO or technical 
         ? noModalDetail
         : nudgeIssue
           ? nudgeIssue.evidence
-          : "Font sizes are comparable",
+          : this.t("DETAIL_BTN_FONTS_OK"),
     });
 
     // ── C. Transparency ───────────────────────────────────────────
     rows.push({
-      category: "Transparency",
-      rule: "Granular controls available",
+      category: this.t("CHECKLIST_CAT_TRANSPARENCY"),
+      rule: this.t("CHECKLIST_RULE_GRANULAR"),
       reference:
         "[EDPB Guidelines 05/2020](https://edpb.europa.eu/our-work-tools/our-documents/guidelines/guidelines-052020-consent-under-regulation-2016679_en)",
       status: !r.modal.detected
@@ -928,53 +915,51 @@ The **Description / Purpose** column is to be filled in by the DPO or technical 
       detail: !r.modal.detected
         ? noModalDetail
         : r.modal.hasGranularControls
-          ? `${r.modal.checkboxes.length} checkbox(es) or preferences panel detected`
-          : "No granular controls (checkboxes or panel) detected",
+          ? this.t("DETAIL_GRANULAR_COUNT", { count: r.modal.checkboxes.length })
+          : this.t("DETAIL_NO_GRANULAR"),
     });
 
-    const infoChecks: Array<{ key: string; label: string; ref: string }> = [
+    const infoChecks: Array<{ key: string; ruleKey: TranslationKey; ref: string }> = [
       {
         key: "purposes",
-        label: "Processing purposes mentioned",
+        ruleKey: "CHECKLIST_RULE_PURPOSES",
         ref: "[GDPR Art. 13-14](https://gdpr-info.eu/art-13-gdpr/)",
       },
       {
         key: "third-parties",
-        label: "Sub-processors / third parties mentioned",
+        ruleKey: "CHECKLIST_RULE_THIRD_PARTIES",
         ref: "[GDPR Art. 13-14](https://gdpr-info.eu/art-13-gdpr/)",
       },
       {
         key: "duration",
-        label: "Retention period mentioned",
+        ruleKey: "CHECKLIST_RULE_DURATION",
         ref: "[GDPR Art. 13(2)(a)](https://gdpr-info.eu/art-13-gdpr/)",
       },
       {
         key: "withdrawal",
-        label: "Right to withdraw consent mentioned",
+        ruleKey: "CHECKLIST_RULE_WITHDRAWAL",
         ref: "[GDPR Art. 7(3)](https://gdpr-info.eu/art-7-gdpr/)",
       },
     ];
 
-    for (const { key, label, ref } of infoChecks) {
-      const missing = issues.find(
-        (i) => i.type === "missing-info" && i.description.includes(`"${key}"`),
-      );
+    for (const { key, ruleKey, ref } of infoChecks) {
+      const missing = issues.find((i) => i.type === "missing-info" && i.key === key);
       rows.push({
-        category: "Transparency",
-        rule: label,
+        category: this.t("CHECKLIST_CAT_TRANSPARENCY"),
+        rule: this.t(ruleKey),
         reference: ref,
         status: !r.modal.detected ? (consentRequired ? ko : na) : missing ? warn : ok,
         detail: !r.modal.detected
           ? noModalDetail
           : missing
-            ? `Information absent from the modal text`
-            : "Mention found in the modal text",
+            ? this.t("DETAIL_INFO_ABSENT")
+            : this.t("DETAIL_INFO_FOUND"),
       });
     }
 
     rows.push({
-      category: "Transparency",
-      rule: "Privacy policy link present in the consent modal",
+      category: this.t("CHECKLIST_CAT_TRANSPARENCY"),
+      rule: this.t("CHECKLIST_RULE_PRIVACY_MODAL"),
       reference: "[GDPR Art. 13](https://gdpr-info.eu/art-13-gdpr/)",
       status: !r.modal.detected
         ? consentRequired
@@ -986,60 +971,71 @@ The **Description / Purpose** column is to be filled in by the DPO or technical 
       detail: !r.modal.detected
         ? noModalDetail
         : r.modal.privacyPolicyUrl
-          ? `Link found: ${r.modal.privacyPolicyUrl}`
-          : "No privacy policy link found inside the consent modal",
+          ? this.t("DETAIL_PRIVACY_LINK_FOUND", { url: r.modal.privacyPolicyUrl })
+          : this.t("DETAIL_NO_PRIVACY_MODAL"),
     });
 
     rows.push({
-      category: "Transparency",
-      rule: "Privacy policy accessible from the main page",
+      category: this.t("CHECKLIST_CAT_TRANSPARENCY"),
+      rule: this.t("CHECKLIST_RULE_PRIVACY_PAGE"),
       reference: "[GDPR Art. 13](https://gdpr-info.eu/art-13-gdpr/)",
       status: r.privacyPolicyUrl ? ok : consentRequired ? warn : na,
       detail: r.privacyPolicyUrl
-        ? `Link found: ${r.privacyPolicyUrl}`
-        : "No privacy policy link found on the main page",
+        ? this.t("DETAIL_PRIVACY_LINK_FOUND", { url: r.privacyPolicyUrl })
+        : this.t("DETAIL_NO_PRIVACY_PAGE"),
     });
 
     // ── D. Cookie behavior ────────────────────────────────────────
     const illegalPre = r.cookiesBeforeInteraction.filter((c) => c.requiresConsent);
     rows.push({
-      category: "Cookie behavior",
-      rule: "No non-essential cookie before consent",
+      category: this.t("CHECKLIST_CAT_COOKIE_BEHAVIOR"),
+      rule: this.t("CHECKLIST_RULE_NO_PRE_COOKIES"),
       reference:
         "[GDPR Art. 7](https://gdpr-info.eu/art-7-gdpr/) · [ePrivacy Dir. Art. 5(3)](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32002L0058)",
       status: illegalPre.length === 0 ? ok : ko,
       detail:
         illegalPre.length === 0
-          ? "No non-essential cookie set before interaction"
-          : `${illegalPre.length} illegal cookie(s): ${illegalPre.map((c) => `\`${c.name}\` (${c.category})`).join(", ")}`,
+          ? this.t("DETAIL_NO_ILLEGAL_PRE")
+          : this.t("DETAIL_ILLEGAL_PRE", {
+              count: illegalPre.length,
+              names: illegalPre.map((c) => `\`${c.name}\` (${c.category})`).join(", "),
+            }),
     });
 
     const persistAfterReject = r.cookiesAfterReject.filter(
       (c) => c.requiresConsent && c.capturedAt === "after-reject",
     );
     rows.push({
-      category: "Cookie behavior",
-      rule: "Non-essential cookies removed after rejection",
+      category: this.t("CHECKLIST_CAT_COOKIE_BEHAVIOR"),
+      rule: this.t("CHECKLIST_RULE_COOKIES_REMOVED"),
       reference:
         "[GDPR Art. 7](https://gdpr-info.eu/art-7-gdpr/) · [CNIL Recommendation 2022](https://www.cnil.fr/fr/cookies-et-autres-traceurs/regles/cookies)",
       status: persistAfterReject.length === 0 ? ok : ko,
       detail:
         persistAfterReject.length === 0
-          ? "No non-essential cookie persisting after rejection"
-          : `${persistAfterReject.length} cookie(s) persisting: ${persistAfterReject.map((c) => `\`${c.name}\``).join(", ")}`,
+          ? this.t("DETAIL_NO_PERSIST")
+          : this.t("DETAIL_PERSIST", {
+              count: persistAfterReject.length,
+              names: persistAfterReject.map((c) => `\`${c.name}\``).join(", "),
+            }),
     });
 
     const preTrackers = r.networkBeforeInteraction.filter((req) => req.requiresConsent);
     rows.push({
-      category: "Cookie behavior",
-      rule: "No network tracker before consent",
+      category: this.t("CHECKLIST_CAT_COOKIE_BEHAVIOR"),
+      rule: this.t("CHECKLIST_RULE_NO_TRACKERS"),
       reference:
         "[GDPR Art. 7](https://gdpr-info.eu/art-7-gdpr/) · [ePrivacy Dir. Art. 5(3)](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32002L0058)",
       status: preTrackers.length === 0 ? ok : ko,
       detail:
         preTrackers.length === 0
-          ? "No tracker request fired before interaction"
-          : `${preTrackers.length} tracker(s): ${[...new Set(preTrackers.map((r) => r.trackerName ?? r.url))].slice(0, 3).join(", ")}`,
+          ? this.t("DETAIL_NO_TRACKERS")
+          : this.t("DETAIL_TRACKERS", {
+              count: preTrackers.length,
+              names: [...new Set(preTrackers.map((r) => r.trackerName ?? r.url))]
+                .slice(0, 3)
+                .join(", "),
+            }),
     });
 
     // ── Totals ────────────────────────────────────────────────────
@@ -1049,24 +1045,26 @@ The **Description / Purpose** column is to be filled in by the DPO or technical 
     const naCount = rows.filter((r) => r.status === na).length;
 
     const lines: string[] = [];
-    lines.push(`# GDPR Compliance Checklist — ${hostname}`);
+    lines.push(`# ${this.t("CHECKLIST_TITLE")} — ${hostname}`);
     lines.push(`
-> **Scan date:** ${scanDate}
-> **Scanned URL:** ${r.url}
-> **Global score:** ${r.compliance.total}/100 — Grade **${r.compliance.grade}**
+> **${this.t("REPORT_SCAN_DATE")}:** ${scanDate}
+> **${this.t("REPORT_SCANNED_URL")}:** ${r.url}
+> **${this.t("CHECKLIST_GLOBAL_SCORE")}:** ${r.compliance.total}/100 — ${this.t("SCORE_GRADE")} **${r.compliance.grade}**
 `);
     const totalsSummary = [
-      `**${conformeCount} rule(s) compliant**`,
-      `**${nonConformeCount} non-compliant**`,
-      `**${avertissementCount} warning(s)**`,
-      ...(naCount > 0 ? [`**${naCount} not applicable**`] : []),
+      this.t("CHECKLIST_RULES_COMPLIANT", { count: conformeCount }),
+      this.t("CHECKLIST_NON_COMPLIANT", { count: nonConformeCount }),
+      this.t("CHECKLIST_WARNINGS", { count: avertissementCount }),
+      ...(naCount > 0 ? [this.t("CHECKLIST_NOT_APPLICABLE", { count: naCount })] : []),
     ].join(" · ");
     lines.push(`${totalsSummary}\n`);
 
     const categories = [...new Set(rows.map((r) => r.category))];
     for (const category of categories) {
       lines.push(`## ${category}\n`);
-      lines.push("| Rule | Reference | Status | Detail |");
+      lines.push(
+        `| ${this.t("CHECKLIST_RULE")} | ${this.t("CHECKLIST_REFERENCE")} | ${this.t("CHECKLIST_STATUS")} | ${this.t("CHECKLIST_DETAIL")} |`,
+      );
       lines.push("|------|-----------|--------|--------|");
       for (const row of rows.filter((r) => r.category === category)) {
         lines.push(`| ${row.rule} | ${row.reference} | ${row.status} | ${row.detail} |`);
