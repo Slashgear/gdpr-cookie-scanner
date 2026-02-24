@@ -24,6 +24,11 @@ program
   .option("-l, --locale <locale>", "Browser locale for language detection", "fr-FR")
   .option("-v, --verbose", "Show detailed output", false)
   .option("-f, --format <formats>", "Output formats: md, html, json, pdf (comma-separated)", "html")
+  .option(
+    "--fail-on <threshold>",
+    "Exit with code 1 if grade is below this letter (A/B/C/D/F) or score is below this number",
+    "F",
+  )
   .action(async (url: string, opts) => {
     console.log();
     console.log(styleText(["bold", "blue"], "  GDPR Cookie Scanner"));
@@ -112,7 +117,18 @@ program
       }
       console.log();
 
-      process.exit(result.compliance.grade === "F" ? 1 : 0);
+      const threshold = opts.failOn as string;
+      const failed = isBeforeThreshold(result.compliance.total, result.compliance.grade, threshold);
+      if (failed) {
+        console.log(
+          styleText(
+            "red",
+            `  Failed threshold: score ${result.compliance.total}/100 (grade ${result.compliance.grade}) is below --fail-on ${threshold.toUpperCase()}`,
+          ),
+        );
+        console.log();
+      }
+      process.exit(failed ? 1 : 0);
     } catch (err) {
       spinner.error({ text: "Scan failed" });
       console.error(
@@ -149,6 +165,26 @@ function normalizeUrl(url: string): string {
     return `https://${url}`;
   }
   return url;
+}
+
+const GRADE_ORDER: Record<string, number> = { A: 4, B: 3, C: 2, D: 1, F: 0 };
+
+function isBeforeThreshold(score: number, grade: string, threshold: string): boolean {
+  const asNumber = Number(threshold);
+  if (!Number.isNaN(asNumber)) {
+    return score < asNumber;
+  }
+  const upper = threshold.toUpperCase();
+  if (!(upper in GRADE_ORDER)) {
+    console.error(
+      styleText(
+        "red",
+        `  Invalid --fail-on value "${threshold}". Use a grade (A/B/C/D/F) or a number (0-100).`,
+      ),
+    );
+    process.exit(2);
+  }
+  return (GRADE_ORDER[grade] ?? 0) < GRADE_ORDER[upper];
 }
 
 function formatScore(score: number): string {

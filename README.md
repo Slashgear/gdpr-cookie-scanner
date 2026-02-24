@@ -57,14 +57,15 @@ gdpr-scan scan <url> [options]
 
 ### Options
 
-| Option                   | Default          | Description                                                   |
-| ------------------------ | ---------------- | ------------------------------------------------------------- |
-| `-o, --output <dir>`     | `./gdpr-reports` | Output directory for the report                               |
-| `-t, --timeout <ms>`     | `30000`          | Navigation timeout                                            |
-| `-f, --format <formats>` | `html`           | Output formats: `md`, `html`, `json`, `pdf` (comma-separated) |
-| `--no-screenshots`       | —                | Disable screenshot capture                                    |
-| `-l, --locale <locale>`  | `fr-FR`          | Browser locale                                                |
-| `-v, --verbose`          | —                | Show full stack trace on error                                |
+| Option                   | Default          | Description                                                                                                  |
+| ------------------------ | ---------------- | ------------------------------------------------------------------------------------------------------------ |
+| `-o, --output <dir>`     | `./gdpr-reports` | Output directory for the report                                                                              |
+| `-t, --timeout <ms>`     | `30000`          | Navigation timeout                                                                                           |
+| `-f, --format <formats>` | `html`           | Output formats: `md`, `html`, `json`, `pdf` (comma-separated)                                                |
+| `--fail-on <threshold>`  | `F`              | Exit with code 1 if grade is below this letter (`A`/`B`/`C`/`D`/`F`) or score is below this number (`0–100`) |
+| `--no-screenshots`       | —                | Disable screenshot capture                                                                                   |
+| `-l, --locale <locale>`  | `fr-FR`          | Browser locale                                                                                               |
+| `-v, --verbose`          | —                | Show full stack trace on error                                                                               |
 
 ### Examples
 
@@ -84,9 +85,84 @@ gdpr-scan scan https://example.com -f md
 # Generate all formats at once
 gdpr-scan scan https://example.com -f md,html,json,pdf
 
+# Fail (exit 1) if the site is graded below B — useful in CI
+gdpr-scan scan https://example.com --fail-on B
+
+# Fail if the numeric score is below 70/100
+gdpr-scan scan https://example.com --fail-on 70
+
 # Show the built-in tracker database
 gdpr-scan list-trackers
 ```
+
+## CI integration
+
+Use `--fail-on` to gate a pipeline on compliance: the process exits with code `1` when the threshold is not met, causing the job to fail.
+
+### GitHub Actions
+
+```yaml
+# .github/workflows/gdpr.yml
+name: GDPR compliance
+
+on:
+  schedule:
+    - cron: "0 6 * * 1" # every Monday at 06:00 UTC
+  workflow_dispatch:
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/slashgear/gdpr-cookie-scanner:latest
+    steps:
+      - name: Scan
+        run: |
+          gdpr-scan scan https://example.com \
+            --fail-on B \
+            --format json,html \
+            -o /tmp/reports
+
+      - name: Upload report
+        if: always() # keep the report even when the scan fails
+        uses: actions/upload-artifact@v4
+        with:
+          name: gdpr-report
+          path: /tmp/reports/
+```
+
+> [!TIP]
+> Using `if: always()` on the upload step ensures the report is available even when the job fails due to `--fail-on`.
+
+### GitLab CI
+
+```yaml
+# .gitlab-ci.yml
+gdpr-scan:
+  image: ghcr.io/slashgear/gdpr-cookie-scanner:latest
+  stage: test
+  script:
+    - gdpr-scan scan https://example.com --fail-on B --format json,html -o reports
+  artifacts:
+    when: always # keep report on failure too
+    paths:
+      - reports/
+    expire_in: 30 days
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+    - if: $CI_PIPELINE_SOURCE == "web"
+```
+
+### Threshold reference
+
+| `--fail-on` value | Fails when grade is… | Fails when score is… |
+| ----------------- | -------------------- | -------------------- |
+| `A`               | B, C, D, or F        | < 90                 |
+| `B`               | C, D, or F           | < 75                 |
+| `C`               | D or F               | < 55                 |
+| `D`               | F                    | < 35                 |
+| `F` _(default)_   | F only               | < 35                 |
+| `70` _(number)_   | any grade            | < 70                 |
 
 ## Programmatic API
 
@@ -204,7 +280,7 @@ The score is made up of 4 criteria (25 points each):
 
 **Grade scale:** A ≥ 90 · B ≥ 75 · C ≥ 55 · D ≥ 35 · F < 35
 
-The process exits with code `1` if the grade is F, `2` on scan error.
+**Exit codes:** `0` success · `1` threshold not met (see `--fail-on`) · `2` scan error
 
 ## Detected dark patterns
 
