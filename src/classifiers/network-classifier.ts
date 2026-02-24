@@ -8,7 +8,11 @@ interface NetworkClassification {
   requiresConsent: boolean;
 }
 
-export function classifyNetworkRequest(url: string, resourceType: string): NetworkClassification {
+export function classifyNetworkRequest(
+  url: string,
+  resourceType: string,
+  strict = false,
+): NetworkClassification {
   let hostname: string;
 
   try {
@@ -54,11 +58,13 @@ export function classifyNetworkRequest(url: string, resourceType: string): Netwo
     };
   }
 
+  // In strict mode, unrecognised third-party requests are assumed to require consent
+  const isThirdParty = strict;
   return {
-    isThirdParty: false,
+    isThirdParty,
     trackerCategory: null,
     trackerName: null,
-    requiresConsent: false,
+    requiresConsent: strict,
   };
 }
 

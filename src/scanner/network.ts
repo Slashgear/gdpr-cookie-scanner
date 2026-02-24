@@ -4,7 +4,7 @@ import { classifyNetworkRequest } from "../classifiers/network-classifier.js";
 
 export type NetworkPhase = "before-interaction" | "after-accept" | "after-reject";
 
-export function createNetworkInterceptor(page: Page, phase: NetworkPhase) {
+export function createNetworkInterceptor(page: Page, phase: NetworkPhase, strict = false) {
   const captured: NetworkRequest[] = [];
   const responseMap = new Map<string, { status: number; contentType: string | null }>();
 
@@ -21,7 +21,7 @@ export function createNetworkInterceptor(page: Page, phase: NetworkPhase) {
     // Skip data URIs and internal chrome requests
     if (url.startsWith("data:") || url.startsWith("chrome-extension:")) return;
 
-    const classification = classifyNetworkRequest(url, request.resourceType());
+    const classification = classifyNetworkRequest(url, request.resourceType(), strict);
     const meta = responseMap.get(url) ?? null;
 
     captured.push({

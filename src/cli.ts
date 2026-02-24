@@ -39,6 +39,11 @@ program
     "Emit a JSON summary line to stdout after the scan (machine-readable)",
     false,
   )
+  .option(
+    "--strict",
+    "Treat unrecognised cookies and unknown third-party requests as requiring consent",
+    false,
+  )
   .action(async (url: string, opts) => {
     console.log();
     console.log(styleText(["bold", "blue"], "  GDPR Cookie Scanner"));
@@ -83,6 +88,7 @@ program
       verbose: opts.verbose,
       formats,
       viewport: viewport as ViewportPreset,
+      strict: opts.strict as boolean,
     };
 
     const spinner = createSpinner("Launching browser...").start();

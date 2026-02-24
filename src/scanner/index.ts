@@ -26,7 +26,11 @@ export class Scanner {
     // ────────────────────────────────────────────────────────────
     onPhase("Phase 1/4 — Loading page (no interaction)...");
     const session1 = await createBrowser(this.options);
-    const interceptor1 = createNetworkInterceptor(session1.page, "before-interaction");
+    const interceptor1 = createNetworkInterceptor(
+      session1.page,
+      "before-interaction",
+      this.options.strict,
+    );
 
     try {
       await session1.page.goto(this.options.url, {
@@ -40,7 +44,11 @@ export class Scanner {
     // Give a moment for late-loading scripts
     await session1.page.waitForTimeout(2000);
 
-    const cookiesBeforeInteraction = await captureCookies(session1.context, "before-interaction");
+    const cookiesBeforeInteraction = await captureCookies(
+      session1.context,
+      "before-interaction",
+      this.options.strict,
+    );
     const networkBeforeInteraction = interceptor1.getRequests();
     interceptor1.stop();
 
@@ -64,7 +72,11 @@ export class Scanner {
     // Phase 3 — Click REJECT, capture state after
     // ────────────────────────────────────────────────────────────
     onPhase("Phase 3/4 — Testing reject button...");
-    const interceptor3 = createNetworkInterceptor(session1.page, "after-reject");
+    const interceptor3 = createNetworkInterceptor(
+      session1.page,
+      "after-reject",
+      this.options.strict,
+    );
 
     let cookiesAfterReject = cookiesBeforeInteraction;
     let networkAfterReject: typeof networkBeforeInteraction = [];
@@ -74,7 +86,11 @@ export class Scanner {
       try {
         await session1.page.click(rejectButton.selector, { timeout: 5000 });
         await session1.page.waitForTimeout(2000);
-        cookiesAfterReject = await captureCookies(session1.context, "after-reject");
+        cookiesAfterReject = await captureCookies(
+          session1.context,
+          "after-reject",
+          this.options.strict,
+        );
         networkAfterReject = interceptor3.getRequests();
       } catch (err) {
         errors.push(`Could not click reject button: ${String(err)}`);
@@ -98,7 +114,11 @@ export class Scanner {
     onPhase("Phase 4/4 — Testing accept button...");
     const session2 = await createBrowser(this.options);
     await clearState(session2.context);
-    const interceptor4 = createNetworkInterceptor(session2.page, "after-accept");
+    const interceptor4 = createNetworkInterceptor(
+      session2.page,
+      "after-accept",
+      this.options.strict,
+    );
 
     let cookiesAfterAccept: typeof cookiesBeforeInteraction = [];
     let networkAfterAccept: typeof networkBeforeInteraction = [];
@@ -122,7 +142,11 @@ export class Scanner {
       if (acceptButton) {
         await session2.page.click(acceptButton.selector, { timeout: 5000 });
         await session2.page.waitForTimeout(3000);
-        cookiesAfterAccept = await captureCookies(session2.context, "after-accept");
+        cookiesAfterAccept = await captureCookies(
+          session2.context,
+          "after-accept",
+          this.options.strict,
+        );
         networkAfterAccept = interceptor4.getRequests();
       } else {
         errors.push("No accept button found — could not test acceptance flow");

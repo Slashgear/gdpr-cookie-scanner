@@ -123,6 +123,8 @@ export interface ScanOptions {
   formats: ReportFormat[];
   userAgent?: string;
   viewport?: ViewportPreset;
+  /** Treat unrecognised cookies and unknown third-party requests as requiring consent. Default: false. */
+  strict?: boolean;
 }
 
 export interface ScanResult {

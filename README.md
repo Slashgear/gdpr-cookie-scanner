@@ -71,6 +71,7 @@ gdpr-scan scan <url> [options]
 | `--viewport <preset>`    | `desktop`        | Viewport preset: `desktop` (1280×900), `tablet` (768×1024), `mobile` (390×844)                               |
 | `--fail-on <threshold>`  | `F`              | Exit with code 1 if grade is below this letter (`A`/`B`/`C`/`D`/`F`) or score is below this number (`0–100`) |
 | `--json-summary`         | —                | Emit a machine-readable JSON line to stdout after the scan (parseable by `jq`)                               |
+| `--strict`               | —                | Treat unrecognised cookies and unknown third-party requests as requiring consent                             |
 | `--no-screenshots`       | —                | Disable screenshot capture                                                                                   |
 | `-l, --locale <locale>`  | `fr-FR`          | Browser locale                                                                                               |
 | `-v, --verbose`          | —                | Show full stack trace on error                                                                               |

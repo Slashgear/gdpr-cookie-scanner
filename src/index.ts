@@ -61,6 +61,8 @@ export interface ScanApiOptions {
   verbose?: boolean;
   /** Viewport preset. desktop=1280×900, tablet=768×1024, mobile=390×844. Default: 'desktop'. */
   viewport?: ViewportPreset;
+  /** Treat unrecognised cookies and unknown third-party requests as requiring consent. Default: false. */
+  strict?: boolean;
 }
 
 /**
@@ -85,6 +87,7 @@ export async function scan(url: string, options: ScanApiOptions = {}): Promise<S
     verbose: options.verbose ?? false,
     formats: [],
     viewport: options.viewport ?? "desktop",
+    strict: options.strict ?? false,
   });
 
   return scanner.run();

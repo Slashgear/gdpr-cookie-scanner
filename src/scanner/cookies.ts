@@ -7,11 +7,12 @@ type CapturePhase = ScannedCookie["capturedAt"];
 export async function captureCookies(
   context: BrowserContext,
   phase: CapturePhase,
+  strict = false,
 ): Promise<ScannedCookie[]> {
   const rawCookies = await context.cookies();
 
   return rawCookies.map((c) => {
-    const classification = classifyCookie(c.name, c.domain, c.value);
+    const classification = classifyCookie(c.name, c.domain, c.value, strict);
     return {
       name: c.name,
       domain: c.domain,

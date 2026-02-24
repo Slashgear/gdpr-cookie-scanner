@@ -65,8 +65,6 @@ Patterns that are explicitly listed in CNIL/EDPB guidelines but not yet detected
 
 - **Tracker database size** — the hardcoded list (`src/classifiers/tracker-list.ts`) currently has ~55 entries. The monthly auto-update workflow merges Disconnect.me and DuckDuckGo Tracker Radar entries but the result needs review before merge. Consider auto-approving updates that only add entries (no removals or category changes).
 
-- **Unknown first-party cookies default** — unknown cookies default to `requiresConsent: false` (conservative). This means new or obfuscated tracking cookies slip through. Consider a stricter mode (`--strict`) that flips the default to `requiresConsent: true` for unrecognised cookies.
-
 ---
 
 ## Report improvements

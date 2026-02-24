@@ -110,7 +110,12 @@ const COOKIE_PATTERNS: Array<{
   },
 ];
 
-export function classifyCookie(name: string, domain: string, value: string): CookieClassification {
+export function classifyCookie(
+  name: string,
+  domain: string,
+  value: string,
+  strict = false,
+): CookieClassification {
   for (const { pattern, category, requiresConsent } of COOKIE_PATTERNS) {
     if (pattern.test(name)) {
       return { category, requiresConsent };
@@ -122,5 +127,6 @@ export function classifyCookie(name: string, domain: string, value: string): Coo
     return { category: "unknown", requiresConsent: true };
   }
 
-  return { category: "unknown", requiresConsent: false };
+  // In strict mode, unrecognised cookies are assumed to require consent
+  return { category: "unknown", requiresConsent: strict };
 }
