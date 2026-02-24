@@ -1,6 +1,6 @@
 {
   "name": "@slashgear/gdpr-cookie-scanner",
-  "version": "3.2.1",
+  "version": "3.2.2",
   "description": "CLI tool to scan websites for GDPR cookie consent compliance",
   "keywords": [
     "compliance",

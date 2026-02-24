@@ -1,5 +1,22 @@
 # @slashgear/gdpr-cookie-scanner
 
+## 3.2.2
+
+### Patch Changes
+
+- f83c693: Restrict CI workflow to least-privilege permissions (CodeQL alert #1).
+
+  The CI workflow had no explicit `permissions:` block, meaning the default GitHub Actions
+  token was granted broad write access to repository contents. Added `permissions: contents: read`
+  to enforce the minimum permissions required for the job.
+
+- f83c693: Fix incomplete URL scheme check in privacy policy link detection (CodeQL alert #2).
+
+  `findPrivacyPolicyUrl` only blocked `javascript:` and `#` hrefs. An attacker-controlled
+  page could bypass this check with `data:`, `vbscript:`, or a mixed-case variant such as
+  `JavaScript:` (the check was not case-normalised). The fix adds `data:` and `vbscript:`
+  to the blocklist and lowercases the href before comparing scheme prefixes.
+
 ## 3.2.1
 
 ### Patch Changes
