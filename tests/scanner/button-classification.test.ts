@@ -203,3 +203,39 @@ describe("classifyButtonText — full BCP 47 tags should be pre-normalised", () 
     expect(classifyButtonText("Tout accepter", "fr")).toBe("accept");
   });
 });
+
+// ── Whitespace normalisation ──────────────────────────────────────────────────
+
+describe("classifyButtonText — whitespace normalisation", () => {
+  it("collapses embedded newlines (common in CMP HTML templates)", () => {
+    expect(classifyButtonText("Tout\nrefuser", "fr")).toBe("reject");
+    expect(classifyButtonText("Accept\nall", "en")).toBe("accept");
+  });
+
+  it("collapses embedded tabs", () => {
+    expect(classifyButtonText("Reject\tall", "en")).toBe("reject");
+    expect(classifyButtonText("Tout\taccepter", "fr")).toBe("accept");
+  });
+
+  it("replaces non-breaking spaces (\\u00A0 / &nbsp;) with regular spaces", () => {
+    expect(classifyButtonText("Tout\u00A0refuser", "fr")).toBe("reject");
+    expect(classifyButtonText("Accept\u00A0all", "en")).toBe("accept");
+    expect(classifyButtonText("Alle\u00A0ablehnen", "de")).toBe("reject");
+  });
+
+  it("collapses multiple consecutive spaces", () => {
+    expect(classifyButtonText("Reject  all", "en")).toBe("reject");
+    expect(classifyButtonText("Tout   accepter", "fr")).toBe("accept");
+  });
+
+  it("strips leading and trailing whitespace", () => {
+    expect(classifyButtonText("  Accept all  ", "en")).toBe("accept");
+    expect(classifyButtonText("\nTout refuser\n", "fr")).toBe("reject");
+  });
+
+  it("handles mixed whitespace characters in a single label", () => {
+    // Real-world CMP buttons sometimes have: icon + &nbsp; + text + newline
+    expect(classifyButtonText("\n  Tout\u00A0refuser\t", "fr")).toBe("reject");
+    expect(classifyButtonText(" Accept\n\tall ", "en")).toBe("accept");
+  });
+});

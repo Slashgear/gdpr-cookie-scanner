@@ -201,13 +201,22 @@ function resolveButtonPatterns(lang: string | null): {
 }
 
 /**
+ * Collapse any whitespace sequence (including &nbsp; / \u00A0, \n, \t, …)
+ * into a single ASCII space and strip leading/trailing whitespace.
+ * In JS, \s already covers \u00A0 and other Unicode spaces.
+ */
+function normalizeText(raw: string): string {
+  return raw.replace(/\s+/g, " ").trim();
+}
+
+/**
  * Classify a consent button label for a given page language.
  * `lang` should be the BCP 47 primary subtag (e.g. "de", "fr") read from
  * <html lang>, or null when the language is undetermined.
  */
 export function classifyButtonText(text: string, lang: string | null): ConsentButtonType {
   const { accept, reject, preferences } = resolveButtonPatterns(lang);
-  return classifyButtonType(text, accept, reject, preferences);
+  return classifyButtonType(normalizeText(text), accept, reject, preferences);
 }
 
 export async function detectConsentModal(page: Page, options: ScanOptions): Promise<ConsentModal> {
@@ -313,7 +322,7 @@ async function extractButtons(
 
   for (const el of buttonEls) {
     try {
-      const text = ((await el.textContent()) ?? "").trim();
+      const text = normalizeText((await el.textContent()) ?? "");
       if (!text) continue;
 
       const isVisible = await el.isVisible();
