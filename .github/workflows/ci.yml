@@ -43,4 +43,23 @@ jobs:
         run: pnpm exec playwright install chromium --with-deps
 
       - name: Test
-        run: pnpm test
+        id: test
+        run: |
+          start=$(date +%s)
+          pnpm test
+          echo "duration=$(( $(date +%s) - start ))" >> "$GITHUB_OUTPUT"
+
+      - name: Record test suite duration
+        if: always()
+        run: |
+          duration="${{ steps.test.outputs.duration }}"
+          echo "## Test suite duration" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Suite | Duration |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| ----- | -------- |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| unit + e2e | ${duration}s |" >> "$GITHUB_STEP_SUMMARY"
+          if [ "${duration:-0}" -gt 300 ]; then
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "> [!WARNING]" >> "$GITHUB_STEP_SUMMARY"
+            echo "> Suite exceeded 300 s — possible performance regression." >> "$GITHUB_STEP_SUMMARY"
+          fi

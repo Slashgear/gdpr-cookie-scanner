@@ -14,25 +14,6 @@ Ideas and improvement areas for `gdpr-cookie-scanner`. Not a roadmap — pick wh
 
 ---
 
-## Language support
-
-Currently only French and English patterns are covered. A lot of EU sites served in other locales will get false "no reject button" results.
-
-Languages to add at minimum (ordered by EU population / GDPR enforcement activity):
-
-| Locale  | Reject examples          | Accept examples                  |
-| ------- | ------------------------ | -------------------------------- |
-| `de-DE` | Ablehnen, Alle ablehnen  | Alle akzeptieren, Zustimmen      |
-| `es-ES` | Rechazar, Rechazar todo  | Aceptar, Aceptar todo            |
-| `it-IT` | Rifiuta, Rifiuta tutto   | Accetta, Accetta tutto           |
-| `nl-NL` | Weigeren, Alles weigeren | Accepteren, Alles accepteren     |
-| `pl-PL` | Odrzuć, Odrzuć wszystkie | Zaakceptuj, Zaakceptuj wszystkie |
-| `pt-PT` | Rejeitar, Rejeitar tudo  | Aceitar, Aceitar tudo            |
-
-The patterns live in `src/scanner/consent-modal.ts`. A locale-aware pattern map keyed by BCP 47 tag would be cleaner than one giant regex.
-
----
-
 ## Dark pattern detection gaps
 
 Patterns that are explicitly listed in CNIL/EDPB guidelines but not yet detected:
@@ -80,12 +61,6 @@ Patterns that are explicitly listed in CNIL/EDPB guidelines but not yet detected
 ## Testing
 
 - **Report output tests** — no tests currently validate the content of generated Markdown, HTML, or JSON files. Add snapshot tests for at least the JSON output and spot-checks for key sections in HTML.
-
-- **Contrast ratio unit tests** — `computeContrastRatio` is pure logic but only exercised through E2E tests. Deserves a dedicated unit test file covering edge cases (identical colours, transparent backgrounds, named/hex inputs once supported).
-
-- **Locale-specific button pattern tests** — once multi-language patterns land, add a test case per locale to prevent regressions.
-
-- **Performance baseline** — the E2E suite takes ~2 minutes. As features grow, tracking suite duration in CI would help catch regressions early.
 
 ---
 
