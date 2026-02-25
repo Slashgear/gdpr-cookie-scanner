@@ -1,5 +1,102 @@
 # @slashgear/gdpr-cookie-scanner
 
+## 3.4.0
+
+### Minor Changes
+
+- 39794dc: Crop consent modal screenshot to the element; make after-reject/accept screenshots opt-in.
+
+  Two behaviour changes:
+
+  **Modal screenshot is now always captured (cropped)**
+  The consent modal screenshot (`modal-initial.png`) is taken whenever a modal
+  is detected and `outputDir` is set, regardless of the `--screenshots` flag.
+  The screenshot is clipped to the bounding box of the modal element instead of
+  capturing the full viewport, giving a tighter, more readable image. If the
+  bounding box cannot be determined (rare), it falls back to the viewport
+  screenshot.
+
+  **`--no-screenshots` replaced by `--screenshots`**
+  Previously all three screenshots were enabled by default and `--no-screenshots`
+  opted out. Now only the modal screenshot is taken by default; passing
+  `--screenshots` additionally captures `after-reject.png` and `after-accept.png`
+  (full viewport, as before). The `screenshots` field in `ScanOptions` / the
+  programmatic API retains the same type (`boolean`) with updated semantics:
+  `false` (default) = modal only; `true` = modal + after-reject + after-accept.
+
+- 6a71a18: Add multi-language consent button detection (de, es, it, nl, pl, pt).
+
+  Previously, button classification only covered French and English, causing
+  false "no reject button" findings on sites served in other EU locales.
+
+  The fix has two parts:
+
+  1. **Locale-aware pattern map** — `ACCEPT_PATTERNS` / `REJECT_PATTERNS` /
+     `PREFERENCES_PATTERNS` are replaced by a `PATTERNS_BY_LOCALE` map keyed by
+     BCP 47 primary subtag, covering `en`, `fr`, `de`, `es`, `it`, `nl`, `pl`,
+     `pt`. Polish patterns use a negative lookbehind instead of `\b` because
+     several Polish words end in non-ASCII characters (ć, ę, ó) that fall
+     outside JS `\w`.
+
+  2. **`<html lang>` detection** — `detectConsentModal` now reads the page's
+     declared language from `document.documentElement.lang` and normalises it to
+     a primary subtag (e.g. `"de-DE"` → `"de"`). When the language is
+     recognised, only that locale's patterns plus English (universal fallback)
+     are tested. When the language is missing or unsupported, all available
+     patterns are tried — preserving the previous behaviour for unknown pages.
+
+  The public export `classifyButtonText(text, lang)` is added for testing and
+  programmatic use; 56 new unit tests cover every supported locale.
+
+### Patch Changes
+
+- ceed240: Add unit tests for `computeContrastRatio`, `parseRgb`, and `relativeLuminance`.
+
+  These three pure functions in `consent-modal.ts` were previously only exercised
+  indirectly through the E2E suite. The new test file
+  (`tests/scanner/contrast-ratio.test.ts`) covers the happy path, edge cases
+  (identical colours, fully transparent rgba, non-integer ratios), and documents
+  the known limitations — named colours (`white`, `black`) and hex values (`#fff`)
+  return `null` until the parser is extended.
+
+  The functions are now exported so they can be imported by the test suite without
+  moving them to a separate module.
+
+- df24a36: Fix consent modal detection for CMPs that start hidden (e.g. Axeptio).
+
+  `MODAL_SELECTORS` was a single flat list where every candidate was required to
+  pass `isVisible()`. CMPs such as Axeptio inject their overlay as `display:none`
+  during initialisation and reveal it via JS animation a few hundred milliseconds
+  later. The visibility check caused the scanner to skip `#axeptio_overlay` and
+  fall through to the first matching generic heuristic (e.g. `[id*='consent']`),
+  which could be a completely unrelated element.
+
+  The list is now split into two:
+
+  - **`CMP_SELECTORS`** — precise, platform-specific identifiers. DOM presence
+    alone is treated as a reliable signal. Once the element is found the scanner
+    waits up to 3 s for it to become visible (so button extraction sees an
+    interactive state) but proceeds regardless, preventing a slow CMP from
+    silently falling back to a wrong heuristic.
+  - **`HEURISTIC_SELECTORS`** — broad patterns that could match unrelated
+    elements. Visibility is still required to avoid false positives.
+
+- f9efe0b: Normalise button text whitespace before classification.
+
+  `classifyButtonType` previously received raw `textContent` that had only been
+  `.trim()`-ed. CMP HTML templates frequently embed `&nbsp;` (U+00A0), newlines,
+  or tabs inside button labels, causing pattern matching to silently fail.
+
+  A `normalizeText` helper now collapses any whitespace sequence (including
+  U+00A0 and all Unicode spaces covered by JS `\s`) into a single ASCII space
+  before the regex is tested. The normalisation is applied in two places:
+
+  - `classifyButtonText` (public export) — defensive normalisation of any caller-
+    provided string.
+  - `extractButtons` — the raw `el.textContent()` result is normalised before
+    being stored in `ConsentButton.text` and before classification, so the
+    report also shows the cleaned label.
+
 ## 3.3.0
 
 ### Minor Changes
