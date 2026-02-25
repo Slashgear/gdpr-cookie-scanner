@@ -68,9 +68,10 @@ export class Scanner {
         .first()
         .boundingBox()
         .catch(() => null);
+      const clip = box && box.width > 0 && box.height > 0 ? box : null;
       await session1.page.screenshot({
         path: screenshotPath,
-        ...(box ? { clip: box } : { fullPage: false }),
+        ...(clip ? { clip } : { fullPage: false }),
       });
       screenshotPaths.push(screenshotPath);
       modal.screenshotPath = screenshotPath;
