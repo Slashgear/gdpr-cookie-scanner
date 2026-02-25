@@ -4,11 +4,13 @@ import { analyzeButtonWording } from "../analyzers/wording.js";
 import type { ScanOptions } from "../types.js";
 
 /**
- * Ordered list of CSS selectors to try for detecting a consent modal/banner.
- * Covers major CMP platforms (Axeptio, Cookiebot, OneTrust, Didomi, Tarteaucitron, etc.)
+ * Selectors for well-known CMP platforms.
+ * These are precise enough that DOM presence alone is a reliable signal —
+ * no visibility check required. Some CMPs (e.g. Axeptio) inject their
+ * container as display:none and reveal it after JS initialisation, so
+ * isVisible() would incorrectly skip them.
  */
-const MODAL_SELECTORS = [
-  // Well-known CMPs
+const CMP_SELECTORS = [
   "#axeptio_overlay",
   "#axeptio-root",
   "#CybotCookiebotDialog",
@@ -29,7 +31,14 @@ const MODAL_SELECTORS = [
   "#cookie-banner",
   "#cookie-notice",
   "#cookie-law-info-bar",
-  // Generic heuristics
+];
+
+/**
+ * Generic heuristic selectors.
+ * These are broad enough to match unrelated elements, so a visibility
+ * check is required to avoid false positives.
+ */
+const HEURISTIC_SELECTORS = [
   "[class*='cookie'][class*='banner']",
   "[class*='cookie'][class*='modal']",
   "[class*='cookie'][class*='popup']",
@@ -220,20 +229,40 @@ export function classifyButtonText(text: string, lang: string | null): ConsentBu
 }
 
 export async function detectConsentModal(page: Page, options: ScanOptions): Promise<ConsentModal> {
-  // Try each selector until we find a visible modal
   let foundSelector: string | null = null;
 
-  for (const selector of MODAL_SELECTORS) {
+  // Step 1 — specific CMP selectors: presence in DOM is sufficient.
+  // Some CMPs (e.g. Axeptio) insert their container as display:none and
+  // animate it in after JS initialisation. Requiring isVisible() would
+  // skip them and fall through to a wrong generic selector.
+  // Once the element is found we wait briefly (up to 3 s) for it to
+  // become visible so button extraction sees an interactive state.
+  for (const selector of CMP_SELECTORS) {
     try {
       const element = await page.$(selector);
       if (!element) continue;
-      const isVisible = await element.isVisible();
-      if (isVisible) {
-        foundSelector = selector;
-        break;
-      }
+      await page.waitForSelector(selector, { state: "visible", timeout: 3000 }).catch(() => {});
+      foundSelector = selector;
+      break;
     } catch {
       continue;
+    }
+  }
+
+  // Step 2 — generic heuristics: require visibility to avoid false positives.
+  if (!foundSelector) {
+    for (const selector of HEURISTIC_SELECTORS) {
+      try {
+        const element = await page.$(selector);
+        if (!element) continue;
+        const isVisible = await element.isVisible();
+        if (isVisible) {
+          foundSelector = selector;
+          break;
+        }
+      } catch {
+        continue;
+      }
     }
   }
 
