@@ -322,7 +322,7 @@ function classifyButtonType(text: string): ConsentButtonType {
  * Basic contrast ratio computation from RGB strings.
  * Returns null if colors cannot be parsed.
  */
-function computeContrastRatio(fg: string, bg: string): number | null {
+export function computeContrastRatio(fg: string, bg: string): number | null {
   const fgRgb = parseRgb(fg);
   const bgRgb = parseRgb(bg);
   if (!fgRgb || !bgRgb) return null;
@@ -334,13 +334,13 @@ function computeContrastRatio(fg: string, bg: string): number | null {
   return parseFloat(((lighter + 0.05) / (darker + 0.05)).toFixed(2));
 }
 
-function parseRgb(color: string): [number, number, number] | null {
+export function parseRgb(color: string): [number, number, number] | null {
   const match = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
   if (!match) return null;
   return [parseInt(match[1], 10), parseInt(match[2], 10), parseInt(match[3], 10)];
 }
 
-function relativeLuminance([r, g, b]: [number, number, number]): number {
+export function relativeLuminance([r, g, b]: [number, number, number]): number {
   const toLinear = (c: number) => {
     const s = c / 255;
     return s <= 0.04045 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
