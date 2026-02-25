@@ -20,7 +20,10 @@ program
   .argument("<url>", "URL of the website to scan")
   .option("-o, --output <dir>", "Output directory for the report", "./gdpr-reports")
   .option("-t, --timeout <ms>", "Navigation timeout in milliseconds", "30000")
-  .option("--no-screenshots", "Disable screenshot capture")
+  .option(
+    "--screenshots",
+    "Capture full-page screenshots after reject and accept interactions (the consent modal is always screenshotted when detected)",
+  )
   .option("-l, --locale <locale>", "Browser locale for language detection", "fr-FR")
   .option("-v, --verbose", "Show detailed output", false)
   .option("-f, --format <formats>", "Output formats: md, html, json, pdf (comma-separated)", "html")
@@ -83,7 +86,7 @@ program
       url: normalizedUrl,
       outputDir,
       timeout: parseInt(opts.timeout, 10),
-      screenshots: opts.screenshots !== false,
+      screenshots: Boolean(opts.screenshots),
       locale: opts.locale,
       verbose: opts.verbose,
       formats,

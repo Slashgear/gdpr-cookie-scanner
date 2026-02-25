@@ -63,18 +63,18 @@ gdpr-scan scan <url> [options]
 
 ### Options
 
-| Option                   | Default          | Description                                                                                                  |
-| ------------------------ | ---------------- | ------------------------------------------------------------------------------------------------------------ |
-| `-o, --output <dir>`     | `./gdpr-reports` | Output directory for the report                                                                              |
-| `-t, --timeout <ms>`     | `30000`          | Navigation timeout                                                                                           |
-| `-f, --format <formats>` | `html`           | Output formats: `md`, `html`, `json`, `pdf` (comma-separated)                                                |
-| `--viewport <preset>`    | `desktop`        | Viewport preset: `desktop` (1280×900), `tablet` (768×1024), `mobile` (390×844)                               |
-| `--fail-on <threshold>`  | `F`              | Exit with code 1 if grade is below this letter (`A`/`B`/`C`/`D`/`F`) or score is below this number (`0–100`) |
-| `--json-summary`         | —                | Emit a machine-readable JSON line to stdout after the scan (parseable by `jq`)                               |
-| `--strict`               | —                | Treat unrecognised cookies and unknown third-party requests as requiring consent                             |
-| `--no-screenshots`       | —                | Disable screenshot capture                                                                                   |
-| `-l, --locale <locale>`  | `fr-FR`          | Browser locale                                                                                               |
-| `-v, --verbose`          | —                | Show full stack trace on error                                                                               |
+| Option                   | Default          | Description                                                                                                                       |
+| ------------------------ | ---------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `-o, --output <dir>`     | `./gdpr-reports` | Output directory for the report                                                                                                   |
+| `-t, --timeout <ms>`     | `30000`          | Navigation timeout                                                                                                                |
+| `-f, --format <formats>` | `html`           | Output formats: `md`, `html`, `json`, `pdf` (comma-separated)                                                                     |
+| `--viewport <preset>`    | `desktop`        | Viewport preset: `desktop` (1280×900), `tablet` (768×1024), `mobile` (390×844)                                                    |
+| `--fail-on <threshold>`  | `F`              | Exit with code 1 if grade is below this letter (`A`/`B`/`C`/`D`/`F`) or score is below this number (`0–100`)                      |
+| `--json-summary`         | —                | Emit a machine-readable JSON line to stdout after the scan (parseable by `jq`)                                                    |
+| `--strict`               | —                | Treat unrecognised cookies and unknown third-party requests as requiring consent                                                  |
+| `--screenshots`          | —                | Also capture full-page screenshots after reject and accept interactions (the consent modal is always screenshotted when detected) |
+| `-l, --locale <locale>`  | `fr-FR`          | Browser locale                                                                                                                    |
+| `-v, --verbose`          | —                | Show full stack trace on error                                                                                                    |
 
 ### Examples
 
@@ -85,8 +85,8 @@ gdpr-scan scan https://example.com
 # With custom output directory
 gdpr-scan scan https://example.com -o ./reports
 
-# Scan in English, without screenshots
-gdpr-scan scan https://example.com --locale en-US --no-screenshots
+# Scan in English with full interaction screenshots (reject + accept)
+gdpr-scan scan https://example.com --locale en-US --screenshots
 
 # Generate a Markdown report instead
 gdpr-scan scan https://example.com -f md
@@ -243,7 +243,7 @@ All fields of `ScanResult` — cookies, network requests, modal analysis, compli
 const result = await scan("https://example.com", {
   locale: "fr-FR", // browser locale, also controls report language
   timeout: 60_000, // navigation timeout in ms (default: 30 000)
-  screenshots: true, // capture screenshots (requires outputDir)
+  screenshots: true, // also capture after-reject and after-accept screenshots (modal is always screenshotted)
   outputDir: "./reports", // where to save screenshots
   verbose: false, // log scanner phases to stdout
   viewport: "mobile", // 'desktop' (default) | 'tablet' | 'mobile'

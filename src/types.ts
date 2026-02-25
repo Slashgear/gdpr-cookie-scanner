@@ -117,6 +117,9 @@ export interface ScanOptions {
   url: string;
   outputDir?: string;
   timeout: number; // ms
+  /** When true, also capture full-page screenshots after reject and accept interactions.
+   *  The consent modal is always screenshotted (cropped to the element) when detected,
+   *  regardless of this flag. Requires outputDir. */
   screenshots: boolean;
   locale: string;
   verbose: boolean;

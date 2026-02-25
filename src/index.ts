@@ -51,7 +51,9 @@ import type { ScanResult, ViewportPreset } from "./types.js";
 export interface ScanApiOptions {
   /** Browser navigation timeout in ms. Default: 30 000. */
   timeout?: number;
-  /** Whether to capture screenshots. Requires `outputDir`. Default: false. */
+  /** Capture full-page screenshots after reject and accept interactions.
+   *  The consent modal is always screenshotted (cropped to the element) when detected.
+   *  Requires `outputDir`. Default: false. */
   screenshots?: boolean;
   /** Directory where screenshots (and optionally reports) are saved. */
   outputDir?: string;

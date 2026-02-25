@@ -61,9 +61,17 @@ export class Scanner {
     onPhase("Phase 2/4 — Analyzing consent modal...");
     const modal = await detectConsentModal(session1.page, this.options);
 
-    if (this.options.screenshots && this.options.outputDir && modal.detected) {
+    if (this.options.outputDir && modal.detected && modal.selector) {
       const screenshotPath = join(this.options.outputDir, "modal-initial.png");
-      await session1.page.screenshot({ path: screenshotPath, fullPage: false });
+      const box = await session1.page
+        .locator(modal.selector)
+        .first()
+        .boundingBox()
+        .catch(() => null);
+      await session1.page.screenshot({
+        path: screenshotPath,
+        ...(box ? { clip: box } : { fullPage: false }),
+      });
       screenshotPaths.push(screenshotPath);
       modal.screenshotPath = screenshotPath;
     }
