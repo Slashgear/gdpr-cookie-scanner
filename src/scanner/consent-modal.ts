@@ -113,17 +113,102 @@ export async function findPrivacyPolicyUrl(
     .catch(() => null);
 }
 
-const ACCEPT_PATTERNS = [
-  /\b(accept|accepter|acceptez|tout accepter|accept all|j'accepte|i accept|agree|ok\b|d'accord|continuer|continue|valider|confirmer)\b/i,
-];
+type ButtonPatternSet = { accept: RegExp; reject: RegExp; preferences: RegExp };
 
-const REJECT_PATTERNS = [
-  /\b(refus|refuse|refuser|tout refuser|rejet|rejeter|tout rejeter|reject|reject all|deny|decline|non merci|no thanks|continuer sans accepter|skip)\b/i,
-];
+/**
+ * Button label patterns keyed by BCP 47 primary-language subtag.
+ * English is always included as a fallback when the page language is known.
+ * When the language is unknown all locales are tested.
+ */
+const PATTERNS_BY_LOCALE: Record<string, ButtonPatternSet> = {
+  en: {
+    accept: /\b(accept|accept all|agree|ok|i accept|i agree|continue)\b/i,
+    reject:
+      /\b(refuse|reject|reject all|deny|decline|no thanks|skip|opt[- ]out|continue without)\b/i,
+    preferences: /\b(manage|customize|customise|settings|options|choose|configure)\b/i,
+  },
+  fr: {
+    accept: /\b(accepter|acceptez|tout accepter|j'accepte|d'accord|continuer|valider|confirmer)\b/i,
+    reject:
+      /\b(refus|refuser|tout refuser|rejeter|tout rejeter|non merci|continuer sans accepter)\b/i,
+    preferences: /\b(param[eè]tres|pr[eé]f[eé]rences|personnaliser|g[eé]rer|choisir)\b/i,
+  },
+  de: {
+    accept:
+      /\b(akzeptieren|alle akzeptieren|zustimmen|einverstanden|annehmen|alle annehmen|ich stimme zu)\b/i,
+    reject: /\b(ablehnen|alle ablehnen|abweisen|nicht zustimmen|nein danke)\b/i,
+    preferences: /\b(einstellungen|anpassen|verwalten|konfigurieren|ausw[äa]hlen|mehr optionen)\b/i,
+  },
+  es: {
+    accept: /\b(aceptar|aceptar todo|acepto|estoy de acuerdo)\b/i,
+    reject: /\b(rechazar|rechazar todo|denegar|no gracias|continuar sin aceptar)\b/i,
+    preferences: /\b(ajustes|configurar|gestionar|opciones|personalizar|preferencias)\b/i,
+  },
+  it: {
+    accept: /\b(accetta|accetta tutto|accetto|acconsento|acconsento a tutto)\b/i,
+    reject: /\b(rifiuta|rifiuta tutto|nega|no grazie)\b/i,
+    preferences: /\b(impostazioni|personalizza|gestisci|opzioni|configura|preferenze)\b/i,
+  },
+  nl: {
+    accept: /\b(accepteren|alles accepteren|akkoord|ik ga akkoord)\b/i,
+    reject: /\b(weigeren|alles weigeren|afwijzen|nee bedankt)\b/i,
+    preferences: /\b(instellingen|aanpassen|beheren|instellen|voorkeuren)\b/i,
+  },
+  pl: {
+    // No \b anchors: Polish words often end in non-ASCII characters (ć, ę, ó)
+    // which are outside JS \w, so \b would not match at the word end.
+    // Negative lookbehind prevents "zgadzam się" from matching inside "nie zgadzam się".
+    accept: /zaakceptuj( wszystkie)?|(?<!nie\s)zgadzam si[eę]|akceptuj[eę]/i,
+    reject: /odrzuć( wszystkie)?|nie zgadzam si[eę]|odm[oó]w/i,
+    preferences: /ustawienia|dostosuj|zarz[aą]dzaj|opcje|skonfiguruj|preferencje/i,
+  },
+  pt: {
+    accept: /\b(aceitar|aceitar tudo|aceito|concordo)\b/i,
+    reject: /\b(rejeitar|rejeitar tudo|recusar|n[aã]o obrigado)\b/i,
+    preferences:
+      /\b(configura[çc][oõ]es|personalizar|gerir|op[çc][oõ]es|defini[çc][oõ]es|prefer[eê]ncias)\b/i,
+  },
+};
 
-const PREFERENCES_PATTERNS = [
-  /\b(param[eè]tres|pr[eé]f[eé]rences|personnaliser|customise|customize|manage|g[eé]rer|options|choose|choisir|configure)\b/i,
-];
+/**
+ * Build the applicable accept/reject/preferences pattern lists for a given
+ * primary-language tag detected from the page's <html lang> attribute.
+ *
+ * - Known language → locale patterns + English fallback
+ * - Unknown / missing → all available patterns (most robust)
+ */
+function resolveButtonPatterns(lang: string | null): {
+  accept: RegExp[];
+  reject: RegExp[];
+  preferences: RegExp[];
+} {
+  if (!lang || !(lang in PATTERNS_BY_LOCALE)) {
+    const all = Object.values(PATTERNS_BY_LOCALE);
+    return {
+      accept: all.map((p) => p.accept),
+      reject: all.map((p) => p.reject),
+      preferences: all.map((p) => p.preferences),
+    };
+  }
+  const locale = PATTERNS_BY_LOCALE[lang]!;
+  const en = PATTERNS_BY_LOCALE.en!;
+  const sets = lang === "en" ? [locale] : [locale, en];
+  return {
+    accept: sets.map((p) => p.accept),
+    reject: sets.map((p) => p.reject),
+    preferences: sets.map((p) => p.preferences),
+  };
+}
+
+/**
+ * Classify a consent button label for a given page language.
+ * `lang` should be the BCP 47 primary subtag (e.g. "de", "fr") read from
+ * <html lang>, or null when the language is undetermined.
+ */
+export function classifyButtonText(text: string, lang: string | null): ConsentButtonType {
+  const { accept, reject, preferences } = resolveButtonPatterns(lang);
+  return classifyButtonType(text, accept, reject, preferences);
+}
 
 export async function detectConsentModal(page: Page, options: ScanOptions): Promise<ConsentModal> {
   // Try each selector until we find a visible modal
@@ -181,11 +266,15 @@ export async function detectConsentModal(page: Page, options: ScanOptions): Prom
     };
   }
 
+  // Detect the page's declared language for locale-aware button classification
+  const rawLang = await page.$eval("html", (el) => el.lang ?? "").catch(() => "");
+  const pageLang = rawLang.split("-")[0].toLowerCase() || null;
+
   // Extract modal text
   const modalText = await page.$eval(foundSelector, (el) => el.textContent ?? "").catch(() => "");
 
   // Find all buttons and interactive elements within the modal
-  const buttons = await extractButtons(page, foundSelector);
+  const buttons = await extractButtons(page, foundSelector, pageLang);
 
   // Find checkboxes / toggles
   const checkboxes = await extractCheckboxes(page, foundSelector);
@@ -210,7 +299,12 @@ export async function detectConsentModal(page: Page, options: ScanOptions): Prom
   };
 }
 
-async function extractButtons(page: Page, modalSelector: string): Promise<ConsentButton[]> {
+async function extractButtons(
+  page: Page,
+  modalSelector: string,
+  lang: string | null,
+): Promise<ConsentButton[]> {
+  const { accept, reject, preferences } = resolveButtonPatterns(lang);
   const buttonEls = await page.$$(
     `${modalSelector} button, ${modalSelector} [role="button"], ${modalSelector} a[href="#"]`,
   );
@@ -234,7 +328,7 @@ async function extractButtons(page: Page, modalSelector: string): Promise<Consen
         };
       });
 
-      const type = classifyButtonType(text);
+      const type = classifyButtonType(text, accept, reject, preferences);
 
       // Build a unique selector for this button
       const selector = await el.evaluate((node) => {
@@ -310,10 +404,15 @@ async function extractCheckboxes(page: Page, modalSelector: string): Promise<Con
     .catch(() => [] as ConsentCheckbox[]);
 }
 
-function classifyButtonType(text: string): ConsentButtonType {
-  if (ACCEPT_PATTERNS.some((p) => p.test(text))) return "accept";
-  if (REJECT_PATTERNS.some((p) => p.test(text))) return "reject";
-  if (PREFERENCES_PATTERNS.some((p) => p.test(text))) return "preferences";
+function classifyButtonType(
+  text: string,
+  accept: RegExp[],
+  reject: RegExp[],
+  preferences: RegExp[],
+): ConsentButtonType {
+  if (accept.some((p) => p.test(text))) return "accept";
+  if (reject.some((p) => p.test(text))) return "reject";
+  if (preferences.some((p) => p.test(text))) return "preferences";
   if (/\b(ferm|close|×|✕)\b/i.test(text)) return "close";
   return "unknown";
 }
