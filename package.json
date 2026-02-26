@@ -39,7 +39,7 @@
     "registry": "https://registry.npmjs.org"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && node scripts/copy-data.mjs",
     "dev": "tsc --watch",
     "start": "node dist/cli.js",
     "lint": "oxlint .",
@@ -51,7 +51,8 @@
     "test:watch": "vitest",
     "changeset": "changeset",
     "update-trackers": "node --experimental-strip-types scripts/update-trackers.ts",
-    "update-trackers:dry": "node --experimental-strip-types scripts/update-trackers.ts --dry-run"
+    "update-trackers:dry": "node --experimental-strip-types scripts/update-trackers.ts --dry-run",
+    "update:ocd": "node scripts/update-cookie-db.mjs"
   },
   "dependencies": {
     "commander": "^14.0.3",

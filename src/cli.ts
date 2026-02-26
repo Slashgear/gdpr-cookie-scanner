@@ -26,7 +26,11 @@ program
   )
   .option("-l, --locale <locale>", "Browser locale for language detection", "fr-FR")
   .option("-v, --verbose", "Show detailed output", false)
-  .option("-f, --format <formats>", "Output formats: md, html, json, pdf (comma-separated)", "html")
+  .option(
+    "-f, --format <formats>",
+    "Output formats: md, html, json, pdf, csv (comma-separated)",
+    "html",
+  )
   .option(
     "--viewport <preset>",
     "Viewport preset: desktop (1280×900), tablet (768×1024), mobile (390×844)",
@@ -69,7 +73,7 @@ program
     console.log(styleText("gray", `  Viewport : ${viewport}`));
     console.log();
 
-    const validFormats = new Set<ReportFormat>(["md", "html", "json", "pdf"]);
+    const validFormats = new Set<ReportFormat>(["md", "html", "json", "pdf", "csv"]);
     const formats = (opts.format as string)
       .split(",")
       .map((f) => f.trim().toLowerCase())
@@ -77,7 +81,7 @@ program
 
     if (formats.length === 0) {
       console.error(
-        styleText("red", "  Invalid --format value. Valid options: md, html, json, pdf"),
+        styleText("red", "  Invalid --format value. Valid options: md, html, json, pdf, csv"),
       );
       process.exit(2);
     }
@@ -141,6 +145,7 @@ program
         html: "HTML",
         json: "JSON",
         pdf: "PDF",
+        csv: "CSV",
       };
       for (const [fmt, path] of Object.entries(paths)) {
         console.log(styleText("green", `  ${(labels[fmt] ?? fmt).padEnd(8)} ${path}`));

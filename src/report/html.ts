@@ -1,4 +1,5 @@
 import type { ScanResult, ScannedCookie, DarkPatternIssue, ConsentButton } from "../types.js";
+import { lookupCookie } from "../classifiers/cookie-lookup.js";
 
 const GRADE_COLOR: Record<string, string> = {
   A: "#16a34a",
@@ -278,6 +279,14 @@ export function generateHtmlReport(result: ScanResult): string {
       padding: 1px 6px;
       border-radius: 4px;
       border: 1px solid var(--border);
+    }
+    .cookie-name {
+      display: inline-block;
+      max-width: 220px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      vertical-align: bottom;
     }
     .empty-state {
       text-align: center;
@@ -616,10 +625,15 @@ function cookieTable(cookies: ScannedCookie[]): string {
       const consent = c.requiresConsent
         ? `<span class="badge badge-warning">Required</span>`
         : `<span class="badge badge-muted">No</span>`;
+      const ocd = lookupCookie(c.name);
+      const descCell = ocd
+        ? `<span title="${esc(ocd.platform)}${ocd.privacyLink ? ` — ${esc(ocd.privacyLink)}` : ""}">${esc(ocd.description)}</span>`
+        : `<span style="color:var(--text-muted)">—</span>`;
       return `<tr>
-      <td><code>${esc(c.name)}</code></td>
+      <td><code class="cookie-name" title="${esc(c.name)}">${esc(c.name)}</code></td>
       <td style="color:var(--text-muted)">${esc(c.domain)}</td>
       <td><span class="badge badge-muted">${esc(c.category)}</span></td>
+      <td>${descCell}</td>
       <td style="color:var(--text-muted)">${formatExpiry(c)}</td>
       <td>${consent}</td>
     </tr>`;
@@ -628,7 +642,7 @@ function cookieTable(cookies: ScannedCookie[]): string {
 
   return `<table class="data-table">
   <thead><tr>
-    <th>Name</th><th>Domain</th><th>Category</th><th>Expiry</th><th>Consent</th>
+    <th>Name</th><th>Domain</th><th>Category</th><th>Description</th><th>Expiry</th><th>Consent</th>
   </tr></thead>
   <tbody>${rows}</tbody>
 </table>`;

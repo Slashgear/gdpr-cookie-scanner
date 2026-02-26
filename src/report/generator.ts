@@ -17,6 +17,7 @@ import type {
   ConsentButton,
 } from "../types.js";
 import type { ScanOptions } from "../types.js";
+import { lookupCookie } from "../classifiers/cookie-lookup.js";
 
 export class ReportGenerator {
   constructor(private readonly options: ScanOptions) {}
@@ -64,6 +65,13 @@ export class ReportGenerator {
       const jsonPath = join(outputDir, `${base}.json`);
       await writeFile(jsonPath, JSON.stringify(result, null, 2), "utf-8");
       paths.json = jsonPath;
+    }
+
+    // ── CSV ───────────────────────────────────────────────────────
+    if (formats.includes("csv")) {
+      const csvPath = join(outputDir, `gdpr-cookies-${hostname}-${date}.csv`);
+      await writeFile(csvPath, this.buildCookiesCsv(result), "utf-8");
+      paths.csv = csvPath;
     }
 
     // ── PDF (via Markdown → HTML → Playwright) ────────────────────
@@ -512,12 +520,14 @@ ${row("Cookie behavior", breakdown.cookieBehavior, 25)}
       return `${Math.round(days / 30)} months`;
     };
 
-    const rows = filtered.map(
-      (c) => `| \`${c.name}\` | ${c.domain} | ${c.category} | ${expires(c)} | ${consent(c)} |`,
-    );
+    const rows = filtered.map((c) => {
+      const ocd = lookupCookie(c.name);
+      const desc = ocd ? ocd.description : "—";
+      return `| \`${c.name}\` | ${c.domain} | ${c.category} | ${expires(c)} | ${consent(c)} | ${desc} |`;
+    });
 
-    return `| Name | Domain | Category | Expiry | Consent required |
-|------|--------|----------|--------|------------------|
+    return `| Name | Domain | Category | Expiry | Consent required | Description |
+|------|--------|----------|--------|------------------|-------------|
 ${rows.join("\n")}
 `;
   }
@@ -762,8 +772,10 @@ The **Description / Purpose** column is to be filled in by the DPO or technical 
       const phases = [...entry.phases].join(", ");
       const consent = entry.requiresConsent ? "⚠️ Yes" : "✅ No";
       const cat = categoryLabel[entry.category] ?? entry.category;
+      const ocd = lookupCookie(entry.name);
+      const desc = ocd ? ocd.description : "<!-- fill in -->";
       lines.push(
-        `| \`${entry.name}\` | ${entry.domain} | ${cat} | ${phases} | ${expires(entry)} | ${consent} | <!-- fill in --> |`,
+        `| \`${entry.name}\` | ${entry.domain} | ${cat} | ${phases} | ${expires(entry)} | ${consent} | ${desc} |`,
       );
     }
 
@@ -1076,4 +1088,108 @@ The **Description / Purpose** column is to be filled in by the DPO or technical 
 
     return lines.join("\n") + "\n";
   }
+
+  private buildCookiesCsv(r: ScanResult): string {
+    type CsvEntry = {
+      name: string;
+      domain: string;
+      category: string;
+      phases: Set<string>;
+      expires: number | null;
+      httpOnly: boolean;
+      secure: boolean;
+      sameSite: string | null;
+      requiresConsent: boolean;
+      type: string;
+    };
+
+    const cookieMap = new Map<string, CsvEntry>();
+
+    const phaseLabel: Record<ScannedCookie["capturedAt"], string> = {
+      "before-interaction": "before consent",
+      "after-accept": "after acceptance",
+      "after-reject": "after rejection",
+    };
+
+    const allCookies = [
+      ...r.cookiesBeforeInteraction,
+      ...r.cookiesAfterAccept,
+      ...r.cookiesAfterReject,
+    ];
+
+    for (const c of allCookies) {
+      const key = `${c.name}||${c.domain}`;
+      if (!cookieMap.has(key)) {
+        cookieMap.set(key, {
+          name: c.name,
+          domain: c.domain,
+          category: c.category,
+          phases: new Set(),
+          expires: c.expires,
+          httpOnly: c.httpOnly,
+          secure: c.secure,
+          sameSite: c.sameSite,
+          requiresConsent: c.requiresConsent,
+          type: c.expires === null ? "Session" : "Persistent",
+        });
+      }
+      cookieMap.get(key)!.phases.add(phaseLabel[c.capturedAt]);
+    }
+
+    const expiryStr = (entry: CsvEntry): string => {
+      if (entry.expires === null) return "Session";
+      const days = Math.round((entry.expires * 1000 - Date.now()) / 86400000);
+      if (days < 0) return "Expired";
+      if (days === 0) return "< 1 day";
+      if (days < 30) return `${days} days`;
+      return `${Math.round(days / 30)} months`;
+    };
+
+    const header =
+      "name,domain,category,description,platform,ocd_retention_period,privacy_link,expiry,type,consent_required,phases,http_only,secure,same_site";
+
+    const rows = [...cookieMap.values()]
+      .sort((a, b) => {
+        const order = [
+          "strictly-necessary",
+          "analytics",
+          "advertising",
+          "social",
+          "personalization",
+          "unknown",
+        ];
+        const oa = order.indexOf(a.category);
+        const ob = order.indexOf(b.category);
+        if (oa !== ob) return oa - ob;
+        return a.name.localeCompare(b.name);
+      })
+      .map((entry) => {
+        const ocd = lookupCookie(entry.name);
+        return [
+          csvEscape(entry.name),
+          csvEscape(entry.domain),
+          csvEscape(entry.category),
+          csvEscape(ocd?.description ?? ""),
+          csvEscape(ocd?.platform ?? ""),
+          csvEscape(ocd?.retentionPeriod ?? ""),
+          csvEscape(ocd?.privacyLink ?? ""),
+          csvEscape(expiryStr(entry)),
+          csvEscape(entry.type),
+          csvEscape(entry.requiresConsent ? "yes" : "no"),
+          csvEscape([...entry.phases].join("; ")),
+          csvEscape(entry.httpOnly ? "true" : "false"),
+          csvEscape(entry.secure ? "true" : "false"),
+          csvEscape(entry.sameSite ?? ""),
+        ].join(",");
+      });
+
+    return [header, ...rows].join("\n") + "\n";
+  }
+}
+
+function csvEscape(value: string): string {
+  if (value.includes('"') || value.includes(",") || value.includes("\n")) {
+    return `"${value.replace(/"/g, '""')}"`;
+  }
+  return value;
 }

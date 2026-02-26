@@ -109,7 +109,7 @@ export interface ComplianceScore {
   grade: "A" | "B" | "C" | "D" | "F";
 }
 
-export type ReportFormat = "md" | "html" | "json" | "pdf";
+export type ReportFormat = "md" | "html" | "json" | "pdf" | "csv";
 
 export type ViewportPreset = "desktop" | "tablet" | "mobile";
 

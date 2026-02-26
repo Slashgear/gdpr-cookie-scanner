@@ -1,0 +1,94 @@
+name: Update Cookie DB
+
+on:
+  schedule:
+    # 1st of every month at 04:00 UTC
+    - cron: "0 4 1 * *"
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Fetch Open Cookie Database
+        run: pnpm update:ocd
+
+      - name: Detect changes
+        id: diff
+        run: |
+          git diff --quiet src/data/open-cookie-database.json \
+            && echo "changed=false" >> "$GITHUB_OUTPUT" \
+            || echo "changed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Type-check
+        if: steps.diff.outputs.changed == 'true'
+        run: pnpm typecheck
+
+      - name: Format
+        if: steps.diff.outputs.changed == 'true'
+        run: pnpm format
+
+      - name: Create PR
+        if: steps.diff.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BRANCH="chore/cookie-db-$(date +%Y%m)"
+          DATE="$(date +%Y-%m-%d)"
+          SLUG="cookie-db-update-${DATE}"
+
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$BRANCH"
+
+          # Write changeset
+          cat > ".changeset/${SLUG}.md" << EOF
+          ---
+          "@slashgear/gdpr-cookie-scanner": patch
+          ---
+
+          chore: monthly Open Cookie Database update
+          EOF
+
+          git add src/data/open-cookie-database.json ".changeset/${SLUG}.md"
+          git commit -m "chore: update Open Cookie Database"
+          git push origin "$BRANCH"
+
+          gh pr create \
+            --title "chore: monthly Open Cookie Database update ($(date +%B %Y))" \
+            --body "$(cat <<'BODY'
+          ## Summary
+
+          Automated monthly update of `src/data/open-cookie-database.json`.
+
+          - **Source**: [Open Cookie Database](https://github.com/jkwakman/Open-Cookie-Database) (Apache 2.0)
+          - Cookie descriptions are used to pre-fill the Description column in reports.
+
+          ## Test plan
+
+          - [ ] `pnpm typecheck` passes (validated by CI)
+          - [ ] `pnpm build` produces `dist/data/open-cookie-database.json`
+          - [ ] Spot-check a few cookie descriptions in the updated file
+
+          🤖 Generated with [Claude Code](https://claude.com/claude-code)
+          BODY
+          )" \
+            --base main

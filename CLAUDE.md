@@ -85,3 +85,21 @@ Grade thresholds: A ≥ 90, B ≥ 75, C ≥ 55, D ≥ 35, F < 35. Exit code 1 on
 ### Module system
 
 The project uses `"type": "module"` with `"moduleResolution": "NodeNext"`. All local imports **must** include the `.js` extension even for `.ts` source files.
+
+## Cookie database (Open Cookie Database)
+
+The file `src/data/open-cookie-database.json` is vendored from
+https://github.com/jkwakman/Open-Cookie-Database (Apache 2.0).
+
+To update manually:
+
+```bash
+pnpm update:ocd   # fetches latest JSON, overwrites src/data/open-cookie-database.json
+```
+
+A GitHub Actions workflow (`.github/workflows/update-cookie-db.yml`) runs this
+automatically on the 1st of each month and opens a PR if the file changed.
+
+The lookup module (`src/classifiers/cookie-lookup.ts`) builds an exact-match index
+and a wildcard-prefix index at startup. `src/data/` is copied to `dist/data/` by
+`scripts/copy-data.mjs` as part of the `pnpm build` step.
