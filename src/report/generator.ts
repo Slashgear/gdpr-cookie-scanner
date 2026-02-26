@@ -1146,7 +1146,7 @@ The **Description / Purpose** column is to be filled in by the DPO or technical 
     };
 
     const header =
-      "name,domain,category,description,platform,ocd_retention_period,privacy_link,expiry,type,consent_required,phases,http_only,secure,same_site";
+      '"name","domain","category","description","platform","ocd_retention_period","privacy_link","expiry","type","consent_required","phases","http_only","secure","same_site"';
 
     const rows = [...cookieMap.values()]
       .sort((a, b) => {
@@ -1188,8 +1188,5 @@ The **Description / Purpose** column is to be filled in by the DPO or technical 
 }
 
 function csvEscape(value: string): string {
-  if (value.includes('"') || value.includes(",") || value.includes("\n")) {
-    return `"${value.replace(/"/g, '""')}"`;
-  }
-  return value;
+  return `"${value.replace(/"/g, '""')}"`;
 }
