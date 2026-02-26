@@ -1,5 +1,38 @@
 # @slashgear/gdpr-cookie-scanner
 
+## 3.5.0
+
+### Minor Changes
+
+- f41d0a0: feat: pre-fill cookie descriptions from Open Cookie Database and add CSV output format
+
+  Cookie reports now automatically include descriptions, platform names, retention
+  periods, and privacy-policy links for ~2 000+ recognised cookies, sourced from the
+  Open Cookie Database (Apache 2.0, vendored at `src/data/open-cookie-database.json`).
+
+  Previously the Description column in the Markdown cookie inventory was left as a
+  `<!-- fill in -->` placeholder. It is now pre-populated whenever the OCD contains a
+  matching entry (exact name or wildcard prefix), with the placeholder kept only for
+  unrecognised cookies.
+
+  The same enrichment is applied to the HTML report (new Description column in every
+  cookie table, with the platform and privacy-policy link surfaced in a tooltip) and to
+  the new `csv` output format (`gdpr-cookies-*.csv`), which includes all cookie
+  metadata plus the OCD fields in a machine-readable file suitable for DPA submissions
+  or spreadsheet review.
+
+  A `pnpm update:ocd` script and a monthly GitHub Actions workflow
+  (`.github/workflows/update-cookie-db.yml`) keep the vendored database up to date.
+
+### Patch Changes
+
+- b88dad5: fix: truncate long cookie names with ellipsis in HTML cookie tables
+
+  Cookie names that contain URLs or other unusually long strings (e.g. Optimizely
+  session keys) were breaking the table layout in the HTML report. The Name column
+  now clamps to 220 px with `text-overflow: ellipsis`; hovering the cell reveals
+  the full name via the `title` attribute.
+
 ## 3.4.0
 
 ### Minor Changes
