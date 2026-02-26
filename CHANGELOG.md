@@ -1,5 +1,16 @@
 # @slashgear/gdpr-cookie-scanner
 
+## 3.5.1
+
+### Patch Changes
+
+- 2893782: fix: copy scripts/ directory into Docker build stage
+
+  The `pnpm build` script now runs `tsc && node scripts/copy-data.mjs` to copy
+  the vendored Open Cookie Database into `dist/data/`. The Dockerfile only copied
+  `src/` and `tsconfig.json`, so the build stage was missing `scripts/`, causing
+  the Docker image build to fail with `Cannot find module '/app/scripts/copy-data.mjs'`.
+
 ## 3.5.0
 
 ### Minor Changes
