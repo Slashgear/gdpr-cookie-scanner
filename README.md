@@ -67,7 +67,7 @@ gdpr-scan scan <url> [options]
 | ------------------------ | ---------------- | --------------------------------------------------------------------------------------------------------------------------------- |
 | `-o, --output <dir>`     | `./gdpr-reports` | Output directory for the report                                                                                                   |
 | `-t, --timeout <ms>`     | `30000`          | Navigation timeout                                                                                                                |
-| `-f, --format <formats>` | `html`           | Output formats: `md`, `html`, `json`, `pdf` (comma-separated)                                                                     |
+| `-f, --format <formats>` | `html`           | Output formats: `md`, `html`, `json`, `pdf`, `csv` (comma-separated)                                                              |
 | `--viewport <preset>`    | `desktop`        | Viewport preset: `desktop` (1280×900), `tablet` (768×1024), `mobile` (390×844)                                                    |
 | `--fail-on <threshold>`  | `F`              | Exit with code 1 if grade is below this letter (`A`/`B`/`C`/`D`/`F`) or score is below this number (`0–100`)                      |
 | `--json-summary`         | —                | Emit a machine-readable JSON line to stdout after the scan (parseable by `jq`)                                                    |
@@ -92,7 +92,7 @@ gdpr-scan scan https://example.com --locale en-US --screenshots
 gdpr-scan scan https://example.com -f md
 
 # Generate all formats at once
-gdpr-scan scan https://example.com -f md,html,json,pdf
+gdpr-scan scan https://example.com -f md,html,json,pdf,csv
 
 # Scan with a mobile viewport (390×844, iPhone UA)
 gdpr-scan scan https://example.com --viewport mobile
@@ -262,7 +262,7 @@ const result = await scan("https://example.com", { locale: "fr-FR" });
 const generator = new ReportGenerator({
   url: result.url,
   outputDir: "./reports",
-  formats: ["html", "json"], // 'md' | 'html' | 'json' | 'pdf'
+  formats: ["html", "json"], // 'md' | 'html' | 'json' | 'pdf' | 'csv'
   locale: "fr-FR",
   timeout: 30_000,
   screenshots: false,
@@ -300,7 +300,7 @@ A real Chromium browser loads the page, interacts with the consent modal (reject
 
 ## Generated reports
 
-Each scan produces up to 4 file types in `<output-dir>/<hostname>/`:
+Each scan produces up to 5 file types in `<output-dir>/<hostname>/`:
 
 | Format | Files                                                          | Description                                                                                                                                    |
 | ------ | -------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -308,6 +308,7 @@ Each scan produces up to 4 file types in `<output-dir>/<hostname>/`:
 | `html` | `gdpr-report-*.html`                                           | Self-contained styled report — grade badge, score cards, dark-pattern issues, cookie and tracker tables. Opens in any browser, no dependencies |
 | `json` | `gdpr-report-*.json`                                           | Full raw scan result for programmatic processing or CI integration                                                                             |
 | `pdf`  | `gdpr-report-*.pdf`                                            | PDF built from the Markdown reports via Playwright                                                                                             |
+| `csv`  | `gdpr-cookies-*.csv`                                           | Deduplicated cookie inventory with OCD descriptions, platform, retention period and privacy link — ready for spreadsheet review or DPA submissions |
 
 All formats contain:
 
