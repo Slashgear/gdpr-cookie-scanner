@@ -1,5 +1,67 @@
 # @slashgear/gdpr-cookie-scanner
 
+## 3.6.0
+
+### Minor Changes
+
+- 0f5ad85: Improve consent button detection and classification
+
+  **Wider element selector**: `extractButtons` now captures `input[type="button"]`, `input[type="submit"]`, and `<a>` elements with `href=""`, `href^="javascript:"`, or no `href` attribute — covering CMP implementations that do not use `<button>` or `[role="button"]`.
+
+  **Text fallback for icon-only buttons**: when `textContent` is empty, the button label is now resolved from `aria-label`, `value` (for `<input>`), then `title` in order.
+
+  **Icon component name stripping**: `normalizeText` now inserts spaces at camelCase boundaries, preventing React icon component names (e.g. `ArrowRightIcon`) leaked into `textContent` from breaking word-boundary anchors in classification patterns.
+
+  **All-locale classification**: button classification now always tests all locale pattern sets regardless of the page's declared `lang` attribute. This fixes misses when a page declares `lang="en"` but its CMP renders buttons in another language.
+
+  **Fixed close button detection**: replaced the broken `\bferm\b` / `\b×\b` pattern with explicit word forms (`fermer`, `close`, …) and a standalone-symbol regex (`^[×✕✗✖✘]$`).
+
+  **Removed ambiguous "continue"/"continuer" from accept patterns**: these words appear in both accept ("Continuer") and reject ("Continuer sans accepter") button labels; removing them from accept patterns prevents false positives while the reject patterns still cover the full phrases.
+
+  **Extended language patterns**: added common variants for EN, FR, DE, ES, IT, NL — including "allow all", "decline all", "necessary only", "nécessaires uniquement", "nur notwendige", etc.
+
+- 19cea5a: Merge Markdown output into a single file
+
+  `-f md` now produces a single `gdpr-report-<host>-<date>.md` file containing
+  the compliance report, the checklist, and the cookie inventory separated by
+  `---` horizontal rules, instead of three separate files.
+
+  The separate `gdpr-checklist-*.md` and `gdpr-cookies-*.md` files are no longer
+  generated.
+
+- 0625db9: Generate PDF directly from the HTML report instead of Markdown
+
+  The PDF output now uses the same styled HTML report as the browser view,
+  giving a visually consistent result (score grid, coloured badges, issue cards,
+  modal screenshot when available) instead of the previous plain Markdown → HTML
+  conversion.
+
+  `@media print` rules added to the HTML report: colour-accurate printing
+  (`print-color-adjust: exact`), page-break hints on sections and table rows,
+  screenshot height capped at 280px, and link colours reset to inherit.
+
+  `buildHtmlBody` and `wrapHtml` methods removed from `ReportGenerator` as they
+  are no longer needed. The `marked` dependency is no longer imported by the
+  generator.
+
+### Patch Changes
+
+- d491e93: Show consent modal screenshot in HTML report
+
+  When a scan is run with `--screenshots`, the captured `modal-initial.png` is now
+  displayed at the top of the "Consent modal" section in the HTML report, giving
+  auditors an immediate visual of the banner as it appeared on the page.
+
+- 00be876: Improve PDF table density and readability
+
+  In `@media print`, data tables now use a smaller font (10px) and tighter
+  cell padding (5px 8px) to reduce cramping. Cookie description and tracker
+  URL cells get dedicated classes (`cell-desc`, `cell-url`) and are further
+  reduced to 9px and 7.5px respectively, keeping narrow columns (name,
+  domain, category, expiry) readable without being squeezed by long values.
+  Long code values wrap instead of overflowing, and sections containing
+  tables are allowed to break across pages.
+
 ## 3.5.1
 
 ### Patch Changes
