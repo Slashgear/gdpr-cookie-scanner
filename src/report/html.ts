@@ -385,10 +385,20 @@ export function generateHtmlReport(result: ScanResult): string {
         page-break-inside: avoid;
       }
       .issue-list { page-break-inside: avoid; }
-      .data-table { page-break-inside: auto; }
+      .data-table { font-size: 10px; page-break-inside: auto; }
+      .data-table th { padding: 5px 8px; }
+      .data-table td { padding: 5px 8px; }
       .data-table tr { page-break-inside: avoid; }
+      /* Long values (URLs, cookie names) wrap rather than overflow */
+      .data-table td code { word-break: break-all; white-space: normal; }
+      .cookie-name { max-width: 140px; }
+      /* Shrink verbose columns to avoid deforming the others */
+      .cell-desc { font-size: 9px; }
+      .cell-url { font-size: 7.5px; }
       .modal-screenshot { max-height: 280px; }
       .rec-list { page-break-inside: avoid; }
+      /* Sections containing large tables can break across pages */
+      .section:has(.data-table) { page-break-inside: auto; }
       a { color: inherit; text-decoration: none; }
     }
   </style>
@@ -670,7 +680,7 @@ function cookieTable(cookies: ScannedCookie[]): string {
       <td><code class="cookie-name" title="${esc(c.name)}">${esc(c.name)}</code></td>
       <td style="color:var(--text-muted)">${esc(c.domain)}</td>
       <td><span class="badge badge-muted">${esc(c.category)}</span></td>
-      <td>${descCell}</td>
+      <td class="cell-desc">${descCell}</td>
       <td style="color:var(--text-muted)">${formatExpiry(c)}</td>
       <td>${consent}</td>
     </tr>`;
@@ -723,7 +733,7 @@ function buildNetworkSection(result: ScanResult): string {
       <td>${esc(req.trackerName ?? "Unknown")}</td>
       <td><span class="badge badge-muted">${esc(req.trackerCategory ?? "")}</span></td>
       <td>${isBefore ? `<span class="badge badge-critical">before consent</span>` : `<span class="badge badge-muted">${esc(req.capturedAt)}</span>`}</td>
-      <td style="font-size:11px;color:var(--text-muted);word-break:break-all"><code>${esc(url)}</code></td>
+      <td class="cell-url" style="font-size:11px;color:var(--text-muted);word-break:break-all"><code>${esc(url)}</code></td>
     </tr>`;
     })
     .join("\n");
