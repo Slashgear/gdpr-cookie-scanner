@@ -368,9 +368,28 @@ export function generateHtmlReport(result: ScanResult): string {
     .footer a { color: var(--text-muted); }
 
     @media print {
+      * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
       body { background: #fff; }
-      .section { box-shadow: none; border: 1px solid var(--border); }
-      .page { padding: 0; }
+      .page { padding: 0; max-width: 100%; }
+      .hero {
+        box-shadow: none;
+        border: 1px solid var(--border);
+        margin-bottom: 12px;
+        page-break-inside: avoid;
+      }
+      .score-grid { page-break-inside: avoid; margin-bottom: 12px; }
+      .section {
+        box-shadow: none;
+        border: 1px solid var(--border);
+        margin-bottom: 12px;
+        page-break-inside: avoid;
+      }
+      .issue-list { page-break-inside: avoid; }
+      .data-table { page-break-inside: auto; }
+      .data-table tr { page-break-inside: avoid; }
+      .modal-screenshot { max-height: 280px; }
+      .rec-list { page-break-inside: avoid; }
+      a { color: inherit; text-decoration: none; }
     }
   </style>
 </head>

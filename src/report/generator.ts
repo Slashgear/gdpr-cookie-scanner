@@ -3,7 +3,6 @@ import { writeFile, mkdir, readFile } from "fs/promises";
 import { basename, dirname, extname, join } from "path";
 import { promisify } from "util";
 import { fileURLToPath } from "url";
-import { Marked } from "marked";
 import { generatePdf } from "./pdf.js";
 import { generateHtmlReport } from "./html.js";
 
@@ -74,73 +73,16 @@ export class ReportGenerator {
       paths.csv = csvPath;
     }
 
-    // ── PDF (via Markdown → HTML → Playwright) ────────────────────
+    // ── PDF (via HTML report → Playwright) ───────────────────────
     if (formats.includes("pdf")) {
-      const markdown = paths.md
-        ? await import("fs/promises").then((m) => m.readFile(paths.md!, "utf-8"))
-        : this.buildMarkdown(result);
-      const checklist = this.buildChecklist(result);
-      const cookiesInventory = this.buildCookiesInventory(result);
-      const combined = [markdown, checklist, cookiesInventory].join("\n\n---\n\n");
-      const rawBody = await this.buildHtmlBody(combined);
-      const body = await this.inlineImages(rawBody, outputDir);
-      const html = this.wrapHtml(body, hostname);
+      const rawHtml = generateHtmlReport(result);
+      const html = await this.inlineImages(rawHtml, outputDir);
       const pdfPath = join(outputDir, `${base}.pdf`);
       await generatePdf(html, pdfPath);
       paths.pdf = pdfPath;
     }
 
     return paths;
-  }
-
-  private async buildHtmlBody(markdown: string): Promise<string> {
-    type TocEntry = { level: number; text: string; id: string };
-    const entries: TocEntry[] = [];
-    const idCounts = new Map<string, number>();
-
-    const slugify = (text: string): string => {
-      const base =
-        text
-          .replace(/[^\p{L}\p{N}\s-]/gu, "")
-          .trim()
-          .toLowerCase()
-          .replace(/\s+/g, "-")
-          .replace(/-+/g, "-") || "section";
-      const count = idCounts.get(base) ?? 0;
-      idCounts.set(base, count + 1);
-      return count === 0 ? base : `${base}-${count}`;
-    };
-
-    const localMarked = new Marked();
-    localMarked.use({
-      renderer: {
-        heading({ text, depth }: { text: string; depth: number }) {
-          const id = slugify(text);
-          if (depth <= 2) entries.push({ level: depth, text, id });
-          return `<h${depth} id="${id}">${text}</h${depth}>\n`;
-        },
-      },
-    });
-
-    const body = await localMarked.parse(markdown);
-
-    if (entries.length === 0) return body;
-
-    const tocItems = entries
-      .map(({ level, text, id }) => {
-        const cls = level === 1 ? "toc-h1" : "toc-h2";
-        return `<li class="${cls}"><a href="#${id}">${text}</a></li>`;
-      })
-      .join("\n");
-
-    const toc = `<nav class="toc">
-<p class="toc-title">Table of Contents</p>
-<ul>
-${tocItems}
-</ul>
-</nav>`;
-
-    return toc + "\n" + body;
   }
 
   private async inlineImages(html: string, outputDir: string): Promise<string> {
@@ -176,54 +118,6 @@ ${tocItems}
       (acc, { original, replacement }) => acc.replace(original, replacement),
       html,
     );
-  }
-
-  private wrapHtml(body: string, hostname: string): string {
-    return `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>GDPR Report — ${hostname}</title>
-  <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-           font-size: 11pt; line-height: 1.6; color: #1a1a1a; max-width: 900px;
-           margin: 0 auto; padding: 0 8px; }
-    h1 { font-size: 18pt; border-bottom: 2px solid #1a1a2e; padding-bottom: 6px;
-         color: #1a1a2e; margin-top: 2em; }
-    h2 { font-size: 14pt; color: #1a1a2e; margin-top: 1.5em; }
-    h3 { font-size: 12pt; margin-top: 1.2em; }
-    table { width: 100%; border-collapse: collapse; font-size: 9.5pt;
-            margin: 1em 0; page-break-inside: auto; }
-    th { background: #f0f0f4; padding: 6px 10px; text-align: left;
-         border-bottom: 2px solid #ccc; }
-    td { padding: 5px 10px; border-bottom: 1px solid #eee; vertical-align: top; }
-    tr { page-break-inside: avoid; }
-    code { font-family: "SFMono-Regular", Consolas, monospace; background: #f4f4f4;
-           padding: 1px 5px; border-radius: 3px; font-size: 9pt; }
-    pre { background: #f4f4f4; padding: 12px; border-radius: 4px;
-          overflow-x: auto; font-size: 9pt; }
-    blockquote { border-left: 3px solid #ccc; margin: 0.5em 0;
-                 padding: 0.5em 1em; color: #555; }
-    hr { border: none; border-top: 1px solid #ddd; margin: 2em 0;
-         page-break-after: always; }
-    a { color: #0066cc; }
-    img { max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 4px; }
-    nav.toc { background: #f4f5f8; border-left: 4px solid #1a1a2e; border-radius: 4px;
-              padding: 14px 20px; margin: 0 0 2.5em 0; page-break-inside: avoid; }
-    .toc-title { font-weight: 700; font-size: 11pt; margin: 0 0 10px 0; color: #1a1a2e; }
-    nav.toc ul { list-style: none; margin: 0; padding: 0; }
-    nav.toc li { margin: 3px 0; line-height: 1.4; }
-    .toc-h1 { font-weight: 600; margin-top: 6px; }
-    .toc-h2 { padding-left: 1.2em; font-size: 9.5pt; }
-    nav.toc a { color: #0055aa; text-decoration: none; }
-    @media print {
-      h1 { page-break-before: always; }
-      h1:first-child { page-break-before: avoid; }
-    }
-  </style>
-</head>
-<body>${body}</body>
-</html>`;
   }
 
   private buildMarkdown(r: ScanResult): string {
