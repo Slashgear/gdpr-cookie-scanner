@@ -131,36 +131,43 @@ type ButtonPatternSet = { accept: RegExp; reject: RegExp; preferences: RegExp };
  */
 const PATTERNS_BY_LOCALE: Record<string, ButtonPatternSet> = {
   en: {
-    accept: /\b(accept|accept all|agree|ok|i accept|i agree|continue)\b/i,
+    // "continue" removed: too ambiguous ("Continue without accepting" must stay reject)
+    accept:
+      /\b(accept|accept all|allow all|enable all|agree|ok|i accept|i agree|i consent|allow cookies)\b/i,
     reject:
-      /\b(refuse|reject|reject all|deny|decline|no thanks|skip|opt[- ]out|continue without)\b/i,
-    preferences: /\b(manage|customize|customise|settings|options|choose|configure)\b/i,
+      /\b(refuse|reject|reject all|deny|decline|decline all|no thanks|skip|opt[- ]out|continue without|necessary only|essential only|only necessary|only essential)\b/i,
+    preferences:
+      /\b(manage|customize|customise|settings|options|choose|configure|save preferences|save settings|save my choices)\b/i,
   },
   fr: {
-    accept: /\b(accepter|acceptez|tout accepter|j'accepte|d'accord|continuer|valider|confirmer)\b/i,
+    // "continuer" removed: too ambiguous ("Continuer sans accepter" must stay reject)
+    accept:
+      /\b(accepter|acceptez|tout accepter|autoriser|tout autoriser|autoriser tout|j'accepte|d'accord|valider|confirmer)\b/i,
     reject:
-      /\b(refus|refuser|tout refuser|rejeter|tout rejeter|non merci|continuer sans accepter)\b/i,
-    preferences: /\b(param[eè]tres|pr[eé]f[eé]rences|personnaliser|g[eé]rer|choisir)\b/i,
+      /\b(refus|refuser|tout refuser|rejeter|tout rejeter|non merci|continuer sans accepter|n[eé]cessaires? uniquement|essentiels? uniquement|que les n[eé]cessaires?)\b/i,
+    preferences:
+      /\b(param[eè]tres|pr[eé]f[eé]rences|personnaliser|g[eé]rer|choisir|enregistrer|sauvegarder)\b/i,
   },
   de: {
     accept:
       /\b(akzeptieren|alle akzeptieren|zustimmen|einverstanden|annehmen|alle annehmen|ich stimme zu)\b/i,
-    reject: /\b(ablehnen|alle ablehnen|abweisen|nicht zustimmen|nein danke)\b/i,
+    reject: /\b(ablehnen|alle ablehnen|abweisen|nicht zustimmen|nein danke|nur notwendige)\b/i,
     preferences: /\b(einstellungen|anpassen|verwalten|konfigurieren|ausw[äa]hlen|mehr optionen)\b/i,
   },
   es: {
-    accept: /\b(aceptar|aceptar todo|acepto|estoy de acuerdo)\b/i,
-    reject: /\b(rechazar|rechazar todo|denegar|no gracias|continuar sin aceptar)\b/i,
+    accept: /\b(aceptar|aceptar todo|acepto|estoy de acuerdo|permitir todo)\b/i,
+    reject:
+      /\b(rechazar|rechazar todo|denegar|no gracias|continuar sin aceptar|solo necesarias?)\b/i,
     preferences: /\b(ajustes|configurar|gestionar|opciones|personalizar|preferencias)\b/i,
   },
   it: {
-    accept: /\b(accetta|accetta tutto|accetto|acconsento|acconsento a tutto)\b/i,
-    reject: /\b(rifiuta|rifiuta tutto|nega|no grazie)\b/i,
+    accept: /\b(accetta|accetta tutto|accetto|acconsento|acconsento a tutto|consenti tutto)\b/i,
+    reject: /\b(rifiuta|rifiuta tutto|nega|no grazie|solo necessari)\b/i,
     preferences: /\b(impostazioni|personalizza|gestisci|opzioni|configura|preferenze)\b/i,
   },
   nl: {
-    accept: /\b(accepteren|alles accepteren|akkoord|ik ga akkoord)\b/i,
-    reject: /\b(weigeren|alles weigeren|afwijzen|nee bedankt)\b/i,
+    accept: /\b(accepteren|alles accepteren|akkoord|ik ga akkoord|alles toestaan)\b/i,
+    reject: /\b(weigeren|alles weigeren|afwijzen|nee bedankt|alleen noodzakelijke)\b/i,
     preferences: /\b(instellingen|aanpassen|beheren|instellen|voorkeuren)\b/i,
   },
   pl: {
@@ -180,42 +187,40 @@ const PATTERNS_BY_LOCALE: Record<string, ButtonPatternSet> = {
 };
 
 /**
- * Build the applicable accept/reject/preferences pattern lists for a given
- * primary-language tag detected from the page's <html lang> attribute.
+ * Always return all locale patterns regardless of the page's declared language.
  *
- * - Known language → locale patterns + English fallback
- * - Unknown / missing → all available patterns (most robust)
+ * Restricting patterns to the detected language was causing misses when a
+ * page declares lang="en" but its CMP displays buttons in the user's locale
+ * (e.g. a French CMP on an English-declared page). Since all patterns are
+ * specific to cookie-consent wording, cross-locale false positives are rare.
+ * The `lang` parameter is kept for API compatibility but is no longer used.
  */
-function resolveButtonPatterns(lang: string | null): {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function resolveButtonPatterns(_lang: string | null): {
   accept: RegExp[];
   reject: RegExp[];
   preferences: RegExp[];
 } {
-  if (!lang || !(lang in PATTERNS_BY_LOCALE)) {
-    const all = Object.values(PATTERNS_BY_LOCALE);
-    return {
-      accept: all.map((p) => p.accept),
-      reject: all.map((p) => p.reject),
-      preferences: all.map((p) => p.preferences),
-    };
-  }
-  const locale = PATTERNS_BY_LOCALE[lang]!;
-  const en = PATTERNS_BY_LOCALE.en!;
-  const sets = lang === "en" ? [locale] : [locale, en];
+  const all = Object.values(PATTERNS_BY_LOCALE);
   return {
-    accept: sets.map((p) => p.accept),
-    reject: sets.map((p) => p.reject),
-    preferences: sets.map((p) => p.preferences),
+    accept: all.map((p) => p.accept),
+    reject: all.map((p) => p.reject),
+    preferences: all.map((p) => p.preferences),
   };
 }
 
 /**
  * Collapse any whitespace sequence (including &nbsp; / \u00A0, \n, \t, …)
  * into a single ASCII space and strip leading/trailing whitespace.
- * In JS, \s already covers \u00A0 and other Unicode spaces.
+ * Also inserts spaces at camelCase boundaries so that icon component names
+ * leaked into textContent (e.g. "accepterArrowRightIcon") do not break the
+ * word-boundary anchors used in button patterns.
  */
 function normalizeText(raw: string): string {
-  return raw.replace(/\s+/g, " ").trim();
+  return raw
+    .replace(/([a-z])([A-Z])/g, "$1 $2") // "accepterArrowRightIcon" → "accepter Arrow Right Icon"
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 /**
@@ -344,14 +349,28 @@ async function extractButtons(
 ): Promise<ConsentButton[]> {
   const { accept, reject, preferences } = resolveButtonPatterns(lang);
   const buttonEls = await page.$$(
-    `${modalSelector} button, ${modalSelector} [role="button"], ${modalSelector} a[href="#"]`,
+    [
+      `${modalSelector} button`,
+      `${modalSelector} [role="button"]`,
+      `${modalSelector} input[type="button"]`,
+      `${modalSelector} input[type="submit"]`,
+      `${modalSelector} a[href="#"]`,
+      `${modalSelector} a[href=""]`,
+      `${modalSelector} a[href^="javascript:"]`,
+      `${modalSelector} a:not([href])`,
+    ].join(", "),
   );
 
   const buttons: ConsentButton[] = [];
 
   for (const el of buttonEls) {
     try {
-      const text = normalizeText((await el.textContent()) ?? "");
+      const rawText = normalizeText((await el.textContent()) ?? "");
+      // Fallbacks for icon-only buttons and <input type="submit"> whose text lives in `value`
+      const ariaLabel = normalizeText((await el.getAttribute("aria-label")) ?? "");
+      const valueAttr = normalizeText((await el.getAttribute("value")) ?? "");
+      const titleAttr = normalizeText((await el.getAttribute("title")) ?? "");
+      const text = rawText || ariaLabel || valueAttr || titleAttr;
       if (!text) continue;
 
       const isVisible = await el.isVisible();
@@ -451,7 +470,12 @@ function classifyButtonType(
   if (accept.some((p) => p.test(text))) return "accept";
   if (reject.some((p) => p.test(text))) return "reject";
   if (preferences.some((p) => p.test(text))) return "preferences";
-  if (/\b(ferm|close|×|✕)\b/i.test(text)) return "close";
+  // Close buttons: word-form match OR standalone symbol (× ✕ ✗ ✖ ✘)
+  if (
+    /\b(close|fermer|schlie[ßs]en|cerrar|chiudi|sluiten|zamknij|fechar)\b/i.test(text) ||
+    /^[×✕✗✖✘]$/.test(text.trim())
+  )
+    return "close";
   return "unknown";
 }
 
