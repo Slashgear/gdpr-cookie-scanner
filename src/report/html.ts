@@ -1,3 +1,4 @@
+import { basename } from "path";
 import type { ScanResult, ScannedCookie, DarkPatternIssue, ConsentButton } from "../types.js";
 import { lookupCookie } from "../classifiers/cookie-lookup.js";
 
@@ -320,6 +321,18 @@ export function generateHtmlReport(result: ScanResult): string {
     .btn-chip.preferences { background: #dbeafe; color: #1e40af; }
     .btn-chip.unknown, .btn-chip.close { background: var(--bg); color: var(--text-muted); }
 
+    /* ── Modal screenshot ── */
+    .modal-screenshot {
+      display: block;
+      max-width: 100%;
+      max-height: 420px;
+      object-fit: contain;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-md);
+      margin-bottom: 20px;
+    }
+
     /* ── Recommendations ── */
     .rec-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
     .rec-item {
@@ -527,12 +540,17 @@ function buildModalSection(result: ScanResult): string {
 
   const preTicked = modal.checkboxes.filter((c) => c.isCheckedByDefault);
 
+  const screenshotHtml = modal.screenshotPath
+    ? `<img src="${esc(basename(modal.screenshotPath))}" alt="Consent modal screenshot" class="modal-screenshot">`
+    : "";
+
   return `<div class="section">
   <div class="section-header">
     <h2>Consent modal</h2>
     <span class="badge badge-ok">Detected</span>
   </div>
   <div class="section-body">
+    ${screenshotHtml}
     <div class="info-grid" style="margin-bottom:20px">
       <div class="info-item">
         <div class="info-label">Selector</div>
