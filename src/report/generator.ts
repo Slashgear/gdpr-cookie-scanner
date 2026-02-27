@@ -39,17 +39,14 @@ export class ReportGenerator {
     // ── Markdown ──────────────────────────────────────────────────
     if (formats.includes("md")) {
       const mdPath = join(outputDir, `${base}.md`);
-      await writeFile(mdPath, this.buildMarkdown(result), "utf-8");
+      const combined = [
+        this.buildMarkdown(result),
+        this.buildChecklist(result),
+        this.buildCookiesInventory(result),
+      ].join("\n\n---\n\n");
+      await writeFile(mdPath, combined, "utf-8");
       await execFileAsync(oxfmtBin, [mdPath]).catch(() => {});
       paths.md = mdPath;
-
-      const checklistPath = join(outputDir, `gdpr-checklist-${hostname}-${date}.md`);
-      await writeFile(checklistPath, this.buildChecklist(result), "utf-8");
-      await execFileAsync(oxfmtBin, [checklistPath]).catch(() => {});
-
-      const cookiesPath = join(outputDir, `gdpr-cookies-${hostname}-${date}.md`);
-      await writeFile(cookiesPath, this.buildCookiesInventory(result), "utf-8");
-      await execFileAsync(oxfmtBin, [cookiesPath]).catch(() => {});
     }
 
     // ── HTML ──────────────────────────────────────────────────────
