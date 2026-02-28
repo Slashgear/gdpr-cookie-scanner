@@ -6,7 +6,7 @@
     <title>gdpr-cookie-scanner — GDPR compliance auditor for cookie consent</title>
     <meta
       name="description"
-      content="Open-source CLI that audits websites for GDPR/RGPD cookie consent compliance using Playwright. Detects dark patterns, scores 4 compliance dimensions, and generates Markdown reports."
+      content="Open-source CLI that audits websites for GDPR/RGPD cookie consent compliance using Playwright. Detects dark patterns, scores 4 compliance dimensions, and generates detailed HTML reports."
     />
     <link rel="stylesheet" href="style.css" />
   </head>
@@ -37,7 +37,7 @@
         </h1>
         <p class="hero-tagline">
           Open-source CLI that scans any website for GDPR compliance — detects dark patterns, scores
-          4 regulatory dimensions, and generates ready-to-share Markdown reports.
+          4 regulatory dimensions, and generates ready-to-share HTML reports.
         </p>
 
         <div class="install-block">
@@ -97,10 +97,10 @@
           </div>
           <div class="feature-card">
             <div class="feature-icon">📄</div>
-            <h3>3 Markdown reports</h3>
+            <h3>Detailed HTML report</h3>
             <p>
-              Compliance report, per-rule checklist with legal references, and a deduplicated cookie
-              inventory — all rendered in GitHub.
+              Full compliance report with score breakdown, dark pattern evidence, cookie inventory,
+              and IAB TCF analysis — ready to share or attach to an audit.
             </p>
           </div>
           <div class="feature-card">
@@ -120,124 +120,112 @@
       <div class="container">
         <h2 class="section-title">Live GDPR reports</h2>
         <p class="section-subtitle">
-          Real scans run on 22 Feb 2026. Click to read the full Markdown report.
+          Real scans run on Feb 2026. Click to open the full interactive HTML report.
         </p>
         <div class="reports-grid">
-          <!-- reddit.com — 34/100 F -->
+          <!-- radiofrance.fr — 87/100 B -->
           <div class="report-card">
             <div class="report-header">
-              <div class="grade-badge grade-F">F</div>
+              <div class="grade-badge grade-B">B</div>
               <div class="report-meta">
-                <h3>reddit.com</h3>
-                <span class="score">34 / 100</span>
+                <h3>radiofrance.fr</h3>
+                <span class="score">87 / 100</span>
               </div>
             </div>
-            <p class="report-date">Scanned 22 Feb 2026</p>
+            <p class="report-date">Scanned 24 Feb 2026</p>
             <a
               class="btn btn-outline"
-              href="https://github.com/Slashgear/gdpr-cookie-scanner/blob/main/docs/reports/reddit.com/gdpr-report-reddit.com-2026-02-22.md"
-              target="_blank"
-              rel="noopener"
+              href="reports/www.radiofrance.fr/gdpr-report-radiofrance.fr-2026-02-24.html"
             >
               View report →
             </a>
           </div>
 
-          <!-- github.com — 15/100 F -->
+          <!-- deezer.com — 80/100 B -->
           <div class="report-card">
             <div class="report-header">
-              <div class="grade-badge grade-F">F</div>
+              <div class="grade-badge grade-B">B</div>
               <div class="report-meta">
-                <h3>github.com</h3>
-                <span class="score">15 / 100</span>
+                <h3>deezer.com</h3>
+                <span class="score">80 / 100</span>
               </div>
             </div>
             <p class="report-date">Scanned 22 Feb 2026</p>
             <a
               class="btn btn-outline"
-              href="https://github.com/Slashgear/gdpr-cookie-scanner/blob/main/docs/reports/github.com/gdpr-report-github.com-2026-02-22.md"
-              target="_blank"
-              rel="noopener"
+              href="reports/www.deezer.com/gdpr-report-deezer.com-2026-02-22.html"
             >
               View report →
             </a>
           </div>
 
-          <!-- gitlab.com — 50/100 D -->
-          <div class="report-card">
-            <div class="report-header">
-              <div class="grade-badge grade-D">D</div>
-              <div class="report-meta">
-                <h3>gitlab.com</h3>
-                <span class="score">50 / 100</span>
-              </div>
-            </div>
-            <p class="report-date">Scanned 22 Feb 2026</p>
-            <a
-              class="btn btn-outline"
-              href="https://github.com/Slashgear/gdpr-cookie-scanner/blob/main/docs/reports/gitlab.com/gdpr-report-gitlab.com-2026-02-22.md"
-              target="_blank"
-              rel="noopener"
-            >
-              View report →
-            </a>
-          </div>
-
-          <!-- stackoverflow.com — 66/100 C -->
+          <!-- netflix.com — 71/100 C -->
           <div class="report-card">
             <div class="report-header">
               <div class="grade-badge grade-C">C</div>
               <div class="report-meta">
-                <h3>stackoverflow.com</h3>
-                <span class="score">66 / 100</span>
+                <h3>netflix.com</h3>
+                <span class="score">71 / 100</span>
               </div>
             </div>
-            <p class="report-date">Scanned 22 Feb 2026</p>
+            <p class="report-date">Scanned 23 Feb 2026</p>
             <a
               class="btn btn-outline"
-              href="https://github.com/Slashgear/gdpr-cookie-scanner/blob/main/docs/reports/stackoverflow.com/gdpr-report-stackoverflow.com-2026-02-22.md"
-              target="_blank"
-              rel="noopener"
+              href="reports/www.netflix.com/gdpr-report-netflix.com-2026-02-23.html"
             >
               View report →
             </a>
           </div>
 
-          <!-- npmjs.com — 25/100 F -->
+          <!-- arte.tv — 53/100 D -->
+          <div class="report-card">
+            <div class="report-header">
+              <div class="grade-badge grade-D">D</div>
+              <div class="report-meta">
+                <h3>arte.tv</h3>
+                <span class="score">53 / 100</span>
+              </div>
+            </div>
+            <p class="report-date">Scanned 24 Feb 2026</p>
+            <a
+              class="btn btn-outline"
+              href="reports/www.arte.tv/gdpr-report-arte.tv-2026-02-24.html"
+            >
+              View report →
+            </a>
+          </div>
+
+          <!-- leboncoin.fr — 25/100 F -->
           <div class="report-card">
             <div class="report-header">
               <div class="grade-badge grade-F">F</div>
               <div class="report-meta">
-                <h3>npmjs.com</h3>
+                <h3>leboncoin.fr</h3>
                 <span class="score">25 / 100</span>
               </div>
             </div>
             <p class="report-date">Scanned 22 Feb 2026</p>
             <a
               class="btn btn-outline"
-              href="https://github.com/Slashgear/gdpr-cookie-scanner/blob/main/docs/reports/npmjs.com/gdpr-report-npmjs.com-2026-02-22.md"
-              target="_blank"
-              rel="noopener"
+              href="reports/www.leboncoin.fr/gdpr-report-leboncoin.fr-2026-02-22.html"
             >
               View report →
             </a>
           </div>
 
-          <!-- afp.com — 47/100 D -->
+          <!-- impots.gouv.fr — 25/100 F -->
           <div class="report-card">
             <div class="report-header">
-              <div class="grade-badge grade-D">D</div>
+              <div class="grade-badge grade-F">F</div>
               <div class="report-meta">
-                <h3>afp.com</h3>
-                <span class="score">47 / 100</span>
+                <h3>impots.gouv.fr</h3>
+                <span class="score">25 / 100</span>
               </div>
             </div>
             <p class="report-date">Scanned 22 Feb 2026</p>
             <a
               class="btn btn-outline"
-              href="https://github.com/Slashgear/gdpr-cookie-scanner/blob/main/docs/reports/www.afp.com/gdpr-report-afp.com-2026-02-22.md"
-              target="_blank"
-              rel="noopener"
+              href="reports/www.impots.gouv.fr/gdpr-report-impots.gouv.fr-2026-02-22.html"
             >
               View report →
             </a>

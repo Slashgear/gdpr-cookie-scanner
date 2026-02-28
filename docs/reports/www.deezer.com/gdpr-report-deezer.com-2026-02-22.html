@@ -1,0 +1,1289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GDPR Report — deezer.com</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+
+    :root {
+      --grade: #65a30d;
+      --grade-bg: #f7fee7;
+      --surface: #ffffff;
+      --bg: #f1f5f9;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --critical: #dc2626;
+      --critical-bg: #fef2f2;
+      --critical-border: #fecaca;
+      --warning: #d97706;
+      --warning-bg: #fffbeb;
+      --warning-border: #fde68a;
+      --ok: #16a34a;
+      --ok-bg: #f0fdf4;
+      --ok-border: #bbf7d0;
+      --radius: 10px;
+      --shadow: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.06);
+      --shadow-md: 0 4px 6px rgba(0,0,0,.07), 0 2px 4px rgba(0,0,0,.06);
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    /* ── Layout ── */
+    .page { max-width: 1000px; margin: 0 auto; padding: 24px 16px 64px; }
+
+    /* ── Hero ── */
+    .hero {
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-md);
+      padding: 32px 36px;
+      display: flex;
+      align-items: center;
+      gap: 32px;
+      margin-bottom: 20px;
+      border-top: 4px solid var(--grade);
+    }
+    .grade-badge {
+      flex-shrink: 0;
+      width: 80px; height: 80px;
+      border-radius: 16px;
+      background: var(--grade);
+      color: #fff;
+      font-size: 42px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      letter-spacing: -2px;
+    }
+    .hero-info { flex: 1; min-width: 0; }
+    .hero-info h1 {
+      margin: 0 0 4px;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .hero-meta {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin: 0;
+    }
+    .hero-score {
+      flex-shrink: 0;
+      text-align: right;
+    }
+    .hero-score .score-num {
+      font-size: 40px;
+      font-weight: 800;
+      color: var(--grade);
+      line-height: 1;
+    }
+    .hero-score .score-den { font-size: 18px; color: var(--text-muted); font-weight: 400; }
+    .hero-score .score-label { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+
+    /* ── Score grid ── */
+    .score-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    @media (max-width: 640px) {
+      .score-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    .score-card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      box-shadow: var(--shadow);
+    }
+    .score-card-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+    .score-card-value {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+    .score-card-value span { font-size: 14px; font-weight: 400; color: var(--text-muted); }
+    .progress-track {
+      height: 6px;
+      background: var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      border-radius: 3px;
+      background: var(--grade-color, #64748b);
+    }
+
+    /* ── Section ── */
+    .section {
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+    .section-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-header h2 {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .section-body { padding: 20px; }
+    .section-body.no-pad { padding: 0; }
+
+    /* ── Badges ── */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 99px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .badge-critical { background: var(--critical-bg); color: var(--critical); border: 1px solid var(--critical-border); }
+    .badge-warning { background: var(--warning-bg); color: var(--warning); border: 1px solid var(--warning-border); }
+    .badge-ok { background: var(--ok-bg); color: var(--ok); border: 1px solid var(--ok-border); }
+    .badge-muted { background: var(--bg); color: var(--text-muted); border: 1px solid var(--border); }
+    .count-badge {
+      background: var(--bg);
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 1px 8px;
+      border-radius: 99px;
+      margin-left: auto;
+    }
+
+    /* ── Issue cards ── */
+    .issue-list { display: flex; flex-direction: column; gap: 10px; }
+    .issue-card {
+      border-radius: 8px;
+      padding: 14px 16px;
+      border: 1px solid;
+    }
+    .issue-card.critical { background: var(--critical-bg); border-color: var(--critical-border); }
+    .issue-card.warning { background: var(--warning-bg); border-color: var(--warning-border); }
+    .issue-title {
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .issue-card.critical .issue-title { color: var(--critical); }
+    .issue-card.warning .issue-title { color: var(--warning); }
+    .issue-evidence {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin: 0;
+    }
+    .no-issues {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--ok);
+      font-weight: 500;
+      font-size: 14px;
+    }
+
+    /* ── Tables ── */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    .data-table th {
+      background: var(--bg);
+      padding: 10px 14px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    .data-table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table tr:hover td { background: #fafafa; }
+    code {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      font-size: 12px;
+      background: var(--bg);
+      padding: 1px 6px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+    }
+    .empty-state {
+      text-align: center;
+      padding: 32px;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    /* ── Checklist status ── */
+    .status-ok { color: var(--ok); font-weight: 600; }
+    .status-ko { color: var(--critical); font-weight: 600; }
+    .status-warn { color: var(--warning); font-weight: 600; }
+
+    /* ── Info grid ── */
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 640px) { .info-grid { grid-template-columns: 1fr; } }
+    .info-item { }
+    .info-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: var(--text-muted); margin-bottom: 2px; }
+    .info-value { font-size: 13px; color: var(--text); }
+
+    /* ── Buttons table ── */
+    .btn-chip {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .btn-chip.accept { background: #dcfce7; color: #166534; }
+    .btn-chip.reject { background: #fee2e2; color: #991b1b; }
+    .btn-chip.preferences { background: #dbeafe; color: #1e40af; }
+    .btn-chip.unknown, .btn-chip.close { background: var(--bg); color: var(--text-muted); }
+
+    /* ── Recommendations ── */
+    .rec-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+    .rec-item {
+      display: flex;
+      gap: 12px;
+      padding: 12px 14px;
+      background: #f8fafc;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      font-size: 13px;
+    }
+    .rec-num {
+      flex-shrink: 0;
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      background: var(--text);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 1px;
+    }
+
+    /* ── Footer ── */
+    .footer {
+      text-align: center;
+      margin-top: 40px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .footer a { color: var(--text-muted); }
+
+    @media print {
+      body { background: #fff; }
+      .section { box-shadow: none; border: 1px solid var(--border); }
+      .page { padding: 0; }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <div class="hero">
+  <div class="grade-badge" style="background:#65a30d">B</div>
+  <div class="hero-info">
+    <h1>deezer.com</h1>
+    <p class="hero-meta">Scanned on 22 February 2026 at 20:53 · 13.9s</p>
+  </div>
+  <div class="hero-score">
+    <div><span class="score-num" style="color:#65a30d">80</span><span class="score-den">/100</span></div>
+    <div class="score-label">Compliance score</div>
+  </div>
+</div>
+
+  <div class="score-grid">
+  <div class="score-card">
+  <div class="score-card-label">Consent validity</div>
+  <div class="score-card-value">25<span>/25</span></div>
+  <div class="progress-track">
+    <div class="progress-fill" style="width:100%;background:#16a34a"></div>
+  </div>
+</div>
+  <div class="score-card">
+  <div class="score-card-label">Easy refusal</div>
+  <div class="score-card-value">25<span>/25</span></div>
+  <div class="progress-track">
+    <div class="progress-fill" style="width:100%;background:#16a34a"></div>
+  </div>
+</div>
+  <div class="score-card">
+  <div class="score-card-label">Transparency</div>
+  <div class="score-card-value">25<span>/25</span></div>
+  <div class="progress-track">
+    <div class="progress-fill" style="width:100%;background:#16a34a"></div>
+  </div>
+</div>
+  <div class="score-card">
+  <div class="score-card-label">Cookie behavior</div>
+  <div class="score-card-value">5<span>/25</span></div>
+  <div class="progress-track">
+    <div class="progress-fill" style="width:20%;background:#dc2626"></div>
+  </div>
+</div>
+</div>
+
+  <div class="section">
+  <div class="section-header">
+    <h2>Issues</h2>
+    <span class="count-badge">3</span>
+    <span class="badge badge-critical">3 critical</span>
+    
+  </div>
+  <div class="section-body">
+    <div class="issue-list">
+      <div class="issue-card critical">
+  <div class="issue-title">1 non-essential cookie(s) deposited before any interaction</div>
+  <p class="issue-evidence">sid (unknown)</p>
+</div>
+<div class="issue-card critical">
+  <div class="issue-title">2 non-essential cookie(s) persist after rejection</div>
+  <p class="issue-evidence">sid (unknown), ajs_anonymous_id (analytics)</p>
+</div>
+<div class="issue-card critical">
+  <div class="issue-title">8 tracker request(s) fired before any consent</div>
+  <p class="issue-evidence">Google Tag Manager, Segment, Google AdSense</p>
+</div>
+    </div>
+  </div>
+</div>
+
+  <div class="section">
+  <div class="section-header">
+    <h2>Consent modal</h2>
+    <span class="badge badge-ok">Detected</span>
+  </div>
+  <div class="section-body">
+    <div class="info-grid" style="margin-bottom:20px">
+      <div class="info-item">
+        <div class="info-label">Selector</div>
+        <div class="info-value"><code>[class*='cookie'][class*='modal']</code></div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">Granular controls</div>
+        <div class="info-value"><span class="status-ok">✓ Yes</span></div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">Privacy policy link</div>
+        <div class="info-value"><a href="https://vdp.deezer.com/p/Welcome" target="_blank" rel="noopener">https://vdp.deezer.com/p/Welcome</a></div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">Pre-ticked checkboxes</div>
+        <div class="info-value"><span class="status-ok">✓ None</span></div>
+      </div>
+    </div>
+    <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--text-muted);margin-bottom:8px">Buttons</div>
+    <table class="data-table">
+    <thead><tr>
+      <th>Type</th><th>Label</th><th>Font size</th><th>Contrast</th><th>Clicks</th>
+    </tr></thead>
+    <tbody>
+      <tr>
+    <td><span class="btn-chip accept">accept</span></td>
+    <td>Accepter</td>
+    <td>16px</td>
+    <td>4.49:1</td>
+    <td>1</td>
+  </tr>
+<tr>
+    <td><span class="btn-chip reject">reject</span></td>
+    <td>Refuser</td>
+    <td>16px</td>
+    <td>20.42:1</td>
+    <td>1</td>
+  </tr>
+<tr>
+    <td><span class="btn-chip preferences">preferences</span></td>
+    <td>Préférences</td>
+    <td>16px</td>
+    <td>20.42:1</td>
+    <td>1</td>
+  </tr>
+    </tbody>
+  </table>
+  </div>
+</div>
+
+  <div class="section">
+  <div class="section-header"><h2>Cookies</h2></div>
+  <div class="section-body">
+    <div style="margin-bottom:24px">
+    <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--text-muted);margin-bottom:8px;display:flex;align-items:center;gap:8px">
+      Before interaction
+      <span class="count-badge">4</span>
+      <span class="badge badge-critical">1 non-essential</span>
+      
+    </div>
+    <table class="data-table">
+  <thead><tr>
+    <th>Name</th><th>Domain</th><th>Category</th><th>Expiry</th><th>Consent</th>
+  </tr></thead>
+  <tbody><tr>
+      <td><code>sid</code></td>
+      <td style="color:var(--text-muted)">.deezer.com</td>
+      <td><span class="badge badge-muted">unknown</span></td>
+      <td style="color:var(--text-muted)">Session</td>
+      <td><span class="badge badge-warning">Required</span></td>
+    </tr>
+<tr>
+      <td><code>dzr_uniq_id</code></td>
+      <td style="color:var(--text-muted)">.deezer.com</td>
+      <td><span class="badge badge-muted">unknown</span></td>
+      <td style="color:var(--text-muted)">6mo</td>
+      <td><span class="badge badge-muted">No</span></td>
+    </tr>
+<tr>
+      <td><code>bm_sz</code></td>
+      <td style="color:var(--text-muted)">.deezer.com</td>
+      <td><span class="badge badge-muted">unknown</span></td>
+      <td style="color:var(--text-muted)">< 1 day</td>
+      <td><span class="badge badge-muted">No</span></td>
+    </tr>
+<tr>
+      <td><code>_abck</code></td>
+      <td style="color:var(--text-muted)">.deezer.com</td>
+      <td><span class="badge badge-muted">unknown</span></td>
+      <td style="color:var(--text-muted)">12mo</td>
+      <td><span class="badge badge-muted">No</span></td>
+    </tr></tbody>
+</table>
+  </div>
+<div style="margin-bottom:24px">
+    <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--text-muted);margin-bottom:8px;display:flex;align-items:center;gap:8px">
+      After reject
+      <span class="count-badge">9</span>
+      
+      <span class="badge badge-critical">2 non-essential</span>
+    </div>
+    <table class="data-table">
+  <thead><tr>
+    <th>Name</th><th>Domain</th><th>Category</th><th>Expiry</th><th>Consent</th>
+  </tr></thead>
+  <tbody><tr>
+      <td><code>sid</code></td>
+      <td style="color:var(--text-muted)">.deezer.com</td>
+      <td><span class="badge badge-muted">unknown</span></td>
+      <td style="color:var(--text-muted)">Session</td>
+      <td><span class="badge badge-warning">Required</span></td>
+    </tr>
+<tr>
+      <td><code>dzr_uniq_id</code></td>
+      <td style="color:var(--text-muted)">.deezer.com</td>
+      <td><span class="badge badge-muted">unknown</span></td>
+      <td style="color:var(--text-muted)">6mo</td>
+      <td><span class="badge badge-muted">No</span></td>
+    </tr>
+<tr>
+      <td><code>bm_sz</code></td>
+      <td style="color:var(--text-muted)">.deezer.com</td>
+      <td><span class="badge badge-muted">unknown</span></td>
+      <td style="color:var(--text-muted)">< 1 day</td>
+      <td><span class="badge badge-muted">No</span></td>
+    </tr>
+<tr>
+      <td><code>euconsent-v2</code></td>
+      <td style="color:var(--text-muted)">.deezer.com</td>
+      <td><span class="badge badge-muted">unknown</span></td>
+      <td style="color:var(--text-muted)">3mo</td>
+      <td><span class="badge badge-muted">No</span></td>
+    </tr>
+<tr>
+      <td><code>noIabVendors</code></td>
+      <td style="color:var(--text-muted)">.deezer.com</td>
+      <td><span class="badge badge-muted">unknown</span></td>
+      <td style="color:var(--text-muted)">3mo</td>
+      <td><span class="badge badge-muted">No</span></td>
+    </tr>
+<tr>
+      <td><code>consentMarketing</code></td>
+      <td style="color:var(--text-muted)">.deezer.com</td>
+      <td><span class="badge badge-muted">strictly-necessary</span></td>
+      <td style="color:var(--text-muted)">3mo</td>
+      <td><span class="badge badge-muted">No</span></td>
+    </tr>
+<tr>
+      <td><code>consentStatistics</code></td>
+      <td style="color:var(--text-muted)">.deezer.com</td>
+      <td><span class="badge badge-muted">strictly-necessary</span></td>
+      <td style="color:var(--text-muted)">3mo</td>
+      <td><span class="badge badge-muted">No</span></td>
+    </tr>
+<tr>
+      <td><code>ajs_anonymous_id</code></td>
+      <td style="color:var(--text-muted)">.deezer.com</td>
+      <td><span class="badge badge-muted">analytics</span></td>
+      <td style="color:var(--text-muted)">12mo</td>
+      <td><span class="badge badge-warning">Required</span></td>
+    </tr>
+<tr>
+      <td><code>_abck</code></td>
+      <td style="color:var(--text-muted)">.deezer.com</td>
+      <td><span class="badge badge-muted">unknown</span></td>
+      <td style="color:var(--text-muted)">12mo</td>
+      <td><span class="badge badge-muted">No</span></td>
+    </tr></tbody>
+</table>
+  </div>
+<div style="margin-bottom:24px">
+    <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--text-muted);margin-bottom:8px;display:flex;align-items:center;gap:8px">
+      After accept
+      <span class="count-badge">40</span>
+      
+      
+    </div>
+    <table class="data-table">
+  <thead><tr>
+    <th>Name</th><th>Domain</th><th>Category</th><th>Expiry</th><th>Consent</th>
+  </tr></thead>
+  <tbody><tr>
+      <td><code>X-AB</code></td>
+      <td style="color:var(--text-muted)">sc-static.net</td>
+      <td><span class="badge badge-muted">unknown</span></td>
+      <td style="color:var(--text-muted)">1d</td>
+      <td><span class="badge badge-warning">Required</span></td>
+    </tr>
+<tr>
+      <td><code>sid</code></td>
+      <td style="color:var(--text-muted)">.deezer.com</td>
+      <td><span class="badge badge-muted">unknown</span></td>
+      <td style="color:var(--text-muted)">Session</td>
+      <td><span class="badge badge-warning">Required</span></td>
+    </tr>
+<tr>
+      <td><code>dzr_uniq_id</code></td>
+      <td style="color:var(--text-muted)">.deezer.com</td>
+      <td><span class="badge badge-muted">unknown</span></td>
+      <td style="color:var(--text-muted)">6mo</td>
+      <td><span class="badge badge-muted">No</span></td>
+    </tr>
+<tr>
+      <td><code>bm_sz</code></td>
+      <td style="color:var(--text-muted)">.deezer.com</td>
+      <td><span class="badge badge-muted">unknown</span></td>
+      <td style="color:var(--text-muted)">< 1 day</td>
+      <td><span class="badge badge-muted">No</span></td>
+    </tr>
+<tr>
+      <td><code>euconsent-v2</code></td>
+      <td style="color:var(--text-muted)">.deezer.com</td>
+      <td><span class="badge badge-muted">unknown</span></td>
+      <td style="color:var(--text-muted)">3mo</td>
+      <td><span class="badge badge-muted">No</span></td>
+    </tr>
+<tr>
+      <td><code>noIabVendors</code></td>
+      <td style="color:var(--text-muted)">.deezer.com</td>
+      <td><span class="badge badge-muted">unknown</span></td>
+      <td style="color:var(--text-muted)">3mo</td>
+      <td><span class="badge badge-muted">No</span></td>
+    </tr>
+<tr>
+      <td><code>pageviewCount</code></td>
+      <td style="color:var(--text-muted)">.deezer.com</td>
+      <td><span class="badge badge-muted">unknown</span></td>
+      <td style="color:var(--text-muted)">1d</td>
+      <td><span class="badge badge-muted">No</span></td>
+    </tr>
+<tr>
+      <td><code>consentMarketing</code></td>
+      <td style="color:var(--text-muted)">.deezer.com</td>
+      <td><span class="badge badge-muted">strictly-necessary</span></td>
+      <td style="color:var(--text-muted)">3mo</td>
+      <td><span class="badge badge-muted">No</span></td>
+    </tr>
+<tr>
+      <td><code>consentStatistics</code></td>
+      <td style="color:var(--text-muted)">.deezer.com</td>
+      <td><span class="badge badge-muted">strictly-necessary</span></td>
+      <td style="color:var(--text-muted)">3mo</td>
+      <td><span class="badge badge-muted">No</span></td>
+    </tr>
+<tr>
+      <td><code>ajs_anonymous_id</code></td>
+      <td style="color:var(--text-muted)">.deezer.com</td>
+      <td><span class="badge badge-muted">analytics</span></td>
+      <td style="color:var(--text-muted)">12mo</td>
+      <td><span class="badge badge-warning">Required</span></td>
+    </tr>
+<tr>
+      <td><code>_rdt_uuid</code></td>
+      <td style="color:var(--text-muted)">.deezer.com</td>
+      <td><span class="badge badge-muted">unknown</span></td>
+      <td style="color:var(--text-muted)">3mo</td>
+      <td><span class="badge badge-muted">No</span></td>
+    </tr>
+<tr>
+      <td><code>IR_gbd</code></td>
+      <td style="color:var(--text-muted)">.deezer.com</td>
+      <td><span class="badge badge-muted">unknown</span></td>
+      <td style="color:var(--text-muted)">Session</td>
+      <td><span class="badge badge-muted">No</span></td>
+    </tr>
+<tr>
+      <td><code>IR_28329</code></td>
+      <td style="color:var(--text-muted)">.deezer.com</td>
+      <td><span class="badge badge-muted">unknown</span></td>
+      <td style="color:var(--text-muted)">Session</td>
+      <td><span class="badge badge-muted">No</span></td>
+    </tr>
+<tr>
+      <td><code>_abck</code></td>
+      <td style="color:var(--text-muted)">.deezer.com</td>
+      <td><span class="badge badge-muted">unknown</span></td>
+      <td style="color:var(--text-muted)">12mo</td>
+      <td><span class="badge badge-muted">No</span></td>
+    </tr>
+<tr>
+      <td><code>brwsr</code></td>
+      <td style="color:var(--text-muted)">.sjv.io</td>
+      <td><span class="badge badge-muted">unknown</span></td>
+      <td style="color:var(--text-muted)">12mo</td>
+      <td><span class="badge badge-muted">No</span></td>
+    </tr>
+<tr>
+      <td><code>irld</code></td>
+      <td style="color:var(--text-muted)">deezer.sjv.io</td>
+      <td><span class="badge badge-muted">unknown</span></td>
+      <td style="color:var(--text-muted)">6mo</td>
+      <td><span class="badge badge-warning">Required</span></td>
+    </tr>
+<tr>
+      <td><code>irtps</code></td>
+      <td style="color:var(--text-muted)">.sjv.io</td>
+      <td><span class="badge badge-muted">unknown</span></td>
+      <td style="color:var(--text-muted)">1d</td>
+      <td><span class="badge badge-muted">No</span></td>
+    </tr>
+<tr>
+      <td><code>_ga</code></td>
+      <td style="color:var(--text-muted)">.deezer.com</td>
+      <td><span class="badge badge-muted">analytics</span></td>
+      <td style="color:var(--text-muted)">13mo</td>
+      <td><span class="badge badge-warning">Required</span></td>
+    </tr>
+<tr>
+      <td><code>_ttp</code></td>
+      <td style="color:var(--text-muted)">.tiktok.com</td>
+      <td><span class="badge badge-muted">advertising</span></td>
+      <td style="color:var(--text-muted)">3mo</td>
+      <td><span class="badge badge-warning">Required</span></td>
+    </tr>
+<tr>
+      <td><code>_scid</code></td>
+      <td style="color:var(--text-muted)">.deezer.com</td>
+      <td><span class="badge badge-muted">unknown</span></td>
+      <td style="color:var(--text-muted)">13mo</td>
+      <td><span class="badge badge-muted">No</span></td>
+    </tr>
+<tr>
+      <td><code>_scid_r</code></td>
+      <td style="color:var(--text-muted)">.deezer.com</td>
+      <td><span class="badge badge-muted">unknown</span></td>
+      <td style="color:var(--text-muted)">13mo</td>
+      <td><span class="badge badge-muted">No</span></td>
+    </tr>
+<tr>
+      <td><code>IR_PI</code></td>
+      <td style="color:var(--text-muted)">.deezer.com</td>
+      <td><span class="badge badge-muted">unknown</span></td>
+      <td style="color:var(--text-muted)">13mo</td>
+      <td><span class="badge badge-muted">No</span></td>
+    </tr>
+<tr>
+      <td><code>_cs_c</code></td>
+      <td style="color:var(--text-muted)">.deezer.com</td>
+      <td><span class="badge badge-muted">unknown</span></td>
+      <td style="color:var(--text-muted)">13mo</td>
+      <td><span class="badge badge-muted">No</span></td>
+    </tr>
+<tr>
+      <td><code>_cs_id</code></td>
+      <td style="color:var(--text-muted)">.deezer.com</td>
+      <td><span class="badge badge-muted">unknown</span></td>
+      <td style="color:var(--text-muted)">13mo</td>
+      <td><span class="badge badge-muted">No</span></td>
+    </tr>
+<tr>
+      <td><code>_fbp</code></td>
+      <td style="color:var(--text-muted)">.deezer.com</td>
+      <td><span class="badge badge-muted">advertising</span></td>
+      <td style="color:var(--text-muted)">3mo</td>
+      <td><span class="badge badge-warning">Required</span></td>
+    </tr>
+<tr>
+      <td><code>_cs_s</code></td>
+      <td style="color:var(--text-muted)">.deezer.com</td>
+      <td><span class="badge badge-muted">unknown</span></td>
+      <td style="color:var(--text-muted)">< 1 day</td>
+      <td><span class="badge badge-muted">No</span></td>
+    </tr>
+<tr>
+      <td><code>_uetsid</code></td>
+      <td style="color:var(--text-muted)">.deezer.com</td>
+      <td><span class="badge badge-muted">unknown</span></td>
+      <td style="color:var(--text-muted)">1d</td>
+      <td><span class="badge badge-muted">No</span></td>
+    </tr>
+<tr>
+      <td><code>_uetvid</code></td>
+      <td style="color:var(--text-muted)">.deezer.com</td>
+      <td><span class="badge badge-muted">unknown</span></td>
+      <td style="color:var(--text-muted)">13mo</td>
+      <td><span class="badge badge-muted">No</span></td>
+    </tr>
+<tr>
+      <td><code>brwsr</code></td>
+      <td style="color:var(--text-muted)">.ojrq.net</td>
+      <td><span class="badge badge-muted">unknown</span></td>
+      <td style="color:var(--text-muted)">12mo</td>
+      <td><span class="badge badge-muted">No</span></td>
+    </tr>
+<tr>
+      <td><code>_tt_enable_cookie</code></td>
+      <td style="color:var(--text-muted)">.deezer.com</td>
+      <td><span class="badge badge-muted">unknown</span></td>
+      <td style="color:var(--text-muted)">3mo</td>
+      <td><span class="badge badge-muted">No</span></td>
+    </tr>
+<tr>
+      <td><code>_ttp</code></td>
+      <td style="color:var(--text-muted)">.deezer.com</td>
+      <td><span class="badge badge-muted">advertising</span></td>
+      <td style="color:var(--text-muted)">3mo</td>
+      <td><span class="badge badge-warning">Required</span></td>
+    </tr>
+<tr>
+      <td><code>MUID</code></td>
+      <td style="color:var(--text-muted)">.bing.com</td>
+      <td><span class="badge badge-muted">advertising</span></td>
+      <td style="color:var(--text-muted)">13mo</td>
+      <td><span class="badge badge-warning">Required</span></td>
+    </tr>
+<tr>
+      <td><code>_gcl_au</code></td>
+      <td style="color:var(--text-muted)">.deezer.com</td>
+      <td><span class="badge badge-muted">unknown</span></td>
+      <td style="color:var(--text-muted)">3mo</td>
+      <td><span class="badge badge-muted">No</span></td>
+    </tr>
+<tr>
+      <td><code>_ga_QHEXZ4K1SH</code></td>
+      <td style="color:var(--text-muted)">.deezer.com</td>
+      <td><span class="badge badge-muted">analytics</span></td>
+      <td style="color:var(--text-muted)">13mo</td>
+      <td><span class="badge badge-warning">Required</span></td>
+    </tr>
+<tr>
+      <td><code>_ScCbts</code></td>
+      <td style="color:var(--text-muted)">.deezer.com</td>
+      <td><span class="badge badge-muted">unknown</span></td>
+      <td style="color:var(--text-muted)">7d</td>
+      <td><span class="badge badge-muted">No</span></td>
+    </tr>
+<tr>
+      <td><code>ttcsid</code></td>
+      <td style="color:var(--text-muted)">.deezer.com</td>
+      <td><span class="badge badge-muted">unknown</span></td>
+      <td style="color:var(--text-muted)">3mo</td>
+      <td><span class="badge badge-muted">No</span></td>
+    </tr>
+<tr>
+      <td><code>ttcsid_C5A7OKS6J7TSRVQBNON0</code></td>
+      <td style="color:var(--text-muted)">.deezer.com</td>
+      <td><span class="badge badge-muted">unknown</span></td>
+      <td style="color:var(--text-muted)">3mo</td>
+      <td><span class="badge badge-muted">No</span></td>
+    </tr>
+<tr>
+      <td><code>_clck</code></td>
+      <td style="color:var(--text-muted)">.deezer.com</td>
+      <td><span class="badge badge-muted">unknown</span></td>
+      <td style="color:var(--text-muted)">12mo</td>
+      <td><span class="badge badge-muted">No</span></td>
+    </tr>
+<tr>
+      <td><code>IDE</code></td>
+      <td style="color:var(--text-muted)">.doubleclick.net</td>
+      <td><span class="badge badge-muted">advertising</span></td>
+      <td style="color:var(--text-muted)">13mo</td>
+      <td><span class="badge badge-warning">Required</span></td>
+    </tr>
+<tr>
+      <td><code>_clsk</code></td>
+      <td style="color:var(--text-muted)">.deezer.com</td>
+      <td><span class="badge badge-muted">unknown</span></td>
+      <td style="color:var(--text-muted)">1d</td>
+      <td><span class="badge badge-muted">No</span></td>
+    </tr></tbody>
+</table>
+  </div>
+  </div>
+</div>
+
+  <div class="section">
+  <div class="section-header">
+    <h2>Network trackers</h2>
+    <span class="count-badge">54</span>
+    <span class="badge badge-critical">8 before consent</span>
+  </div>
+  <div class="section-body no-pad">
+    <table class="data-table">
+      <thead><tr><th>Tracker</th><th>Category</th><th>Phase</th><th>URL</th></tr></thead>
+      <tbody><tr>
+      <td>Google Tag Manager</td>
+      <td><span class="badge badge-muted">analytics</span></td>
+      <td><span class="badge badge-critical">before consent</span></td>
+      <td style="font-size:11px;color:var(--text-muted);word-break:break-all"><code>https://www.googletagmanager.com/gtm.js?id=GTM-PPQNZ6</code></td>
+    </tr>
+<tr>
+      <td>Segment</td>
+      <td><span class="badge badge-muted">analytics</span></td>
+      <td><span class="badge badge-critical">before consent</span></td>
+      <td style="font-size:11px;color:var(--text-muted);word-break:break-all"><code>https://cdn.segment.com/v1/projects/VyJDmr2wHu0SDrieAdHE8tIX2Gi2WgU…</code></td>
+    </tr>
+<tr>
+      <td>Google AdSense</td>
+      <td><span class="badge badge-muted">advertising</span></td>
+      <td><span class="badge badge-critical">before consent</span></td>
+      <td style="font-size:11px;color:var(--text-muted);word-break:break-all"><code>https://pagead2.googlesyndication.com/ccm/collect?frm=0&amp;en=page_vie…</code></td>
+    </tr>
+<tr>
+      <td>Google Tag Manager</td>
+      <td><span class="badge badge-muted">analytics</span></td>
+      <td><span class="badge badge-critical">before consent</span></td>
+      <td style="font-size:11px;color:var(--text-muted);word-break:break-all"><code>https://www.googletagmanager.com/static/service_worker/6240/sw_ifra…</code></td>
+    </tr>
+<tr>
+      <td>Segment</td>
+      <td><span class="badge badge-muted">analytics</span></td>
+      <td><span class="badge badge-critical">before consent</span></td>
+      <td style="font-size:11px;color:var(--text-muted);word-break:break-all"><code>https://cdn.segment.com/next-integrations/actions/braze-cloud-plugi…</code></td>
+    </tr>
+<tr>
+      <td>Segment</td>
+      <td><span class="badge badge-muted">analytics</span></td>
+      <td><span class="badge badge-critical">before consent</span></td>
+      <td style="font-size:11px;color:var(--text-muted);word-break:break-all"><code>https://cdn.segment.com/next-integrations/actions/3962/1faa179dfb20…</code></td>
+    </tr>
+<tr>
+      <td>Segment</td>
+      <td><span class="badge badge-muted">analytics</span></td>
+      <td><span class="badge badge-critical">before consent</span></td>
+      <td style="font-size:11px;color:var(--text-muted);word-break:break-all"><code>https://cdn.segment.com/next-integrations/integrations/survicate/1.…</code></td>
+    </tr>
+<tr>
+      <td>Segment</td>
+      <td><span class="badge badge-muted">analytics</span></td>
+      <td><span class="badge badge-critical">before consent</span></td>
+      <td style="font-size:11px;color:var(--text-muted);word-break:break-all"><code>https://cdn.segment.com/next-integrations/integrations/vendor/commo…</code></td>
+    </tr>
+<tr>
+      <td>Google Tag Manager</td>
+      <td><span class="badge badge-muted">analytics</span></td>
+      <td><span class="badge badge-muted">after-accept</span></td>
+      <td style="font-size:11px;color:var(--text-muted);word-break:break-all"><code>https://www.googletagmanager.com/gtm.js?id=GTM-PPQNZ6</code></td>
+    </tr>
+<tr>
+      <td>Segment</td>
+      <td><span class="badge badge-muted">analytics</span></td>
+      <td><span class="badge badge-muted">after-accept</span></td>
+      <td style="font-size:11px;color:var(--text-muted);word-break:break-all"><code>https://cdn.segment.com/v1/projects/VyJDmr2wHu0SDrieAdHE8tIX2Gi2WgU…</code></td>
+    </tr>
+<tr>
+      <td>Google AdSense</td>
+      <td><span class="badge badge-muted">advertising</span></td>
+      <td><span class="badge badge-muted">after-accept</span></td>
+      <td style="font-size:11px;color:var(--text-muted);word-break:break-all"><code>https://pagead2.googlesyndication.com/ccm/collect?frm=0&amp;en=page_vie…</code></td>
+    </tr>
+<tr>
+      <td>Google Tag Manager</td>
+      <td><span class="badge badge-muted">analytics</span></td>
+      <td><span class="badge badge-muted">after-accept</span></td>
+      <td style="font-size:11px;color:var(--text-muted);word-break:break-all"><code>https://www.googletagmanager.com/static/service_worker/6240/sw_ifra…</code></td>
+    </tr>
+<tr>
+      <td>Segment</td>
+      <td><span class="badge badge-muted">analytics</span></td>
+      <td><span class="badge badge-muted">after-accept</span></td>
+      <td style="font-size:11px;color:var(--text-muted);word-break:break-all"><code>https://cdn.segment.com/next-integrations/actions/braze-cloud-plugi…</code></td>
+    </tr>
+<tr>
+      <td>Segment</td>
+      <td><span class="badge badge-muted">analytics</span></td>
+      <td><span class="badge badge-muted">after-accept</span></td>
+      <td style="font-size:11px;color:var(--text-muted);word-break:break-all"><code>https://cdn.segment.com/next-integrations/actions/3962/1faa179dfb20…</code></td>
+    </tr>
+<tr>
+      <td>Segment</td>
+      <td><span class="badge badge-muted">analytics</span></td>
+      <td><span class="badge badge-muted">after-accept</span></td>
+      <td style="font-size:11px;color:var(--text-muted);word-break:break-all"><code>https://cdn.segment.com/next-integrations/integrations/survicate/1.…</code></td>
+    </tr>
+<tr>
+      <td>Segment</td>
+      <td><span class="badge badge-muted">analytics</span></td>
+      <td><span class="badge badge-muted">after-accept</span></td>
+      <td style="font-size:11px;color:var(--text-muted);word-break:break-all"><code>https://cdn.segment.com/next-integrations/integrations/vendor/commo…</code></td>
+    </tr>
+<tr>
+      <td>Google Tag Manager</td>
+      <td><span class="badge badge-muted">analytics</span></td>
+      <td><span class="badge badge-muted">after-accept</span></td>
+      <td style="font-size:11px;color:var(--text-muted);word-break:break-all"><code>https://www.googletagmanager.com/gtag/js?id=DC-14894270&amp;cx=c&amp;gtm=4e…</code></td>
+    </tr>
+<tr>
+      <td>Google Tag Manager</td>
+      <td><span class="badge badge-muted">analytics</span></td>
+      <td><span class="badge badge-muted">after-accept</span></td>
+      <td style="font-size:11px;color:var(--text-muted);word-break:break-all"><code>https://www.googletagmanager.com/gtag/js?id=AW-988306579&amp;cx=c&amp;gtm=4…</code></td>
+    </tr>
+<tr>
+      <td>TikTok Analytics</td>
+      <td><span class="badge badge-muted">analytics</span></td>
+      <td><span class="badge badge-muted">after-accept</span></td>
+      <td style="font-size:11px;color:var(--text-muted);word-break:break-all"><code>https://analytics.tiktok.com/i18n/pixel/events.js?sdkid=C5A7OKS6J7T…</code></td>
+    </tr>
+<tr>
+      <td>Bing Ads</td>
+      <td><span class="badge badge-muted">advertising</span></td>
+      <td><span class="badge badge-muted">after-accept</span></td>
+      <td style="font-size:11px;color:var(--text-muted);word-break:break-all"><code>https://bat.bing.com/bat.js</code></td>
+    </tr>
+<tr>
+      <td>Facebook SDK</td>
+      <td><span class="badge badge-muted">social</span></td>
+      <td><span class="badge badge-muted">after-accept</span></td>
+      <td style="font-size:11px;color:var(--text-muted);word-break:break-all"><code>https://connect.facebook.net/en_US/fbevents.js</code></td>
+    </tr>
+<tr>
+      <td>Google Tag Manager</td>
+      <td><span class="badge badge-muted">analytics</span></td>
+      <td><span class="badge badge-muted">after-accept</span></td>
+      <td style="font-size:11px;color:var(--text-muted);word-break:break-all"><code>https://www.googletagmanager.com/gtag/js?id=G-QHEXZ4K1SH&amp;cx=c&amp;gtm=4…</code></td>
+    </tr>
+<tr>
+      <td>Tracking Pixel</td>
+      <td><span class="badge badge-muted">pixel</span></td>
+      <td><span class="badge badge-muted">after-accept</span></td>
+      <td style="font-size:11px;color:var(--text-muted);word-break:break-all"><code>https://alb.reddit.com/rp.gif?ts=1771789981100&amp;id=a2_h7t01c9hiroo&amp;e…</code></td>
+    </tr>
+<tr>
+      <td>Google AdSense</td>
+      <td><span class="badge badge-muted">advertising</span></td>
+      <td><span class="badge badge-muted">after-accept</span></td>
+      <td style="font-size:11px;color:var(--text-muted);word-break:break-all"><code>https://pagead2.googlesyndication.com/ccm/collect?frm=0&amp;en=page_vie…</code></td>
+    </tr>
+<tr>
+      <td>Google AdSense</td>
+      <td><span class="badge badge-muted">advertising</span></td>
+      <td><span class="badge badge-muted">after-accept</span></td>
+      <td style="font-size:11px;color:var(--text-muted);word-break:break-all"><code>https://ade.googlesyndication.com/ddm/activity/src=14894270;type=in…</code></td>
+    </tr>
+<tr>
+      <td>Google AdSense</td>
+      <td><span class="badge badge-muted">advertising</span></td>
+      <td><span class="badge badge-muted">after-accept</span></td>
+      <td style="font-size:11px;color:var(--text-muted);word-break:break-all"><code>https://pagead2.googlesyndication.com/pagead/conversion/988306579/?…</code></td>
+    </tr>
+<tr>
+      <td>Google AdSense</td>
+      <td><span class="badge badge-muted">advertising</span></td>
+      <td><span class="badge badge-muted">after-accept</span></td>
+      <td style="font-size:11px;color:var(--text-muted);word-break:break-all"><code>https://pagead2.googlesyndication.com/ccm/collect?frm=0&amp;en=page_vie…</code></td>
+    </tr>
+<tr>
+      <td>Google Analytics</td>
+      <td><span class="badge badge-muted">analytics</span></td>
+      <td><span class="badge badge-muted">after-accept</span></td>
+      <td style="font-size:11px;color:var(--text-muted);word-break:break-all"><code>https://region1.google-analytics.com/g/collect?v=2&amp;tid=G-QHEXZ4K1SH…</code></td>
+    </tr>
+<tr>
+      <td>Google AdSense</td>
+      <td><span class="badge badge-muted">advertising</span></td>
+      <td><span class="badge badge-muted">after-accept</span></td>
+      <td style="font-size:11px;color:var(--text-muted);word-break:break-all"><code>https://ade.googlesyndication.com/ddm/activity/src=14894270;dc_pre=…</code></td>
+    </tr>
+<tr>
+      <td>Facebook SDK</td>
+      <td><span class="badge badge-muted">social</span></td>
+      <td><span class="badge badge-muted">after-accept</span></td>
+      <td style="font-size:11px;color:var(--text-muted);word-break:break-all"><code>https://connect.facebook.net/signals/config/264792006515013?v=2.9.2…</code></td>
+    </tr>
+<tr>
+      <td>Bing Ads</td>
+      <td><span class="badge badge-muted">advertising</span></td>
+      <td><span class="badge badge-muted">after-accept</span></td>
+      <td style="font-size:11px;color:var(--text-muted);word-break:break-all"><code>https://bat.bing.com/p/action/5601943.js</code></td>
+    </tr>
+<tr>
+      <td>TikTok Analytics</td>
+      <td><span class="badge badge-muted">analytics</span></td>
+      <td><span class="badge badge-muted">after-accept</span></td>
+      <td style="font-size:11px;color:var(--text-muted);word-break:break-all"><code>https://analytics.tiktok.com/i18n/pixel/static/main.MWIwNzUxMTllMQ.js</code></td>
+    </tr>
+<tr>
+      <td>Microsoft Clarity</td>
+      <td><span class="badge badge-muted">analytics</span></td>
+      <td><span class="badge badge-muted">after-accept</span></td>
+      <td style="font-size:11px;color:var(--text-muted);word-break:break-all"><code>https://www.clarity.ms/tag/uet/5601943</code></td>
+    </tr>
+<tr>
+      <td>Bing Ads</td>
+      <td><span class="badge badge-muted">advertising</span></td>
+      <td><span class="badge badge-muted">after-accept</span></td>
+      <td style="font-size:11px;color:var(--text-muted);word-break:break-all"><code>https://bat.bing.com/actionp/0?ti=5601943&amp;tm=gtm002&amp;Ver=2&amp;mid=b7b66…</code></td>
+    </tr>
+<tr>
+      <td>Bing Ads</td>
+      <td><span class="badge badge-muted">advertising</span></td>
+      <td><span class="badge badge-muted">after-accept</span></td>
+      <td style="font-size:11px;color:var(--text-muted);word-break:break-all"><code>https://bat.bing.com/action/0?ti=5601943&amp;tm=gtm002&amp;Ver=2&amp;mid=b7b66a…</code></td>
+    </tr>
+<tr>
+      <td>TikTok Analytics</td>
+      <td><span class="badge badge-muted">analytics</span></td>
+      <td><span class="badge badge-muted">after-accept</span></td>
+      <td style="font-size:11px;color:var(--text-muted);word-break:break-all"><code>https://analytics.tiktok.com/i18n/pixel/static/identify_31760074.js</code></td>
+    </tr>
+<tr>
+      <td>TikTok Analytics</td>
+      <td><span class="badge badge-muted">analytics</span></td>
+      <td><span class="badge badge-muted">after-accept</span></td>
+      <td style="font-size:11px;color:var(--text-muted);word-break:break-all"><code>https://analytics.tiktok.com/api/v2/pixel</code></td>
+    </tr>
+<tr>
+      <td>TikTok Analytics</td>
+      <td><span class="badge badge-muted">analytics</span></td>
+      <td><span class="badge badge-muted">after-accept</span></td>
+      <td style="font-size:11px;color:var(--text-muted);word-break:break-all"><code>https://analytics.tiktok.com/api/v2/pixel</code></td>
+    </tr>
+<tr>
+      <td>TikTok Analytics</td>
+      <td><span class="badge badge-muted">analytics</span></td>
+      <td><span class="badge badge-muted">after-accept</span></td>
+      <td style="font-size:11px;color:var(--text-muted);word-break:break-all"><code>https://analytics.tiktok.com/api/v2/pixel</code></td>
+    </tr>
+<tr>
+      <td>Google DoubleClick</td>
+      <td><span class="badge badge-muted">advertising</span></td>
+      <td><span class="badge badge-muted">after-accept</span></td>
+      <td style="font-size:11px;color:var(--text-muted);word-break:break-all"><code>https://ad.doubleclick.net/activity;src=14894270;type=invmedia;cat=…</code></td>
+    </tr>
+<tr>
+      <td>Google DoubleClick</td>
+      <td><span class="badge badge-muted">advertising</span></td>
+      <td><span class="badge badge-muted">after-accept</span></td>
+      <td style="font-size:11px;color:var(--text-muted);word-break:break-all"><code>https://14894270.fls.doubleclick.net/activityi;src=14894270;type=in…</code></td>
+    </tr>
+<tr>
+      <td>Google DoubleClick</td>
+      <td><span class="badge badge-muted">advertising</span></td>
+      <td><span class="badge badge-muted">after-accept</span></td>
+      <td style="font-size:11px;color:var(--text-muted);word-break:break-all"><code>https://googleads.g.doubleclick.net/pagead/viewthroughconversion/98…</code></td>
+    </tr>
+<tr>
+      <td>Google DoubleClick</td>
+      <td><span class="badge badge-muted">advertising</span></td>
+      <td><span class="badge badge-muted">after-accept</span></td>
+      <td style="font-size:11px;color:var(--text-muted);word-break:break-all"><code>https://googleads.g.doubleclick.net/pagead/viewthroughconversion/98…</code></td>
+    </tr>
+<tr>
+      <td>Google Ad Services</td>
+      <td><span class="badge badge-muted">advertising</span></td>
+      <td><span class="badge badge-muted">after-accept</span></td>
+      <td style="font-size:11px;color:var(--text-muted);word-break:break-all"><code>https://www.googleadservices.com/pagead/conversion/988306579/?rando…</code></td>
+    </tr>
+<tr>
+      <td>Bing Ads</td>
+      <td><span class="badge badge-muted">advertising</span></td>
+      <td><span class="badge badge-muted">after-accept</span></td>
+      <td style="font-size:11px;color:var(--text-muted);word-break:break-all"><code>https://bat.bing.com/actionp/0?ti=5601943&amp;tm=gtm002&amp;Ver=2&amp;mid=b7b66…</code></td>
+    </tr>
+<tr>
+      <td>Bing Ads</td>
+      <td><span class="badge badge-muted">advertising</span></td>
+      <td><span class="badge badge-muted">after-accept</span></td>
+      <td style="font-size:11px;color:var(--text-muted);word-break:break-all"><code>https://bat.bing.com/actionp/0?ti=5601943&amp;tm=gtm002&amp;Ver=2&amp;mid=b7b66…</code></td>
+    </tr>
+<tr>
+      <td>Google Analytics</td>
+      <td><span class="badge badge-muted">analytics</span></td>
+      <td><span class="badge badge-muted">after-accept</span></td>
+      <td style="font-size:11px;color:var(--text-muted);word-break:break-all"><code>https://region1.analytics.google.com/g/collect?v=2&amp;tid=G-QHEXZ4K1SH…</code></td>
+    </tr>
+<tr>
+      <td>Tracking Pixel</td>
+      <td><span class="badge badge-muted">pixel</span></td>
+      <td><span class="badge badge-muted">after-accept</span></td>
+      <td style="font-size:11px;color:var(--text-muted);word-break:break-all"><code>https://www.google.com/ccm/collect?frm=0&amp;en=consent_update&amp;dl=https…</code></td>
+    </tr>
+<tr>
+      <td>Microsoft Clarity</td>
+      <td><span class="badge badge-muted">analytics</span></td>
+      <td><span class="badge badge-muted">after-accept</span></td>
+      <td style="font-size:11px;color:var(--text-muted);word-break:break-all"><code>https://scripts.clarity.ms/0.8.54/clarity.js</code></td>
+    </tr>
+<tr>
+      <td>Google DoubleClick</td>
+      <td><span class="badge badge-muted">advertising</span></td>
+      <td><span class="badge badge-muted">after-accept</span></td>
+      <td style="font-size:11px;color:var(--text-muted);word-break:break-all"><code>https://14894270.fls.doubleclick.net/activityi;dc_pre=COaV24Pw7ZIDF…</code></td>
+    </tr></tbody>
+    </table>
+    <p style="padding:12px 14px;font-size:12px;color:var(--text-muted)">… and 4 more.</p>
+  </div>
+</div>
+
+  <div class="section">
+  <div class="section-header"><h2>Recommendations</h2><span class="count-badge">2</span></div>
+  <div class="section-body">
+    <ul class="rec-list"><li class="rec-item">
+    <span class="rec-num">1</span>
+    <span>Do not set any non-essential cookie before consent. Gate the initialisation of third-party scripts on the acceptance callback.</span>
+  </li>
+<li class="rec-item">
+    <span class="rec-num">2</span>
+    <span>Remove or block non-essential cookies after rejection, and verify consent handling server-side.</span>
+  </li></ul>
+  </div>
+</div>
+
+  <div class="section">
+  <div class="section-header">
+    <h2>Compliance checklist</h2>
+    <span class="count-badge">12 rules</span>
+    <span class="badge badge-ok">9 ✓</span>
+    <span class="badge badge-critical">3 ✗</span>
+    
+  </div>
+  <div class="section-body no-pad">
+    <table class="data-table">
+      <thead><tr><th>Category</th><th>Rule</th><th>Status</th><th>Detail</th></tr></thead>
+      <tbody><tr>
+          <td rowspan="3" style="font-weight:600;vertical-align:top;background:var(--bg)">Consent</td>
+          <td>Consent modal detected</td>
+          <td><span class="status-ok">✓ Compliant</span></td>
+          <td style="color:var(--text-muted);font-size:12px">Detected ([class*='cookie'][class*='modal'])</td>
+        </tr>
+<tr>
+          
+          <td>No pre-ticked checkboxes</td>
+          <td><span class="status-ok">✓ Compliant</span></td>
+          <td style="color:var(--text-muted);font-size:12px">None detected</td>
+        </tr>
+<tr>
+          
+          <td>Unambiguous accept label</td>
+          <td><span class="status-ok">✓ Compliant</span></td>
+          <td style="color:var(--text-muted);font-size:12px">Accepter</td>
+        </tr>
+<tr>
+          <td rowspan="3" style="font-weight:600;vertical-align:top;background:var(--bg)">Easy refusal</td>
+          <td>Reject button at first layer</td>
+          <td><span class="status-ok">✓ Compliant</span></td>
+          <td style="color:var(--text-muted);font-size:12px">Refuser</td>
+        </tr>
+<tr>
+          
+          <td>Reject ≤ clicks than accept</td>
+          <td><span class="status-ok">✓ Compliant</span></td>
+          <td style="color:var(--text-muted);font-size:12px">Accept: 1 · Reject: 1</td>
+        </tr>
+<tr>
+          
+          <td>Button size symmetry</td>
+          <td><span class="status-ok">✓ Compliant</span></td>
+          <td style="color:var(--text-muted);font-size:12px">Comparable sizes</td>
+        </tr>
+<tr>
+          <td rowspan="3" style="font-weight:600;vertical-align:top;background:var(--bg)">Transparency</td>
+          <td>Granular controls available</td>
+          <td><span class="status-ok">✓ Compliant</span></td>
+          <td style="color:var(--text-muted);font-size:12px">0 control(s) detected</td>
+        </tr>
+<tr>
+          
+          <td>Privacy policy in modal</td>
+          <td><span class="status-ok">✓ Compliant</span></td>
+          <td style="color:var(--text-muted);font-size:12px">https://vdp.deezer.com/p/Welcome</td>
+        </tr>
+<tr>
+          
+          <td>Privacy policy on page</td>
+          <td><span class="status-ok">✓ Compliant</span></td>
+          <td style="color:var(--text-muted);font-size:12px">https://vdp.deezer.com/p/Welcome</td>
+        </tr>
+<tr>
+          <td rowspan="3" style="font-weight:600;vertical-align:top;background:var(--bg)">Cookie behavior</td>
+          <td>No non-essential cookie before consent</td>
+          <td><span class="status-ko">✗ Non-compliant</span></td>
+          <td style="color:var(--text-muted);font-size:12px">1: sid</td>
+        </tr>
+<tr>
+          
+          <td>Non-essential cookies removed after reject</td>
+          <td><span class="status-ko">✗ Non-compliant</span></td>
+          <td style="color:var(--text-muted);font-size:12px">2 persisting</td>
+        </tr>
+<tr>
+          
+          <td>No tracker before consent</td>
+          <td><span class="status-ko">✗ Non-compliant</span></td>
+          <td style="color:var(--text-muted);font-size:12px">8 tracker(s)</td>
+        </tr></tbody>
+    </table>
+  </div>
+</div>
+
+  <div class="footer">
+    Generated by <a href="https://github.com/Slashgear/gdpr-report">gdpr-cookie-scanner</a>
+    on 22 February 2026 at 20:53
+  </div>
+
+</div>
+</body>
+</html>
