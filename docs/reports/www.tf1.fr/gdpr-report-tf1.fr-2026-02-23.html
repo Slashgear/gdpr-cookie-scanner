@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>GDPR Report — radiofrance.fr</title>
+    <title>GDPR Report — tf1.fr</title>
     <style>
       *,
       *::before,
@@ -12,8 +12,8 @@
       }
 
       :root {
-        --grade: #65a30d;
-        --grade-bg: #f7fee7;
+        --grade: #ca8a04;
+        --grade-bg: #fefce8;
         --surface: #ffffff;
         --bg: #f1f5f9;
         --border: #e2e8f0;
@@ -446,14 +446,14 @@
   <body>
     <div class="page">
       <div class="hero">
-        <div class="grade-badge" style="background: #65a30d">B</div>
+        <div class="grade-badge" style="background: #ca8a04">C</div>
         <div class="hero-info">
-          <h1>radiofrance.fr</h1>
-          <p class="hero-meta">Scanned on 24 February 2026 at 14:59 · 14.1s</p>
+          <h1>tf1.fr</h1>
+          <p class="hero-meta">Scanned on 23 February 2026 at 23:01 · 42.8s</p>
         </div>
         <div class="hero-score">
           <div>
-            <span class="score-num" style="color: #65a30d">87</span
+            <span class="score-num" style="color: #ca8a04">61</span
             ><span class="score-den">/100</span>
           </div>
           <div class="score-label">Compliance score</div>
@@ -477,16 +477,16 @@
         </div>
         <div class="score-card">
           <div class="score-card-label">Transparency</div>
-          <div class="score-card-value">20<span>/25</span></div>
+          <div class="score-card-value">10<span>/25</span></div>
           <div class="progress-track">
-            <div class="progress-fill" style="width: 80%; background: #16a34a"></div>
+            <div class="progress-fill" style="width: 40%; background: #ea580c"></div>
           </div>
         </div>
         <div class="score-card">
           <div class="score-card-label">Cookie behavior</div>
-          <div class="score-card-value">17<span>/25</span></div>
+          <div class="score-card-value">1<span>/25</span></div>
           <div class="progress-track">
-            <div class="progress-fill" style="width: 68%; background: #ca8a04"></div>
+            <div class="progress-fill" style="width: 4%; background: #dc2626"></div>
           </div>
         </div>
       </div>
@@ -494,15 +494,27 @@
       <div class="section">
         <div class="section-header">
           <h2>Issues</h2>
-          <span class="count-badge">2</span>
-          <span class="badge badge-critical">1 critical</span>
+          <span class="count-badge">4</span>
+          <span class="badge badge-critical">3 critical</span>
           <span class="badge badge-warning">1 warning</span>
         </div>
         <div class="section-body">
           <div class="issue-list">
             <div class="issue-card critical">
-              <div class="issue-title">4 tracker request(s) fired before any consent</div>
-              <p class="issue-evidence">Google Tag Manager, Google AdSense, Outbrain</p>
+              <div class="issue-title">
+                2 non-essential cookie(s) deposited before any interaction
+              </div>
+              <p class="issue-evidence">gmid (unknown), ucid (unknown)</p>
+            </div>
+            <div class="issue-card critical">
+              <div class="issue-title">4 non-essential cookie(s) persist after rejection</div>
+              <p class="issue-evidence">
+                gmid (unknown), ucid (unknown), TCID (unknown), WID (unknown)
+              </p>
+            </div>
+            <div class="issue-card critical">
+              <div class="issue-title">2 tracker request(s) fired before any consent</div>
+              <p class="issue-evidence">Facebook SDK</p>
             </div>
             <div class="issue-card warning">
               <div class="issue-title">No privacy policy link found in the consent modal</div>
@@ -528,7 +540,7 @@
             </div>
             <div class="info-item">
               <div class="info-label">Granular controls</div>
-              <div class="info-value"><span class="status-ok">✓ Yes</span></div>
+              <div class="info-value"><span class="status-warn">✗ No</span></div>
             </div>
             <div class="info-item">
               <div class="info-label">Privacy policy link</div>
@@ -564,30 +576,23 @@
             <tbody>
               <tr>
                 <td><span class="btn-chip unknown">unknown</span></td>
-                <td>Voir nos 154 partenaires</td>
-                <td>16px</td>
-                <td>4.08:1</td>
-                <td>1</td>
-              </tr>
-              <tr>
-                <td><span class="btn-chip preferences">preferences</span></td>
-                <td>Gérer mes choix</td>
-                <td>16px</td>
-                <td>1.26:1</td>
+                <td>PARAMÉTRER VOS CHOIX</td>
+                <td>12px</td>
+                <td>3.03:1</td>
                 <td>1</td>
               </tr>
               <tr>
                 <td><span class="btn-chip reject">reject</span></td>
-                <td>Tout refuser</td>
-                <td>16px</td>
-                <td>18.42:1</td>
+                <td>TOUT REFUSER</td>
+                <td>12px</td>
+                <td>6.24:1</td>
                 <td>1</td>
               </tr>
               <tr>
                 <td><span class="btn-chip accept">accept</span></td>
-                <td>Tout accepter</td>
-                <td>16px</td>
-                <td>18.42:1</td>
+                <td>TOUT ACCEPTER</td>
+                <td>12px</td>
+                <td>6.24:1</td>
                 <td>1</td>
               </tr>
             </tbody>
@@ -613,7 +618,8 @@
               "
             >
               Before interaction
-              <span class="count-badge">3</span>
+              <span class="count-badge">14</span>
+              <span class="badge badge-critical">2 non-essential</span>
             </div>
             <table class="data-table">
               <thead>
@@ -627,24 +633,105 @@
               </thead>
               <tbody>
                 <tr>
+                  <td><code>_dd_s</code></td>
+                  <td style="color: var(--text-muted)">www.tf1.fr</td>
+                  <td><span class="badge badge-muted">unknown</span></td>
+                  <td style="color: var(--text-muted)">12mo</td>
+                  <td><span class="badge badge-muted">No</span></td>
+                </tr>
+                <tr>
+                  <td><code>tf1_version</code></td>
+                  <td style="color: var(--text-muted)">www.tf1.fr</td>
+                  <td><span class="badge badge-muted">unknown</span></td>
+                  <td style="color: var(--text-muted)">3mo</td>
+                  <td><span class="badge badge-muted">No</span></td>
+                </tr>
+                <tr>
+                  <td><code>TCPID</code></td>
+                  <td style="color: var(--text-muted)">.tf1.fr</td>
+                  <td><span class="badge badge-muted">unknown</span></td>
+                  <td style="color: var(--text-muted)">13mo</td>
+                  <td><span class="badge badge-muted">No</span></td>
+                </tr>
+                <tr>
+                  <td><code>_pprv</code></td>
+                  <td style="color: var(--text-muted)">.tf1.fr</td>
+                  <td><span class="badge badge-muted">unknown</span></td>
+                  <td style="color: var(--text-muted)">13mo</td>
+                  <td><span class="badge badge-muted">No</span></td>
+                </tr>
+                <tr>
+                  <td><code>tc_unique_id</code></td>
+                  <td style="color: var(--text-muted)">.tf1.fr</td>
+                  <td><span class="badge badge-muted">unknown</span></td>
+                  <td style="color: var(--text-muted)">Session</td>
+                  <td><span class="badge badge-muted">No</span></td>
+                </tr>
+                <tr>
+                  <td><code>ID_SESSION</code></td>
+                  <td style="color: var(--text-muted)">.tf1.fr</td>
+                  <td><span class="badge badge-muted">unknown</span></td>
+                  <td style="color: var(--text-muted)">Session</td>
+                  <td><span class="badge badge-muted">No</span></td>
+                </tr>
+                <tr>
+                  <td><code>tc_pp_test</code></td>
+                  <td style="color: var(--text-muted)">.tf1.fr</td>
+                  <td><span class="badge badge-muted">unknown</span></td>
+                  <td style="color: var(--text-muted)">1mo</td>
+                  <td><span class="badge badge-muted">No</span></td>
+                </tr>
+                <tr>
+                  <td><code>gig_canary</code></td>
+                  <td style="color: var(--text-muted)">cdns.eu1.gigya.com</td>
+                  <td><span class="badge badge-muted">unknown</span></td>
+                  <td style="color: var(--text-muted)">< 1 day</td>
+                  <td><span class="badge badge-muted">No</span></td>
+                </tr>
+                <tr>
                   <td><code>didomi_token</code></td>
-                  <td style="color: var(--text-muted)">.radiofrance.fr</td>
+                  <td style="color: var(--text-muted)">.tf1.fr</td>
                   <td><span class="badge badge-muted">strictly-necessary</span></td>
                   <td style="color: var(--text-muted)">6mo</td>
                   <td><span class="badge badge-muted">No</span></td>
                 </tr>
                 <tr>
-                  <td><code>rf-session</code></td>
-                  <td style="color: var(--text-muted)">www.radiofrance.fr</td>
-                  <td><span class="badge badge-muted">unknown</span></td>
-                  <td style="color: var(--text-muted)">< 1 day</td>
+                  <td><code>didomi_cookies</code></td>
+                  <td style="color: var(--text-muted)">www.tf1.fr</td>
+                  <td><span class="badge badge-muted">strictly-necessary</span></td>
+                  <td style="color: var(--text-muted)">12mo</td>
                   <td><span class="badge badge-muted">No</span></td>
                 </tr>
                 <tr>
-                  <td><code>visit_id</code></td>
-                  <td style="color: var(--text-muted)">www.radiofrance.fr</td>
+                  <td><code>gmid</code></td>
+                  <td style="color: var(--text-muted)">.compte.tf1.fr</td>
                   <td><span class="badge badge-muted">unknown</span></td>
-                  <td style="color: var(--text-muted)">< 1 day</td>
+                  <td style="color: var(--text-muted)">12mo</td>
+                  <td><span class="badge badge-warning">Required</span></td>
+                </tr>
+                <tr>
+                  <td><code>ucid</code></td>
+                  <td style="color: var(--text-muted)">.compte.tf1.fr</td>
+                  <td><span class="badge badge-muted">unknown</span></td>
+                  <td style="color: var(--text-muted)">12mo</td>
+                  <td><span class="badge badge-warning">Required</span></td>
+                </tr>
+                <tr>
+                  <td><code>hasGmid</code></td>
+                  <td style="color: var(--text-muted)">.compte.tf1.fr</td>
+                  <td><span class="badge badge-muted">unknown</span></td>
+                  <td style="color: var(--text-muted)">6mo</td>
+                  <td><span class="badge badge-muted">No</span></td>
+                </tr>
+                <tr>
+                  <td>
+                    <code
+                      >gig_bootstrap_3_hWgJdARhz_7l1oOp3a8BDLoR9cuWZpUaKG4aqF7gum9_iK3uTZ2VlDBl8ANf8FVk</code
+                    >
+                  </td>
+                  <td style="color: var(--text-muted)">.tf1.fr</td>
+                  <td><span class="badge badge-muted">unknown</span></td>
+                  <td style="color: var(--text-muted)">12mo</td>
                   <td><span class="badge badge-muted">No</span></td>
                 </tr>
               </tbody>
@@ -665,7 +752,9 @@
               "
             >
               After reject
-              <span class="count-badge">4</span>
+              <span class="count-badge">18</span>
+
+              <span class="badge badge-critical">4 non-essential</span>
             </div>
             <table class="data-table">
               <thead>
@@ -679,32 +768,134 @@
               </thead>
               <tbody>
                 <tr>
-                  <td><code>rf-session</code></td>
-                  <td style="color: var(--text-muted)">www.radiofrance.fr</td>
+                  <td><code>tf1_version</code></td>
+                  <td style="color: var(--text-muted)">www.tf1.fr</td>
+                  <td><span class="badge badge-muted">unknown</span></td>
+                  <td style="color: var(--text-muted)">3mo</td>
+                  <td><span class="badge badge-muted">No</span></td>
+                </tr>
+                <tr>
+                  <td><code>TCPID</code></td>
+                  <td style="color: var(--text-muted)">.tf1.fr</td>
+                  <td><span class="badge badge-muted">unknown</span></td>
+                  <td style="color: var(--text-muted)">13mo</td>
+                  <td><span class="badge badge-muted">No</span></td>
+                </tr>
+                <tr>
+                  <td><code>_pprv</code></td>
+                  <td style="color: var(--text-muted)">.tf1.fr</td>
+                  <td><span class="badge badge-muted">unknown</span></td>
+                  <td style="color: var(--text-muted)">13mo</td>
+                  <td><span class="badge badge-muted">No</span></td>
+                </tr>
+                <tr>
+                  <td><code>tc_unique_id</code></td>
+                  <td style="color: var(--text-muted)">.tf1.fr</td>
+                  <td><span class="badge badge-muted">unknown</span></td>
+                  <td style="color: var(--text-muted)">Session</td>
+                  <td><span class="badge badge-muted">No</span></td>
+                </tr>
+                <tr>
+                  <td><code>ID_SESSION</code></td>
+                  <td style="color: var(--text-muted)">.tf1.fr</td>
+                  <td><span class="badge badge-muted">unknown</span></td>
+                  <td style="color: var(--text-muted)">Session</td>
+                  <td><span class="badge badge-muted">No</span></td>
+                </tr>
+                <tr>
+                  <td><code>tc_pp_test</code></td>
+                  <td style="color: var(--text-muted)">.tf1.fr</td>
+                  <td><span class="badge badge-muted">unknown</span></td>
+                  <td style="color: var(--text-muted)">1mo</td>
+                  <td><span class="badge badge-muted">No</span></td>
+                </tr>
+                <tr>
+                  <td><code>gig_canary</code></td>
+                  <td style="color: var(--text-muted)">cdns.eu1.gigya.com</td>
                   <td><span class="badge badge-muted">unknown</span></td>
                   <td style="color: var(--text-muted)">< 1 day</td>
                   <td><span class="badge badge-muted">No</span></td>
                 </tr>
                 <tr>
-                  <td><code>visit_id</code></td>
-                  <td style="color: var(--text-muted)">www.radiofrance.fr</td>
+                  <td><code>didomi_cookies</code></td>
+                  <td style="color: var(--text-muted)">www.tf1.fr</td>
+                  <td><span class="badge badge-muted">strictly-necessary</span></td>
+                  <td style="color: var(--text-muted)">12mo</td>
+                  <td><span class="badge badge-muted">No</span></td>
+                </tr>
+                <tr>
+                  <td><code>gmid</code></td>
+                  <td style="color: var(--text-muted)">.compte.tf1.fr</td>
                   <td><span class="badge badge-muted">unknown</span></td>
-                  <td style="color: var(--text-muted)">< 1 day</td>
+                  <td style="color: var(--text-muted)">12mo</td>
+                  <td><span class="badge badge-warning">Required</span></td>
+                </tr>
+                <tr>
+                  <td><code>ucid</code></td>
+                  <td style="color: var(--text-muted)">.compte.tf1.fr</td>
+                  <td><span class="badge badge-muted">unknown</span></td>
+                  <td style="color: var(--text-muted)">12mo</td>
+                  <td><span class="badge badge-warning">Required</span></td>
+                </tr>
+                <tr>
+                  <td><code>hasGmid</code></td>
+                  <td style="color: var(--text-muted)">.compte.tf1.fr</td>
+                  <td><span class="badge badge-muted">unknown</span></td>
+                  <td style="color: var(--text-muted)">6mo</td>
+                  <td><span class="badge badge-muted">No</span></td>
+                </tr>
+                <tr>
+                  <td>
+                    <code
+                      >gig_bootstrap_3_hWgJdARhz_7l1oOp3a8BDLoR9cuWZpUaKG4aqF7gum9_iK3uTZ2VlDBl8ANf8FVk</code
+                    >
+                  </td>
+                  <td style="color: var(--text-muted)">.tf1.fr</td>
+                  <td><span class="badge badge-muted">unknown</span></td>
+                  <td style="color: var(--text-muted)">12mo</td>
+                  <td><span class="badge badge-muted">No</span></td>
+                </tr>
+                <tr>
+                  <td><code>_dd_s</code></td>
+                  <td style="color: var(--text-muted)">www.tf1.fr</td>
+                  <td><span class="badge badge-muted">unknown</span></td>
+                  <td style="color: var(--text-muted)">12mo</td>
                   <td><span class="badge badge-muted">No</span></td>
                 </tr>
                 <tr>
                   <td><code>didomi_token</code></td>
-                  <td style="color: var(--text-muted)">.radiofrance.fr</td>
+                  <td style="color: var(--text-muted)">.tf1.fr</td>
                   <td><span class="badge badge-muted">strictly-necessary</span></td>
                   <td style="color: var(--text-muted)">6mo</td>
                   <td><span class="badge badge-muted">No</span></td>
                 </tr>
                 <tr>
                   <td><code>euconsent-v2</code></td>
-                  <td style="color: var(--text-muted)">.radiofrance.fr</td>
+                  <td style="color: var(--text-muted)">.tf1.fr</td>
                   <td><span class="badge badge-muted">unknown</span></td>
                   <td style="color: var(--text-muted)">6mo</td>
                   <td><span class="badge badge-muted">No</span></td>
+                </tr>
+                <tr>
+                  <td><code>tCdebugLib</code></td>
+                  <td style="color: var(--text-muted)">.tf1.fr</td>
+                  <td><span class="badge badge-muted">unknown</span></td>
+                  <td style="color: var(--text-muted)">1mo</td>
+                  <td><span class="badge badge-muted">No</span></td>
+                </tr>
+                <tr>
+                  <td><code>TCID</code></td>
+                  <td style="color: var(--text-muted)">.commander1.com</td>
+                  <td><span class="badge badge-muted">unknown</span></td>
+                  <td style="color: var(--text-muted)">12mo</td>
+                  <td><span class="badge badge-warning">Required</span></td>
+                </tr>
+                <tr>
+                  <td><code>WID</code></td>
+                  <td style="color: var(--text-muted)">.commander1.com</td>
+                  <td><span class="badge badge-muted">unknown</span></td>
+                  <td style="color: var(--text-muted)">Session</td>
+                  <td><span class="badge badge-warning">Required</span></td>
                 </tr>
               </tbody>
             </table>
@@ -724,7 +915,7 @@
               "
             >
               After accept
-              <span class="count-badge">7</span>
+              <span class="count-badge">31</span>
             </div>
             <table class="data-table">
               <thead>
@@ -738,53 +929,225 @@
               </thead>
               <tbody>
                 <tr>
-                  <td><code>rf-session</code></td>
-                  <td style="color: var(--text-muted)">www.radiofrance.fr</td>
+                  <td><code>tf1_version</code></td>
+                  <td style="color: var(--text-muted)">www.tf1.fr</td>
+                  <td><span class="badge badge-muted">unknown</span></td>
+                  <td style="color: var(--text-muted)">3mo</td>
+                  <td><span class="badge badge-muted">No</span></td>
+                </tr>
+                <tr>
+                  <td><code>TCPID</code></td>
+                  <td style="color: var(--text-muted)">.tf1.fr</td>
+                  <td><span class="badge badge-muted">unknown</span></td>
+                  <td style="color: var(--text-muted)">13mo</td>
+                  <td><span class="badge badge-muted">No</span></td>
+                </tr>
+                <tr>
+                  <td><code>tc_unique_id</code></td>
+                  <td style="color: var(--text-muted)">.tf1.fr</td>
+                  <td><span class="badge badge-muted">unknown</span></td>
+                  <td style="color: var(--text-muted)">Session</td>
+                  <td><span class="badge badge-muted">No</span></td>
+                </tr>
+                <tr>
+                  <td><code>ID_SESSION</code></td>
+                  <td style="color: var(--text-muted)">.tf1.fr</td>
+                  <td><span class="badge badge-muted">unknown</span></td>
+                  <td style="color: var(--text-muted)">Session</td>
+                  <td><span class="badge badge-muted">No</span></td>
+                </tr>
+                <tr>
+                  <td><code>tc_pp_test</code></td>
+                  <td style="color: var(--text-muted)">.tf1.fr</td>
+                  <td><span class="badge badge-muted">unknown</span></td>
+                  <td style="color: var(--text-muted)">1mo</td>
+                  <td><span class="badge badge-muted">No</span></td>
+                </tr>
+                <tr>
+                  <td><code>gig_canary</code></td>
+                  <td style="color: var(--text-muted)">cdns.eu1.gigya.com</td>
                   <td><span class="badge badge-muted">unknown</span></td>
                   <td style="color: var(--text-muted)">< 1 day</td>
                   <td><span class="badge badge-muted">No</span></td>
                 </tr>
                 <tr>
-                  <td><code>visit_id</code></td>
-                  <td style="color: var(--text-muted)">www.radiofrance.fr</td>
+                  <td><code>gmid</code></td>
+                  <td style="color: var(--text-muted)">.compte.tf1.fr</td>
                   <td><span class="badge badge-muted">unknown</span></td>
-                  <td style="color: var(--text-muted)">< 1 day</td>
+                  <td style="color: var(--text-muted)">12mo</td>
+                  <td><span class="badge badge-warning">Required</span></td>
+                </tr>
+                <tr>
+                  <td><code>ucid</code></td>
+                  <td style="color: var(--text-muted)">.compte.tf1.fr</td>
+                  <td><span class="badge badge-muted">unknown</span></td>
+                  <td style="color: var(--text-muted)">12mo</td>
+                  <td><span class="badge badge-warning">Required</span></td>
+                </tr>
+                <tr>
+                  <td><code>hasGmid</code></td>
+                  <td style="color: var(--text-muted)">.compte.tf1.fr</td>
+                  <td><span class="badge badge-muted">unknown</span></td>
+                  <td style="color: var(--text-muted)">6mo</td>
+                  <td><span class="badge badge-muted">No</span></td>
+                </tr>
+                <tr>
+                  <td>
+                    <code
+                      >gig_bootstrap_3_hWgJdARhz_7l1oOp3a8BDLoR9cuWZpUaKG4aqF7gum9_iK3uTZ2VlDBl8ANf8FVk</code
+                    >
+                  </td>
+                  <td style="color: var(--text-muted)">.tf1.fr</td>
+                  <td><span class="badge badge-muted">unknown</span></td>
+                  <td style="color: var(--text-muted)">12mo</td>
+                  <td><span class="badge badge-muted">No</span></td>
+                </tr>
+                <tr>
+                  <td><code>tCdebugLib</code></td>
+                  <td style="color: var(--text-muted)">.tf1.fr</td>
+                  <td><span class="badge badge-muted">unknown</span></td>
+                  <td style="color: var(--text-muted)">1mo</td>
+                  <td><span class="badge badge-muted">No</span></td>
+                </tr>
+                <tr>
+                  <td><code>TCID</code></td>
+                  <td style="color: var(--text-muted)">.commander1.com</td>
+                  <td><span class="badge badge-muted">unknown</span></td>
+                  <td style="color: var(--text-muted)">12mo</td>
+                  <td><span class="badge badge-warning">Required</span></td>
+                </tr>
+                <tr>
+                  <td><code>WID</code></td>
+                  <td style="color: var(--text-muted)">.commander1.com</td>
+                  <td><span class="badge badge-muted">unknown</span></td>
+                  <td style="color: var(--text-muted)">Session</td>
+                  <td><span class="badge badge-warning">Required</span></td>
+                </tr>
+                <tr>
+                  <td><code>_dd_s</code></td>
+                  <td style="color: var(--text-muted)">www.tf1.fr</td>
+                  <td><span class="badge badge-muted">unknown</span></td>
+                  <td style="color: var(--text-muted)">12mo</td>
                   <td><span class="badge badge-muted">No</span></td>
                 </tr>
                 <tr>
                   <td><code>didomi_token</code></td>
-                  <td style="color: var(--text-muted)">.radiofrance.fr</td>
+                  <td style="color: var(--text-muted)">.tf1.fr</td>
                   <td><span class="badge badge-muted">strictly-necessary</span></td>
                   <td style="color: var(--text-muted)">6mo</td>
                   <td><span class="badge badge-muted">No</span></td>
                 </tr>
                 <tr>
                   <td><code>euconsent-v2</code></td>
-                  <td style="color: var(--text-muted)">.radiofrance.fr</td>
+                  <td style="color: var(--text-muted)">.tf1.fr</td>
                   <td><span class="badge badge-muted">unknown</span></td>
                   <td style="color: var(--text-muted)">6mo</td>
                   <td><span class="badge badge-muted">No</span></td>
                 </tr>
                 <tr>
+                  <td><code>didomi_cookies</code></td>
+                  <td style="color: var(--text-muted)">www.tf1.fr</td>
+                  <td><span class="badge badge-muted">strictly-necessary</span></td>
+                  <td style="color: var(--text-muted)">12mo</td>
+                  <td><span class="badge badge-muted">No</span></td>
+                </tr>
+                <tr>
+                  <td><code>nol_fpid</code></td>
+                  <td style="color: var(--text-muted)">.tf1.fr</td>
+                  <td><span class="badge badge-muted">unknown</span></td>
+                  <td style="color: var(--text-muted)">6mo</td>
+                  <td><span class="badge badge-muted">No</span></td>
+                </tr>
+                <tr>
+                  <td><code>ab.storage.deviceId.059bf192-2687-4fbb-9315-86fe062b7c26</code></td>
+                  <td style="color: var(--text-muted)">.tf1.fr</td>
+                  <td><span class="badge badge-muted">unknown</span></td>
+                  <td style="color: var(--text-muted)">13mo</td>
+                  <td><span class="badge badge-muted">No</span></td>
+                </tr>
+                <tr>
+                  <td><code>ABTastySession</code></td>
+                  <td style="color: var(--text-muted)">.tf1.fr</td>
+                  <td><span class="badge badge-muted">unknown</span></td>
+                  <td style="color: var(--text-muted)">< 1 day</td>
+                  <td><span class="badge badge-muted">No</span></td>
+                </tr>
+                <tr>
+                  <td><code>_pprv</code></td>
+                  <td style="color: var(--text-muted)">.tf1.fr</td>
+                  <td><span class="badge badge-muted">unknown</span></td>
+                  <td style="color: var(--text-muted)">13mo</td>
+                  <td><span class="badge badge-muted">No</span></td>
+                </tr>
+                <tr>
+                  <td><code>pa_user</code></td>
+                  <td style="color: var(--text-muted)">www.tf1.fr</td>
+                  <td><span class="badge badge-muted">unknown</span></td>
+                  <td style="color: var(--text-muted)">13mo</td>
+                  <td><span class="badge badge-muted">No</span></td>
+                </tr>
+                <tr>
+                  <td><code>_pcid</code></td>
+                  <td style="color: var(--text-muted)">.tf1.fr</td>
+                  <td><span class="badge badge-muted">unknown</span></td>
+                  <td style="color: var(--text-muted)">13mo</td>
+                  <td><span class="badge badge-muted">No</span></td>
+                </tr>
+                <tr>
+                  <td><code>_pctx</code></td>
+                  <td style="color: var(--text-muted)">.tf1.fr</td>
+                  <td><span class="badge badge-muted">unknown</span></td>
+                  <td style="color: var(--text-muted)">13mo</td>
+                  <td><span class="badge badge-muted">No</span></td>
+                </tr>
+                <tr>
+                  <td><code>ab.storage.sessionId.059bf192-2687-4fbb-9315-86fe062b7c26</code></td>
+                  <td style="color: var(--text-muted)">.tf1.fr</td>
+                  <td><span class="badge badge-muted">unknown</span></td>
+                  <td style="color: var(--text-muted)">13mo</td>
+                  <td><span class="badge badge-muted">No</span></td>
+                </tr>
+                <tr>
+                  <td><code>ABTasty</code></td>
+                  <td style="color: var(--text-muted)">.tf1.fr</td>
+                  <td><span class="badge badge-muted">unknown</span></td>
+                  <td style="color: var(--text-muted)">13mo</td>
+                  <td><span class="badge badge-muted">No</span></td>
+                </tr>
+                <tr>
                   <td><code>_gcl_au</code></td>
-                  <td style="color: var(--text-muted)">.radiofrance.fr</td>
+                  <td style="color: var(--text-muted)">.tf1.fr</td>
                   <td><span class="badge badge-muted">unknown</span></td>
                   <td style="color: var(--text-muted)">3mo</td>
                   <td><span class="badge badge-muted">No</span></td>
                 </tr>
                 <tr>
-                  <td><code>test_cookie</code></td>
-                  <td style="color: var(--text-muted)">.doubleclick.net</td>
+                  <td><code>XANDR_PANID</code></td>
+                  <td style="color: var(--text-muted)">.adnxs.com</td>
                   <td><span class="badge badge-muted">unknown</span></td>
-                  <td style="color: var(--text-muted)">< 1 day</td>
+                  <td style="color: var(--text-muted)">3mo</td>
                   <td><span class="badge badge-muted">No</span></td>
                 </tr>
                 <tr>
-                  <td><code>dicbo_id</code></td>
-                  <td style="color: var(--text-muted)">www.radiofrance.fr</td>
+                  <td><code>uuid2</code></td>
+                  <td style="color: var(--text-muted)">.adnxs.com</td>
+                  <td><span class="badge badge-muted">unknown</span></td>
+                  <td style="color: var(--text-muted)">3mo</td>
+                  <td><span class="badge badge-muted">No</span></td>
+                </tr>
+                <tr>
+                  <td><code>IDE</code></td>
+                  <td style="color: var(--text-muted)">.doubleclick.net</td>
+                  <td><span class="badge badge-muted">advertising</span></td>
+                  <td style="color: var(--text-muted)">13mo</td>
+                  <td><span class="badge badge-warning">Required</span></td>
+                </tr>
+                <tr>
+                  <td><code>chk</code></td>
+                  <td style="color: var(--text-muted)">.mediarithmics.com</td>
                   <td><span class="badge badge-muted">unknown</span></td>
                   <td style="color: var(--text-muted)">< 1 day</td>
-                  <td><span class="badge badge-muted">No</span></td>
+                  <td><span class="badge badge-warning">Required</span></td>
                 </tr>
               </tbody>
             </table>
@@ -795,8 +1158,8 @@
       <div class="section">
         <div class="section-header">
           <h2>Network trackers</h2>
-          <span class="count-badge">22</span>
-          <span class="badge badge-critical">4 before consent</span>
+          <span class="count-badge">21</span>
+          <span class="badge badge-critical">2 before consent</span>
         </div>
         <div class="section-body no-pad">
           <table class="data-table">
@@ -810,37 +1173,35 @@
             </thead>
             <tbody>
               <tr>
-                <td>Google Tag Manager</td>
-                <td><span class="badge badge-muted">analytics</span></td>
+                <td>Facebook SDK</td>
+                <td><span class="badge badge-muted">social</span></td>
                 <td><span class="badge badge-critical">before consent</span></td>
                 <td style="font-size: 11px; color: var(--text-muted); word-break: break-all">
-                  <code>https://www.googletagmanager.com/gtag/js?id=AW-702468586</code>
+                  <code>https://connect.facebook.net/fr_FR/sdk.js</code>
                 </td>
               </tr>
               <tr>
-                <td>Google AdSense</td>
-                <td><span class="badge badge-muted">advertising</span></td>
+                <td>Facebook SDK</td>
+                <td><span class="badge badge-muted">social</span></td>
                 <td><span class="badge badge-critical">before consent</span></td>
                 <td style="font-size: 11px; color: var(--text-muted); word-break: break-all">
-                  <code
-                    >https://pagead2.googlesyndication.com/ccm/collect?frm=0&amp;en=page_vie…</code
-                  >
+                  <code>https://connect.facebook.net/fr_FR/sdk.js?hash=c54cd069db9225e0ba0e…</code>
                 </td>
               </tr>
               <tr>
-                <td>Google Tag Manager</td>
-                <td><span class="badge badge-muted">analytics</span></td>
-                <td><span class="badge badge-critical">before consent</span></td>
+                <td>Facebook SDK</td>
+                <td><span class="badge badge-muted">social</span></td>
+                <td><span class="badge badge-muted">after-accept</span></td>
                 <td style="font-size: 11px; color: var(--text-muted); word-break: break-all">
-                  <code>https://www.googletagmanager.com/static/service_worker/6240/sw_ifra…</code>
+                  <code>https://connect.facebook.net/fr_FR/sdk.js</code>
                 </td>
               </tr>
               <tr>
-                <td>Outbrain</td>
-                <td><span class="badge badge-muted">advertising</span></td>
-                <td><span class="badge badge-critical">before consent</span></td>
+                <td>Facebook SDK</td>
+                <td><span class="badge badge-muted">social</span></td>
+                <td><span class="badge badge-muted">after-accept</span></td>
                 <td style="font-size: 11px; color: var(--text-muted); word-break: break-all">
-                  <code>https://amplify.outbrain.com/cp/obtp.js</code>
+                  <code>https://connect.facebook.net/fr_FR/sdk.js?hash=c54cd069db9225e0ba0e…</code>
                 </td>
               </tr>
               <tr>
@@ -848,82 +1209,16 @@
                 <td><span class="badge badge-muted">analytics</span></td>
                 <td><span class="badge badge-muted">after-accept</span></td>
                 <td style="font-size: 11px; color: var(--text-muted); word-break: break-all">
-                  <code>https://www.googletagmanager.com/gtag/js?id=AW-702468586</code>
+                  <code>https://www.googletagmanager.com/gtag/js?id=AW-1060694752</code>
                 </td>
               </tr>
               <tr>
-                <td>Google Tag Manager</td>
-                <td><span class="badge badge-muted">analytics</span></td>
-                <td><span class="badge badge-muted">after-accept</span></td>
-                <td style="font-size: 11px; color: var(--text-muted); word-break: break-all">
-                  <code>https://www.googletagmanager.com/static/service_worker/6240/sw_ifra…</code>
-                </td>
-              </tr>
-              <tr>
-                <td>Google AdSense</td>
-                <td><span class="badge badge-muted">advertising</span></td>
+                <td>Tracking Pixel</td>
+                <td><span class="badge badge-muted">pixel</span></td>
                 <td><span class="badge badge-muted">after-accept</span></td>
                 <td style="font-size: 11px; color: var(--text-muted); word-break: break-all">
                   <code
-                    >https://pagead2.googlesyndication.com/ccm/collect?frm=0&amp;en=page_vie…</code
-                  >
-                </td>
-              </tr>
-              <tr>
-                <td>Outbrain</td>
-                <td><span class="badge badge-muted">advertising</span></td>
-                <td><span class="badge badge-muted">after-accept</span></td>
-                <td style="font-size: 11px; color: var(--text-muted); word-break: break-all">
-                  <code>https://amplify.outbrain.com/cp/obtp.js</code>
-                </td>
-              </tr>
-              <tr>
-                <td>Google DoubleClick</td>
-                <td><span class="badge badge-muted">advertising</span></td>
-                <td><span class="badge badge-muted">after-accept</span></td>
-                <td style="font-size: 11px; color: var(--text-muted); word-break: break-all">
-                  <code>https://googleads.g.doubleclick.net/pagead/viewthroughconversion/70…</code>
-                </td>
-              </tr>
-              <tr>
-                <td>Google DoubleClick</td>
-                <td><span class="badge badge-muted">advertising</span></td>
-                <td><span class="badge badge-muted">after-accept</span></td>
-                <td style="font-size: 11px; color: var(--text-muted); word-break: break-all">
-                  <code>https://googleads.g.doubleclick.net/pagead/viewthroughconversion/79…</code>
-                </td>
-              </tr>
-              <tr>
-                <td>Outbrain</td>
-                <td><span class="badge badge-muted">advertising</span></td>
-                <td><span class="badge badge-muted">after-accept</span></td>
-                <td style="font-size: 11px; color: var(--text-muted); word-break: break-all">
-                  <code>https://wave.outbrain.com/mtWavesBundler/handler/005df27d93a2629bd0…</code>
-                </td>
-              </tr>
-              <tr>
-                <td>Outbrain</td>
-                <td><span class="badge badge-muted">advertising</span></td>
-                <td><span class="badge badge-muted">after-accept</span></td>
-                <td style="font-size: 11px; color: var(--text-muted); word-break: break-all">
-                  <code>https://amplify.outbrain.com/topics</code>
-                </td>
-              </tr>
-              <tr>
-                <td>Outbrain</td>
-                <td><span class="badge badge-muted">advertising</span></td>
-                <td><span class="badge badge-muted">after-accept</span></td>
-                <td style="font-size: 11px; color: var(--text-muted); word-break: break-all">
-                  <code>https://tr.outbrain.com/cachedClickId?marketerId=005df27d93a2629bd0…</code>
-                </td>
-              </tr>
-              <tr>
-                <td>Outbrain</td>
-                <td><span class="badge badge-muted">advertising</span></td>
-                <td><span class="badge badge-muted">after-accept</span></td>
-                <td style="font-size: 11px; color: var(--text-muted); word-break: break-all">
-                  <code
-                    >https://tr.outbrain.com/unifiedPixel?au=false&amp;bust=0250574939881576…</code
+                    >https://cnzpbrw.pa-cd.com/event?s=553584&amp;idclient=mlzq0x728k6xguix</code
                   >
                 </td>
               </tr>
@@ -933,7 +1228,27 @@
                 <td><span class="badge badge-muted">after-accept</span></td>
                 <td style="font-size: 11px; color: var(--text-muted); word-break: break-all">
                   <code
-                    >https://www.google.com/ccm/collect?frm=0&amp;en=consent_update&amp;dl=https…</code
+                    >https://cnzpbrw.pa-cd.com/event?s=553584&amp;idclient=mlzq0x728k6xguix</code
+                  >
+                </td>
+              </tr>
+              <tr>
+                <td>Tracking Pixel</td>
+                <td><span class="badge badge-muted">pixel</span></td>
+                <td><span class="badge badge-muted">after-accept</span></td>
+                <td style="font-size: 11px; color: var(--text-muted); word-break: break-all">
+                  <code
+                    >https://cnzpbrw.pa-cd.com/event?s=553584&amp;idclient=mlzq0x728k6xguix</code
+                  >
+                </td>
+              </tr>
+              <tr>
+                <td>Tracking Pixel</td>
+                <td><span class="badge badge-muted">pixel</span></td>
+                <td><span class="badge badge-muted">after-accept</span></td>
+                <td style="font-size: 11px; color: var(--text-muted); word-break: break-all">
+                  <code
+                    >https://cnzpbrw.pa-cd.com/event?s=553584&amp;idclient=mlzq0x728k6xguix</code
                   >
                 </td>
               </tr>
@@ -942,15 +1257,15 @@
                 <td><span class="badge badge-muted">advertising</span></td>
                 <td><span class="badge badge-muted">after-accept</span></td>
                 <td style="font-size: 11px; color: var(--text-muted); word-break: break-all">
-                  <code>https://securepubads.g.doubleclick.net/tag/js/gpt.js</code>
+                  <code>https://googleads.g.doubleclick.net/pagead/viewthroughconversion/10…</code>
                 </td>
               </tr>
               <tr>
-                <td>Amazon Ads</td>
+                <td>Google Ad Services</td>
                 <td><span class="badge badge-muted">advertising</span></td>
                 <td><span class="badge badge-muted">after-accept</span></td>
                 <td style="font-size: 11px; color: var(--text-muted); word-break: break-all">
-                  <code>https://c.amazon-adsystem.com/aax2/apstag.js</code>
+                  <code>https://www.googleadservices.com/pagead/conversion/1060694752/?rand…</code>
                 </td>
               </tr>
               <tr>
@@ -958,33 +1273,43 @@
                 <td><span class="badge badge-muted">advertising</span></td>
                 <td><span class="badge badge-muted">after-accept</span></td>
                 <td style="font-size: 11px; color: var(--text-muted); word-break: break-all">
-                  <code>https://securepubads.g.doubleclick.net/pagead/managed/js/gpt/m20260…</code>
+                  <code>https://googleads.g.doubleclick.net/pagead/viewthroughconversion/10…</code>
                 </td>
               </tr>
               <tr>
-                <td>Amazon Ads</td>
+                <td>Google Ad Services</td>
                 <td><span class="badge badge-muted">advertising</span></td>
                 <td><span class="badge badge-muted">after-accept</span></td>
                 <td style="font-size: 11px; color: var(--text-muted); word-break: break-all">
-                  <code>https://config.aps.amazon-adsystem.com/configs/3789</code>
+                  <code>https://www.googleadservices.com/pagead/conversion/1060694752/?rand…</code>
                 </td>
               </tr>
               <tr>
-                <td>Amazon Ads</td>
+                <td>Tracking Pixel</td>
+                <td><span class="badge badge-muted">pixel</span></td>
+                <td><span class="badge badge-muted">after-accept</span></td>
+                <td style="font-size: 11px; color: var(--text-muted); word-break: break-all">
+                  <code
+                    >https://www.google.com/ccm/collect?frm=0&amp;en=page_view&amp;dl=https%3A%2…</code
+                  >
+                </td>
+              </tr>
+              <tr>
+                <td>Google Tag Manager</td>
+                <td><span class="badge badge-muted">analytics</span></td>
+                <td><span class="badge badge-muted">after-accept</span></td>
+                <td style="font-size: 11px; color: var(--text-muted); word-break: break-all">
+                  <code>https://www.googletagmanager.com/static/service_worker/6240/sw_ifra…</code>
+                </td>
+              </tr>
+              <tr>
+                <td>Google DoubleClick</td>
                 <td><span class="badge badge-muted">advertising</span></td>
                 <td><span class="badge badge-muted">after-accept</span></td>
                 <td style="font-size: 11px; color: var(--text-muted); word-break: break-all">
                   <code
-                    >https://c.amazon-adsystem.com/cdn/prod/config?src=3789&amp;u=https%3A%2…</code
+                    >https://cm.g.doubleclick.net/pixel?google_nid=medr_dmp&amp;google_cm&amp;ke…</code
                   >
-                </td>
-              </tr>
-              <tr>
-                <td>Amazon Ads</td>
-                <td><span class="badge badge-muted">advertising</span></td>
-                <td><span class="badge badge-muted">after-accept</span></td>
-                <td style="font-size: 11px; color: var(--text-muted); word-break: break-all">
-                  <code>https://c.amazon-adsystem.com/bao-csm/aps-comm/aps_csm.js</code>
                 </td>
               </tr>
               <tr>
@@ -992,7 +1317,41 @@
                 <td><span class="badge badge-muted">advertising</span></td>
                 <td><span class="badge badge-muted">after-accept</span></td>
                 <td style="font-size: 11px; color: var(--text-muted); word-break: break-all">
-                  <code>https://securepubads.g.doubleclick.net/pagead/managed/dict/m2026021…</code>
+                  <code
+                    >https://cm.g.doubleclick.net/pixel?google_nid=medr_dmp&amp;google_cm=&amp;k…</code
+                  >
+                </td>
+              </tr>
+              <tr>
+                <td>Google DoubleClick</td>
+                <td><span class="badge badge-muted">advertising</span></td>
+                <td><span class="badge badge-muted">after-accept</span></td>
+                <td style="font-size: 11px; color: var(--text-muted); word-break: break-all">
+                  <code>https://googleads.g.doubleclick.net/pagead/viewthroughconversion/10…</code>
+                </td>
+              </tr>
+              <tr>
+                <td>Google DoubleClick</td>
+                <td><span class="badge badge-muted">advertising</span></td>
+                <td><span class="badge badge-muted">after-accept</span></td>
+                <td style="font-size: 11px; color: var(--text-muted); word-break: break-all">
+                  <code>https://googleads.g.doubleclick.net/pagead/viewthroughconversion/10…</code>
+                </td>
+              </tr>
+              <tr>
+                <td>Tracking Pixel</td>
+                <td><span class="badge badge-muted">pixel</span></td>
+                <td><span class="badge badge-muted">after-accept</span></td>
+                <td style="font-size: 11px; color: var(--text-muted); word-break: break-all">
+                  <code>https://events.mediarithmics.com/v1/visits/pixel?environment=jso-%7…</code>
+                </td>
+              </tr>
+              <tr>
+                <td>Tracking Pixel</td>
+                <td><span class="badge badge-muted">pixel</span></td>
+                <td><span class="badge badge-muted">after-accept</span></td>
+                <td style="font-size: 11px; color: var(--text-muted); word-break: break-all">
+                  <code>https://events.mediarithmics.com/v1/visits/pixel?environment=jso-%7…</code>
                 </td>
               </tr>
             </tbody>
@@ -1003,7 +1362,7 @@
       <div class="section">
         <div class="section-header">
           <h2>Recommendations</h2>
-          <span class="count-badge">2</span>
+          <span class="count-badge">3</span>
         </div>
         <div class="section-body">
           <ul class="rec-list">
@@ -1021,6 +1380,13 @@
                 retention period, right to withdraw.</span
               >
             </li>
+            <li class="rec-item">
+              <span class="rec-num">3</span>
+              <span
+                >Remove or block non-essential cookies after rejection, and verify consent handling
+                server-side.</span
+              >
+            </li>
           </ul>
         </div>
       </div>
@@ -1029,9 +1395,9 @@
         <div class="section-header">
           <h2>Compliance checklist</h2>
           <span class="count-badge">12 rules</span>
-          <span class="badge badge-ok">10 ✓</span>
-          <span class="badge badge-critical">1 ✗</span>
-          <span class="badge badge-warning">1 ⚠</span>
+          <span class="badge badge-ok">7 ✓</span>
+          <span class="badge badge-critical">3 ✗</span>
+          <span class="badge badge-warning">2 ⚠</span>
         </div>
         <div class="section-body no-pad">
           <table class="data-table">
@@ -1065,7 +1431,7 @@
               <tr>
                 <td>Unambiguous accept label</td>
                 <td><span class="status-ok">✓ Compliant</span></td>
-                <td style="color: var(--text-muted); font-size: 12px">Tout accepter</td>
+                <td style="color: var(--text-muted); font-size: 12px">TOUT ACCEPTER</td>
               </tr>
               <tr>
                 <td
@@ -1076,7 +1442,7 @@
                 </td>
                 <td>Reject button at first layer</td>
                 <td><span class="status-ok">✓ Compliant</span></td>
-                <td style="color: var(--text-muted); font-size: 12px">Tout refuser</td>
+                <td style="color: var(--text-muted); font-size: 12px">TOUT REFUSER</td>
               </tr>
               <tr>
                 <td>Reject ≤ clicks than accept</td>
@@ -1096,8 +1462,8 @@
                   Transparency
                 </td>
                 <td>Granular controls available</td>
-                <td><span class="status-ok">✓ Compliant</span></td>
-                <td style="color: var(--text-muted); font-size: 12px">0 control(s) detected</td>
+                <td><span class="status-warn">⚠ Warning</span></td>
+                <td style="color: var(--text-muted); font-size: 12px">No granular controls</td>
               </tr>
               <tr>
                 <td>Privacy policy in modal</td>
@@ -1108,7 +1474,7 @@
                 <td>Privacy policy on page</td>
                 <td><span class="status-ok">✓ Compliant</span></td>
                 <td style="color: var(--text-muted); font-size: 12px">
-                  https://www.radiofrance.com/mentions-legales
+                  https://www.tf1.fr/#content
                 </td>
               </tr>
               <tr>
@@ -1119,18 +1485,18 @@
                   Cookie behavior
                 </td>
                 <td>No non-essential cookie before consent</td>
-                <td><span class="status-ok">✓ Compliant</span></td>
-                <td style="color: var(--text-muted); font-size: 12px">None</td>
+                <td><span class="status-ko">✗ Non-compliant</span></td>
+                <td style="color: var(--text-muted); font-size: 12px">2: gmid, ucid</td>
               </tr>
               <tr>
                 <td>Non-essential cookies removed after reject</td>
-                <td><span class="status-ok">✓ Compliant</span></td>
-                <td style="color: var(--text-muted); font-size: 12px">Correctly removed</td>
+                <td><span class="status-ko">✗ Non-compliant</span></td>
+                <td style="color: var(--text-muted); font-size: 12px">4 persisting</td>
               </tr>
               <tr>
                 <td>No tracker before consent</td>
                 <td><span class="status-ko">✗ Non-compliant</span></td>
-                <td style="color: var(--text-muted); font-size: 12px">4 tracker(s)</td>
+                <td style="color: var(--text-muted); font-size: 12px">2 tracker(s)</td>
               </tr>
             </tbody>
           </table>
@@ -1139,7 +1505,7 @@
 
       <div class="footer">
         Generated by <a href="https://github.com/Slashgear/gdpr-report">gdpr-cookie-scanner</a>
-        on 24 February 2026 at 14:59
+        on 23 February 2026 at 23:01
       </div>
     </div>
   </body>

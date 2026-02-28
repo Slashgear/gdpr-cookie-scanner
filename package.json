@@ -52,7 +52,8 @@
     "changeset": "changeset",
     "update-trackers": "node --experimental-strip-types scripts/update-trackers.ts",
     "update-trackers:dry": "node --experimental-strip-types scripts/update-trackers.ts --dry-run",
-    "update:ocd": "node scripts/update-cookie-db.mjs"
+    "update:ocd": "node scripts/update-cookie-db.mjs",
+    "build:showcase": "node scripts/build-showcase.mjs && pnpm format"
   },
   "dependencies": {
     "commander": "^14.0.3",

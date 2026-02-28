@@ -1,0 +1,1862 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GDPR Report — m6.fr</title>
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      :root {
+        --grade: #ca8a04;
+        --grade-bg: #fefce8;
+        --surface: #ffffff;
+        --bg: #f1f5f9;
+        --border: #e2e8f0;
+        --text: #0f172a;
+        --text-muted: #64748b;
+        --critical: #dc2626;
+        --critical-bg: #fef2f2;
+        --critical-border: #fecaca;
+        --warning: #d97706;
+        --warning-bg: #fffbeb;
+        --warning-border: #fde68a;
+        --ok: #16a34a;
+        --ok-bg: #f0fdf4;
+        --ok-border: #bbf7d0;
+        --radius: 10px;
+        --shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
+        --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.06);
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+
+      /* ── Layout ── */
+      .page {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 24px 16px 64px;
+      }
+
+      /* ── Hero ── */
+      .hero {
+        background: var(--surface);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow-md);
+        padding: 32px 36px;
+        display: flex;
+        align-items: center;
+        gap: 32px;
+        margin-bottom: 20px;
+        border-top: 4px solid var(--grade);
+      }
+      .grade-badge {
+        flex-shrink: 0;
+        width: 80px;
+        height: 80px;
+        border-radius: 16px;
+        background: var(--grade);
+        color: #fff;
+        font-size: 42px;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        letter-spacing: -2px;
+      }
+      .hero-info {
+        flex: 1;
+        min-width: 0;
+      }
+      .hero-info h1 {
+        margin: 0 0 4px;
+        font-size: 22px;
+        font-weight: 700;
+        color: var(--text);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .hero-meta {
+        font-size: 13px;
+        color: var(--text-muted);
+        margin: 0;
+      }
+      .hero-score {
+        flex-shrink: 0;
+        text-align: right;
+      }
+      .hero-score .score-num {
+        font-size: 40px;
+        font-weight: 800;
+        color: var(--grade);
+        line-height: 1;
+      }
+      .hero-score .score-den {
+        font-size: 18px;
+        color: var(--text-muted);
+        font-weight: 400;
+      }
+      .hero-score .score-label {
+        font-size: 12px;
+        color: var(--text-muted);
+        margin-top: 4px;
+      }
+
+      /* ── Score grid ── */
+      .score-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+        margin-bottom: 20px;
+      }
+      @media (max-width: 640px) {
+        .score-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+      .score-card {
+        background: var(--surface);
+        border-radius: var(--radius);
+        padding: 16px 18px;
+        box-shadow: var(--shadow);
+      }
+      .score-card-label {
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-muted);
+        margin-bottom: 8px;
+      }
+      .score-card-value {
+        font-size: 22px;
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: 8px;
+      }
+      .score-card-value span {
+        font-size: 14px;
+        font-weight: 400;
+        color: var(--text-muted);
+      }
+      .progress-track {
+        height: 6px;
+        background: var(--border);
+        border-radius: 3px;
+        overflow: hidden;
+      }
+      .progress-fill {
+        height: 100%;
+        border-radius: 3px;
+        background: var(--grade-color, #64748b);
+      }
+
+      /* ── Section ── */
+      .section {
+        background: var(--surface);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        margin-bottom: 16px;
+        overflow: hidden;
+      }
+      .section-header {
+        padding: 16px 20px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .section-header h2 {
+        margin: 0;
+        font-size: 15px;
+        font-weight: 600;
+        color: var(--text);
+      }
+      .section-body {
+        padding: 20px;
+      }
+      .section-body.no-pad {
+        padding: 0;
+      }
+
+      /* ── Badges ── */
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 2px 8px;
+        border-radius: 99px;
+        font-size: 11px;
+        font-weight: 600;
+      }
+      .badge-critical {
+        background: var(--critical-bg);
+        color: var(--critical);
+        border: 1px solid var(--critical-border);
+      }
+      .badge-warning {
+        background: var(--warning-bg);
+        color: var(--warning);
+        border: 1px solid var(--warning-border);
+      }
+      .badge-ok {
+        background: var(--ok-bg);
+        color: var(--ok);
+        border: 1px solid var(--ok-border);
+      }
+      .badge-muted {
+        background: var(--bg);
+        color: var(--text-muted);
+        border: 1px solid var(--border);
+      }
+      .count-badge {
+        background: var(--bg);
+        color: var(--text-muted);
+        font-size: 12px;
+        font-weight: 600;
+        padding: 1px 8px;
+        border-radius: 99px;
+        margin-left: auto;
+      }
+
+      /* ── Issue cards ── */
+      .issue-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .issue-card {
+        border-radius: 8px;
+        padding: 14px 16px;
+        border: 1px solid;
+      }
+      .issue-card.critical {
+        background: var(--critical-bg);
+        border-color: var(--critical-border);
+      }
+      .issue-card.warning {
+        background: var(--warning-bg);
+        border-color: var(--warning-border);
+      }
+      .issue-title {
+        font-size: 13px;
+        font-weight: 600;
+        margin-bottom: 4px;
+      }
+      .issue-card.critical .issue-title {
+        color: var(--critical);
+      }
+      .issue-card.warning .issue-title {
+        color: var(--warning);
+      }
+      .issue-evidence {
+        font-size: 12px;
+        color: var(--text-muted);
+        margin: 0;
+      }
+      .no-issues {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--ok);
+        font-weight: 500;
+        font-size: 14px;
+      }
+
+      /* ── Tables ── */
+      .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+      }
+      .data-table th {
+        background: var(--bg);
+        padding: 10px 14px;
+        text-align: left;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: var(--text-muted);
+        border-bottom: 1px solid var(--border);
+        white-space: nowrap;
+      }
+      .data-table td {
+        padding: 10px 14px;
+        border-bottom: 1px solid var(--border);
+        vertical-align: top;
+      }
+      .data-table tr:last-child td {
+        border-bottom: none;
+      }
+      .data-table tr:hover td {
+        background: #fafafa;
+      }
+      code {
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+        font-size: 12px;
+        background: var(--bg);
+        padding: 1px 6px;
+        border-radius: 4px;
+        border: 1px solid var(--border);
+      }
+      .cookie-name {
+        display: inline-block;
+        max-width: 220px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        vertical-align: bottom;
+      }
+      .empty-state {
+        text-align: center;
+        padding: 32px;
+        color: var(--text-muted);
+        font-size: 13px;
+      }
+
+      /* ── Checklist status ── */
+      .status-ok {
+        color: var(--ok);
+        font-weight: 600;
+      }
+      .status-ko {
+        color: var(--critical);
+        font-weight: 600;
+      }
+      .status-warn {
+        color: var(--warning);
+        font-weight: 600;
+      }
+
+      /* ── Info grid ── */
+      .info-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+      @media (max-width: 640px) {
+        .info-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+      .info-item {
+      }
+      .info-label {
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: var(--text-muted);
+        margin-bottom: 2px;
+      }
+      .info-value {
+        font-size: 13px;
+        color: var(--text);
+      }
+
+      /* ── Buttons table ── */
+      .btn-chip {
+        display: inline-block;
+        padding: 2px 10px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 600;
+      }
+      .btn-chip.accept {
+        background: #dcfce7;
+        color: #166534;
+      }
+      .btn-chip.reject {
+        background: #fee2e2;
+        color: #991b1b;
+      }
+      .btn-chip.preferences {
+        background: #dbeafe;
+        color: #1e40af;
+      }
+      .btn-chip.unknown,
+      .btn-chip.close {
+        background: var(--bg);
+        color: var(--text-muted);
+      }
+
+      /* ── Modal screenshot ── */
+      .modal-screenshot {
+        display: block;
+        max-width: 100%;
+        max-height: 420px;
+        object-fit: contain;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow-md);
+        margin-bottom: 20px;
+      }
+
+      /* ── Recommendations ── */
+      .rec-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .rec-item {
+        display: flex;
+        gap: 12px;
+        padding: 12px 14px;
+        background: #f8fafc;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        font-size: 13px;
+      }
+      .rec-num {
+        flex-shrink: 0;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: var(--text);
+        color: #fff;
+        font-size: 12px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 1px;
+      }
+
+      /* ── Footer ── */
+      .footer {
+        text-align: center;
+        margin-top: 40px;
+        font-size: 12px;
+        color: var(--text-muted);
+      }
+      .footer a {
+        color: var(--text-muted);
+      }
+
+      @media print {
+        * {
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
+        }
+        body {
+          background: #fff;
+        }
+        .page {
+          padding: 0;
+          max-width: 100%;
+        }
+        .hero {
+          box-shadow: none;
+          border: 1px solid var(--border);
+          margin-bottom: 12px;
+          page-break-inside: avoid;
+        }
+        .score-grid {
+          page-break-inside: avoid;
+          margin-bottom: 12px;
+        }
+        .section {
+          box-shadow: none;
+          border: 1px solid var(--border);
+          margin-bottom: 12px;
+          page-break-inside: avoid;
+        }
+        .issue-list {
+          page-break-inside: avoid;
+        }
+        .data-table {
+          font-size: 10px;
+          page-break-inside: auto;
+        }
+        .data-table th {
+          padding: 5px 8px;
+        }
+        .data-table td {
+          padding: 5px 8px;
+        }
+        .data-table tr {
+          page-break-inside: avoid;
+        }
+        /* Long values (URLs, cookie names) wrap rather than overflow */
+        .data-table td code {
+          word-break: break-all;
+          white-space: normal;
+        }
+        .cookie-name {
+          max-width: 140px;
+        }
+        /* Shrink verbose columns to avoid deforming the others */
+        .cell-desc {
+          font-size: 9px;
+        }
+        .cell-url {
+          font-size: 7.5px;
+        }
+        .modal-screenshot {
+          max-height: 280px;
+        }
+        .rec-list {
+          page-break-inside: avoid;
+        }
+        /* Sections containing large tables can break across pages */
+        .section:has(.data-table) {
+          page-break-inside: auto;
+        }
+        a {
+          color: inherit;
+          text-decoration: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <div class="hero">
+        <div class="grade-badge" style="background: #ca8a04">C</div>
+        <div class="hero-info">
+          <h1>m6.fr</h1>
+          <p class="hero-meta">Scanned on 28 February 2026 at 16:00 · 15.8s</p>
+        </div>
+        <div class="hero-score">
+          <div>
+            <span class="score-num" style="color: #ca8a04">58</span
+            ><span class="score-den">/100</span>
+          </div>
+          <div class="score-label">Compliance score</div>
+        </div>
+      </div>
+
+      <div class="score-grid">
+        <div class="score-card">
+          <div class="score-card-label">Consent validity</div>
+          <div class="score-card-value">20<span>/25</span></div>
+          <div class="progress-track">
+            <div class="progress-fill" style="width: 80%; background: #16a34a"></div>
+          </div>
+        </div>
+        <div class="score-card">
+          <div class="score-card-label">Easy refusal</div>
+          <div class="score-card-value">25<span>/25</span></div>
+          <div class="progress-track">
+            <div class="progress-fill" style="width: 100%; background: #16a34a"></div>
+          </div>
+        </div>
+        <div class="score-card">
+          <div class="score-card-label">Transparency</div>
+          <div class="score-card-value">12<span>/25</span></div>
+          <div class="progress-track">
+            <div class="progress-fill" style="width: 48%; background: #ea580c"></div>
+          </div>
+        </div>
+        <div class="score-card">
+          <div class="score-card-label">Cookie behavior</div>
+          <div class="score-card-value">1<span>/25</span></div>
+          <div class="progress-track">
+            <div class="progress-fill" style="width: 4%; background: #dc2626"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header">
+          <h2>Issues</h2>
+          <span class="count-badge">4</span>
+          <span class="badge badge-critical">3 critical</span>
+          <span class="badge badge-warning">1 warning</span>
+        </div>
+        <div class="section-body">
+          <div class="issue-list">
+            <div class="issue-card critical">
+              <div class="issue-title">
+                2 non-essential cookie(s) deposited before any interaction
+              </div>
+              <p class="issue-evidence">gmid (unknown), ucid (unknown)</p>
+            </div>
+            <div class="issue-card critical">
+              <div class="issue-title">2 non-essential cookie(s) persist after rejection</div>
+              <p class="issue-evidence">gmid (unknown), ucid (unknown)</p>
+            </div>
+            <div class="issue-card critical">
+              <div class="issue-title">8 tracker request(s) fired before any consent</div>
+              <p class="issue-evidence">
+                Google Tag Services, Google DoubleClick, Google AdSense, Facebook SDK
+              </p>
+            </div>
+            <div class="issue-card warning">
+              <div class="issue-title">Missing required information: &quot;purposes&quot;</div>
+              <p class="issue-evidence">The consent text does not mention purposes</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header">
+          <h2>Consent modal</h2>
+          <span class="badge badge-ok">Detected</span>
+        </div>
+        <div class="section-body">
+          <img src="modal-initial.png" alt="Consent modal screenshot" class="modal-screenshot" />
+          <div class="info-grid" style="margin-bottom: 20px">
+            <div class="info-item">
+              <div class="info-label">Selector</div>
+              <div class="info-value"><code>.didomi-popup-container</code></div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Granular controls</div>
+              <div class="info-value"><span class="status-warn">✗ No</span></div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Privacy policy link</div>
+              <div class="info-value">
+                <a
+                  href="https://www.m6.fr/politique-de-confidentialite/cookies-partenaires"
+                  target="_blank"
+                  rel="noopener"
+                  >https://www.m6.fr/politique-de-confidentialite/cookies-partenaires</a
+                >
+              </div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Pre-ticked checkboxes</div>
+              <div class="info-value"><span class="status-ok">✓ None</span></div>
+            </div>
+          </div>
+          <div
+            style="
+              font-size: 12px;
+              font-weight: 600;
+              text-transform: uppercase;
+              letter-spacing: 0.04em;
+              color: var(--text-muted);
+              margin-bottom: 8px;
+            "
+          >
+            Buttons
+          </div>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Type</th>
+                <th>Label</th>
+                <th>Font size</th>
+                <th>Contrast</th>
+                <th>Clicks</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="btn-chip reject">reject</span></td>
+                <td>Continuer sans accepter →</td>
+                <td>—</td>
+                <td>21:1</td>
+                <td>1</td>
+              </tr>
+              <tr>
+                <td><span class="btn-chip unknown">unknown</span></td>
+                <td>des tiers</td>
+                <td>15px</td>
+                <td>21:1</td>
+                <td>1</td>
+              </tr>
+              <tr>
+                <td><span class="btn-chip unknown">unknown</span></td>
+                <td>tiers</td>
+                <td>15px</td>
+                <td>21:1</td>
+                <td>1</td>
+              </tr>
+              <tr>
+                <td><span class="btn-chip unknown">unknown</span></td>
+                <td>Voir nos 119 partenaires</td>
+                <td>15px</td>
+                <td>21:1</td>
+                <td>1</td>
+              </tr>
+              <tr>
+                <td><span class="btn-chip unknown">unknown</span></td>
+                <td>PARAMETRER MES CHOIX</td>
+                <td>16px</td>
+                <td>1.66:1</td>
+                <td>1</td>
+              </tr>
+              <tr>
+                <td><span class="btn-chip accept">accept</span></td>
+                <td>TOUT ACCEPTER</td>
+                <td>16px</td>
+                <td>12.63:1</td>
+                <td>1</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header"><h2>Cookies</h2></div>
+        <div class="section-body">
+          <div style="margin-bottom: 24px">
+            <div
+              style="
+                font-size: 12px;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.04em;
+                color: var(--text-muted);
+                margin-bottom: 8px;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+              "
+            >
+              Before interaction
+              <span class="count-badge">6</span>
+              <span class="badge badge-critical">2 non-essential</span>
+            </div>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Domain</th>
+                  <th>Category</th>
+                  <th>Description</th>
+                  <th>Expiry</th>
+                  <th>Consent</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code class="cookie-name" title="didomi_token">didomi_token</code></td>
+                  <td style="color: var(--text-muted)">.m6.fr</td>
+                  <td><span class="badge badge-muted">strictly-necessary</span></td>
+                  <td class="cell-desc">
+                    <span title="Didomi — https://privacy.console.didomi.io/"
+                      >This cookie contains consent information for personalized purposes and for
+                      personalized partners, as well as information specific to Didomi (e.g. user
+                      ID).</span
+                    >
+                  </td>
+                  <td style="color: var(--text-muted)">6mo</td>
+                  <td><span class="badge badge-muted">No</span></td>
+                </tr>
+                <tr>
+                  <td><code class="cookie-name" title="gig_canary">gig_canary</code></td>
+                  <td style="color: var(--text-muted)">cdns.eu1.gigya.com</td>
+                  <td><span class="badge badge-muted">unknown</span></td>
+                  <td class="cell-desc">
+                    <span title="SAP — https://www.sap.com/privacy"
+                      >Indicates whether the client is using the canary version of the WebSDK.</span
+                    >
+                  </td>
+                  <td style="color: var(--text-muted)">< 1 day</td>
+                  <td><span class="badge badge-muted">No</span></td>
+                </tr>
+                <tr>
+                  <td><code class="cookie-name" title="gmid">gmid</code></td>
+                  <td style="color: var(--text-muted)">.login-gigya.m6.fr</td>
+                  <td><span class="badge badge-muted">unknown</span></td>
+                  <td class="cell-desc">
+                    <span title="SAP — https://www.sap.com/privacy">User cookie.</span>
+                  </td>
+                  <td style="color: var(--text-muted)">12mo</td>
+                  <td><span class="badge badge-warning">Required</span></td>
+                </tr>
+                <tr>
+                  <td><code class="cookie-name" title="ucid">ucid</code></td>
+                  <td style="color: var(--text-muted)">.login-gigya.m6.fr</td>
+                  <td><span class="badge badge-muted">unknown</span></td>
+                  <td class="cell-desc">
+                    <span title="SAP — https://www.sap.com/privacy"
+                      >Unique computer identifier used for generating reports, and used by the Web
+                      SDK to get saved response.</span
+                    >
+                  </td>
+                  <td style="color: var(--text-muted)">12mo</td>
+                  <td><span class="badge badge-warning">Required</span></td>
+                </tr>
+                <tr>
+                  <td><code class="cookie-name" title="hasGmid">hasGmid</code></td>
+                  <td style="color: var(--text-muted)">.login-gigya.m6.fr</td>
+                  <td><span class="badge badge-muted">unknown</span></td>
+                  <td class="cell-desc">
+                    <span title="SAP — https://www.sap.com/privacy"
+                      >Internal cookie for the Web SDK</span
+                    >
+                  </td>
+                  <td style="color: var(--text-muted)">6mo</td>
+                  <td><span class="badge badge-muted">No</span></td>
+                </tr>
+                <tr>
+                  <td>
+                    <code
+                      class="cookie-name"
+                      title="gig_bootstrap_3_hH5KBv25qZTd_sURpixbQW6a4OsiIzIEF2Ei_2H7TXTGLJb_1Hr4THKZianCQhWK"
+                      >gig_bootstrap_3_hH5KBv25qZTd_sURpixbQW6a4OsiIzIEF2Ei_2H7TXTGLJb_1Hr4THKZianCQhWK</code
+                    >
+                  </td>
+                  <td style="color: var(--text-muted)">.m6.fr</td>
+                  <td><span class="badge badge-muted">unknown</span></td>
+                  <td class="cell-desc">
+                    <span title="SAP — https://www.sap.com/privacy"
+                      >If declined, user may be intermittently logged out.</span
+                    >
+                  </td>
+                  <td style="color: var(--text-muted)">12mo</td>
+                  <td><span class="badge badge-muted">No</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div style="margin-bottom: 24px">
+            <div
+              style="
+                font-size: 12px;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.04em;
+                color: var(--text-muted);
+                margin-bottom: 8px;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+              "
+            >
+              After reject
+              <span class="count-badge">7</span>
+
+              <span class="badge badge-critical">2 non-essential</span>
+            </div>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Domain</th>
+                  <th>Category</th>
+                  <th>Description</th>
+                  <th>Expiry</th>
+                  <th>Consent</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code class="cookie-name" title="gig_canary">gig_canary</code></td>
+                  <td style="color: var(--text-muted)">cdns.eu1.gigya.com</td>
+                  <td><span class="badge badge-muted">unknown</span></td>
+                  <td class="cell-desc">
+                    <span title="SAP — https://www.sap.com/privacy"
+                      >Indicates whether the client is using the canary version of the WebSDK.</span
+                    >
+                  </td>
+                  <td style="color: var(--text-muted)">< 1 day</td>
+                  <td><span class="badge badge-muted">No</span></td>
+                </tr>
+                <tr>
+                  <td><code class="cookie-name" title="gmid">gmid</code></td>
+                  <td style="color: var(--text-muted)">.login-gigya.m6.fr</td>
+                  <td><span class="badge badge-muted">unknown</span></td>
+                  <td class="cell-desc">
+                    <span title="SAP — https://www.sap.com/privacy">User cookie.</span>
+                  </td>
+                  <td style="color: var(--text-muted)">12mo</td>
+                  <td><span class="badge badge-warning">Required</span></td>
+                </tr>
+                <tr>
+                  <td><code class="cookie-name" title="ucid">ucid</code></td>
+                  <td style="color: var(--text-muted)">.login-gigya.m6.fr</td>
+                  <td><span class="badge badge-muted">unknown</span></td>
+                  <td class="cell-desc">
+                    <span title="SAP — https://www.sap.com/privacy"
+                      >Unique computer identifier used for generating reports, and used by the Web
+                      SDK to get saved response.</span
+                    >
+                  </td>
+                  <td style="color: var(--text-muted)">12mo</td>
+                  <td><span class="badge badge-warning">Required</span></td>
+                </tr>
+                <tr>
+                  <td><code class="cookie-name" title="hasGmid">hasGmid</code></td>
+                  <td style="color: var(--text-muted)">.login-gigya.m6.fr</td>
+                  <td><span class="badge badge-muted">unknown</span></td>
+                  <td class="cell-desc">
+                    <span title="SAP — https://www.sap.com/privacy"
+                      >Internal cookie for the Web SDK</span
+                    >
+                  </td>
+                  <td style="color: var(--text-muted)">6mo</td>
+                  <td><span class="badge badge-muted">No</span></td>
+                </tr>
+                <tr>
+                  <td>
+                    <code
+                      class="cookie-name"
+                      title="gig_bootstrap_3_hH5KBv25qZTd_sURpixbQW6a4OsiIzIEF2Ei_2H7TXTGLJb_1Hr4THKZianCQhWK"
+                      >gig_bootstrap_3_hH5KBv25qZTd_sURpixbQW6a4OsiIzIEF2Ei_2H7TXTGLJb_1Hr4THKZianCQhWK</code
+                    >
+                  </td>
+                  <td style="color: var(--text-muted)">.m6.fr</td>
+                  <td><span class="badge badge-muted">unknown</span></td>
+                  <td class="cell-desc">
+                    <span title="SAP — https://www.sap.com/privacy"
+                      >If declined, user may be intermittently logged out.</span
+                    >
+                  </td>
+                  <td style="color: var(--text-muted)">12mo</td>
+                  <td><span class="badge badge-muted">No</span></td>
+                </tr>
+                <tr>
+                  <td><code class="cookie-name" title="didomi_token">didomi_token</code></td>
+                  <td style="color: var(--text-muted)">.m6.fr</td>
+                  <td><span class="badge badge-muted">strictly-necessary</span></td>
+                  <td class="cell-desc">
+                    <span title="Didomi — https://privacy.console.didomi.io/"
+                      >This cookie contains consent information for personalized purposes and for
+                      personalized partners, as well as information specific to Didomi (e.g. user
+                      ID).</span
+                    >
+                  </td>
+                  <td style="color: var(--text-muted)">6mo</td>
+                  <td><span class="badge badge-muted">No</span></td>
+                </tr>
+                <tr>
+                  <td><code class="cookie-name" title="euconsent-v2">euconsent-v2</code></td>
+                  <td style="color: var(--text-muted)">.m6.fr</td>
+                  <td><span class="badge badge-muted">unknown</span></td>
+                  <td class="cell-desc">
+                    <span title="Didomi — https://privacy.console.didomi.io/"
+                      >This cookie contains the chain of consent for the IAB's Transparency and
+                      consent framework as well as the consent information for all IAB standards
+                      (partners and purposes).</span
+                    >
+                  </td>
+                  <td style="color: var(--text-muted)">6mo</td>
+                  <td><span class="badge badge-muted">No</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div style="margin-bottom: 24px">
+            <div
+              style="
+                font-size: 12px;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.04em;
+                color: var(--text-muted);
+                margin-bottom: 8px;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+              "
+            >
+              After accept
+              <span class="count-badge">13</span>
+            </div>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Domain</th>
+                  <th>Category</th>
+                  <th>Description</th>
+                  <th>Expiry</th>
+                  <th>Consent</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code class="cookie-name" title="gig_canary">gig_canary</code></td>
+                  <td style="color: var(--text-muted)">cdns.eu1.gigya.com</td>
+                  <td><span class="badge badge-muted">unknown</span></td>
+                  <td class="cell-desc">
+                    <span title="SAP — https://www.sap.com/privacy"
+                      >Indicates whether the client is using the canary version of the WebSDK.</span
+                    >
+                  </td>
+                  <td style="color: var(--text-muted)">< 1 day</td>
+                  <td><span class="badge badge-muted">No</span></td>
+                </tr>
+                <tr>
+                  <td><code class="cookie-name" title="gmid">gmid</code></td>
+                  <td style="color: var(--text-muted)">.login-gigya.m6.fr</td>
+                  <td><span class="badge badge-muted">unknown</span></td>
+                  <td class="cell-desc">
+                    <span title="SAP — https://www.sap.com/privacy">User cookie.</span>
+                  </td>
+                  <td style="color: var(--text-muted)">12mo</td>
+                  <td><span class="badge badge-warning">Required</span></td>
+                </tr>
+                <tr>
+                  <td><code class="cookie-name" title="ucid">ucid</code></td>
+                  <td style="color: var(--text-muted)">.login-gigya.m6.fr</td>
+                  <td><span class="badge badge-muted">unknown</span></td>
+                  <td class="cell-desc">
+                    <span title="SAP — https://www.sap.com/privacy"
+                      >Unique computer identifier used for generating reports, and used by the Web
+                      SDK to get saved response.</span
+                    >
+                  </td>
+                  <td style="color: var(--text-muted)">12mo</td>
+                  <td><span class="badge badge-warning">Required</span></td>
+                </tr>
+                <tr>
+                  <td><code class="cookie-name" title="hasGmid">hasGmid</code></td>
+                  <td style="color: var(--text-muted)">.login-gigya.m6.fr</td>
+                  <td><span class="badge badge-muted">unknown</span></td>
+                  <td class="cell-desc">
+                    <span title="SAP — https://www.sap.com/privacy"
+                      >Internal cookie for the Web SDK</span
+                    >
+                  </td>
+                  <td style="color: var(--text-muted)">6mo</td>
+                  <td><span class="badge badge-muted">No</span></td>
+                </tr>
+                <tr>
+                  <td>
+                    <code
+                      class="cookie-name"
+                      title="gig_bootstrap_3_hH5KBv25qZTd_sURpixbQW6a4OsiIzIEF2Ei_2H7TXTGLJb_1Hr4THKZianCQhWK"
+                      >gig_bootstrap_3_hH5KBv25qZTd_sURpixbQW6a4OsiIzIEF2Ei_2H7TXTGLJb_1Hr4THKZianCQhWK</code
+                    >
+                  </td>
+                  <td style="color: var(--text-muted)">.m6.fr</td>
+                  <td><span class="badge badge-muted">unknown</span></td>
+                  <td class="cell-desc">
+                    <span title="SAP — https://www.sap.com/privacy"
+                      >If declined, user may be intermittently logged out.</span
+                    >
+                  </td>
+                  <td style="color: var(--text-muted)">12mo</td>
+                  <td><span class="badge badge-muted">No</span></td>
+                </tr>
+                <tr>
+                  <td><code class="cookie-name" title="didomi_token">didomi_token</code></td>
+                  <td style="color: var(--text-muted)">.m6.fr</td>
+                  <td><span class="badge badge-muted">strictly-necessary</span></td>
+                  <td class="cell-desc">
+                    <span title="Didomi — https://privacy.console.didomi.io/"
+                      >This cookie contains consent information for personalized purposes and for
+                      personalized partners, as well as information specific to Didomi (e.g. user
+                      ID).</span
+                    >
+                  </td>
+                  <td style="color: var(--text-muted)">6mo</td>
+                  <td><span class="badge badge-muted">No</span></td>
+                </tr>
+                <tr>
+                  <td><code class="cookie-name" title="euconsent-v2">euconsent-v2</code></td>
+                  <td style="color: var(--text-muted)">.m6.fr</td>
+                  <td><span class="badge badge-muted">unknown</span></td>
+                  <td class="cell-desc">
+                    <span title="Didomi — https://privacy.console.didomi.io/"
+                      >This cookie contains the chain of consent for the IAB's Transparency and
+                      consent framework as well as the consent information for all IAB standards
+                      (partners and purposes).</span
+                    >
+                  </td>
+                  <td style="color: var(--text-muted)">6mo</td>
+                  <td><span class="badge badge-muted">No</span></td>
+                </tr>
+                <tr>
+                  <td><code class="cookie-name" title="test_cookie">test_cookie</code></td>
+                  <td style="color: var(--text-muted)">.doubleclick.net</td>
+                  <td><span class="badge badge-muted">unknown</span></td>
+                  <td class="cell-desc">
+                    <span title="Google — https://business.safety.google/privacy/"
+                      >This cookie is set by DoubleClick (which is owned by Google) to determine if
+                      the website visitor's browser supports cookies.</span
+                    >
+                  </td>
+                  <td style="color: var(--text-muted)">< 1 day</td>
+                  <td><span class="badge badge-muted">No</span></td>
+                </tr>
+                <tr>
+                  <td><code class="cookie-name" title="__gads">__gads</code></td>
+                  <td style="color: var(--text-muted)">.m6.fr</td>
+                  <td><span class="badge badge-muted">advertising</span></td>
+                  <td class="cell-desc">
+                    <span title="Google — https://business.safety.google/privacy/"
+                      >This cookie is used by Google for a variety of purposes (e.g., ensuring
+                      Frequency Caps work correctly). It includes AdSense if you have AdSense
+                      enabled. This cookie is associated with the DoubleClick for Publishers service
+                      from Google. Its purpose is to monitor the showing of advertisements on the
+                      site, for which the owner may earn some revenue. The main purpose of this
+                      cookie is targeting/advertising.</span
+                    >
+                  </td>
+                  <td style="color: var(--text-muted)">13mo</td>
+                  <td><span class="badge badge-warning">Required</span></td>
+                </tr>
+                <tr>
+                  <td><code class="cookie-name" title="__gpi">__gpi</code></td>
+                  <td style="color: var(--text-muted)">.m6.fr</td>
+                  <td><span class="badge badge-muted">advertising</span></td>
+                  <td class="cell-desc">
+                    <span title="Google — https://business.safety.google/privacy/"
+                      >Collects information on user behaviour on multiple websites. This information
+                      is used in order to optimize the relevance of advertisement on the
+                      website.</span
+                    >
+                  </td>
+                  <td style="color: var(--text-muted)">13mo</td>
+                  <td><span class="badge badge-warning">Required</span></td>
+                </tr>
+                <tr>
+                  <td><code class="cookie-name" title="__eoi">__eoi</code></td>
+                  <td style="color: var(--text-muted)">.m6.fr</td>
+                  <td><span class="badge badge-muted">unknown</span></td>
+                  <td class="cell-desc">
+                    <span title="Google — https://business.safety.google/privacy/"
+                      >This cookie is used for security authenticate users, prevent fraud, and
+                      protect users as they interact with a service.</span
+                    >
+                  </td>
+                  <td style="color: var(--text-muted)">6mo</td>
+                  <td><span class="badge badge-muted">No</span></td>
+                </tr>
+                <tr>
+                  <td><code class="cookie-name" title="_fbp">_fbp</code></td>
+                  <td style="color: var(--text-muted)">.m6.fr</td>
+                  <td><span class="badge badge-muted">advertising</span></td>
+                  <td class="cell-desc">
+                    <span title="Facebook — https://www.facebook.com/about/privacy/"
+                      >Used by Facebook to deliver a series of advertisement products such as real
+                      time bidding from third party advertisers</span
+                    >
+                  </td>
+                  <td style="color: var(--text-muted)">3mo</td>
+                  <td><span class="badge badge-warning">Required</span></td>
+                </tr>
+                <tr>
+                  <td><code class="cookie-name" title="dicbo_id">dicbo_id</code></td>
+                  <td style="color: var(--text-muted)">www.m6.fr</td>
+                  <td><span class="badge badge-muted">unknown</span></td>
+                  <td class="cell-desc">
+                    <span title="Outbrain — https://www.outbrain.com/privacy/"
+                      >Collects statistics concerning the visitors' use of the website and its
+                      general functionality. This is used to optimize and compile reports on the
+                      website for comparison through a third party analysis service.</span
+                    >
+                  </td>
+                  <td style="color: var(--text-muted)">< 1 day</td>
+                  <td><span class="badge badge-muted">No</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header">
+          <h2>Network trackers</h2>
+          <span class="count-badge">37</span>
+          <span class="badge badge-critical">8 before consent</span>
+        </div>
+        <div class="section-body no-pad">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Tracker</th>
+                <th>Category</th>
+                <th>Phase</th>
+                <th>URL</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Google Tag Services</td>
+                <td><span class="badge badge-muted">advertising</span></td>
+                <td><span class="badge badge-critical">before consent</span></td>
+                <td
+                  class="cell-url"
+                  style="font-size: 11px; color: var(--text-muted); word-break: break-all"
+                >
+                  <code>https://www.googletagservices.com/tag/js/gpt.js</code>
+                </td>
+              </tr>
+              <tr>
+                <td>Google DoubleClick</td>
+                <td><span class="badge badge-muted">advertising</span></td>
+                <td><span class="badge badge-critical">before consent</span></td>
+                <td
+                  class="cell-url"
+                  style="font-size: 11px; color: var(--text-muted); word-break: break-all"
+                >
+                  <code>https://securepubads.g.doubleclick.net/pagead/managed/js/gpt/m20260…</code>
+                </td>
+              </tr>
+              <tr>
+                <td>Google DoubleClick</td>
+                <td><span class="badge badge-muted">advertising</span></td>
+                <td><span class="badge badge-critical">before consent</span></td>
+                <td
+                  class="cell-url"
+                  style="font-size: 11px; color: var(--text-muted); word-break: break-all"
+                >
+                  <code>https://securepubads.g.doubleclick.net/pagead/managed/dict/m2026022…</code>
+                </td>
+              </tr>
+              <tr>
+                <td>Google AdSense</td>
+                <td><span class="badge badge-muted">advertising</span></td>
+                <td><span class="badge badge-critical">before consent</span></td>
+                <td
+                  class="cell-url"
+                  style="font-size: 11px; color: var(--text-muted); word-break: break-all"
+                >
+                  <code>https://pagead2.googlesyndication.com/pagead/js/rum.js</code>
+                </td>
+              </tr>
+              <tr>
+                <td>Google AdSense</td>
+                <td><span class="badge badge-muted">advertising</span></td>
+                <td><span class="badge badge-critical">before consent</span></td>
+                <td
+                  class="cell-url"
+                  style="font-size: 11px; color: var(--text-muted); word-break: break-all"
+                >
+                  <code
+                    >https://pagead2.googlesyndication.com/pagead/gen_204?id=ama_stats&amp;s…</code
+                  >
+                </td>
+              </tr>
+              <tr>
+                <td>Facebook SDK</td>
+                <td><span class="badge badge-muted">social</span></td>
+                <td><span class="badge badge-critical">before consent</span></td>
+                <td
+                  class="cell-url"
+                  style="font-size: 11px; color: var(--text-muted); word-break: break-all"
+                >
+                  <code>https://connect.facebook.net/fr_FR/sdk.js</code>
+                </td>
+              </tr>
+              <tr>
+                <td>Facebook SDK</td>
+                <td><span class="badge badge-muted">social</span></td>
+                <td><span class="badge badge-critical">before consent</span></td>
+                <td
+                  class="cell-url"
+                  style="font-size: 11px; color: var(--text-muted); word-break: break-all"
+                >
+                  <code>https://connect.facebook.net/fr_FR/sdk.js?hash=1d43b1045098adf3ab81…</code>
+                </td>
+              </tr>
+              <tr>
+                <td>Google AdSense</td>
+                <td><span class="badge badge-muted">advertising</span></td>
+                <td><span class="badge badge-critical">before consent</span></td>
+                <td
+                  class="cell-url"
+                  style="font-size: 11px; color: var(--text-muted); word-break: break-all"
+                >
+                  <code>https://pagead2.googlesyndication.com/pagead/ping?e=1</code>
+                </td>
+              </tr>
+              <tr>
+                <td>Google AdSense</td>
+                <td><span class="badge badge-muted">advertising</span></td>
+                <td><span class="badge badge-muted">after-reject</span></td>
+                <td
+                  class="cell-url"
+                  style="font-size: 11px; color: var(--text-muted); word-break: break-all"
+                >
+                  <code>https://pagead2.googlesyndication.com/gampad/ads?pvsid=762805352401…</code>
+                </td>
+              </tr>
+              <tr>
+                <td>Google AdSense</td>
+                <td><span class="badge badge-muted">advertising</span></td>
+                <td><span class="badge badge-muted">after-reject</span></td>
+                <td
+                  class="cell-url"
+                  style="font-size: 11px; color: var(--text-muted); word-break: break-all"
+                >
+                  <code>https://pagead2.googlesyndication.com/gampad/ads?pvsid=762805352401…</code>
+                </td>
+              </tr>
+              <tr>
+                <td>Google AdSense</td>
+                <td><span class="badge badge-muted">advertising</span></td>
+                <td><span class="badge badge-muted">after-reject</span></td>
+                <td
+                  class="cell-url"
+                  style="font-size: 11px; color: var(--text-muted); word-break: break-all"
+                >
+                  <code>https://4a1e3b07473ddec5fc49fc6f8d362ece.safeframe.googlesyndicatio…</code>
+                </td>
+              </tr>
+              <tr>
+                <td>Tracking Pixel</td>
+                <td><span class="badge badge-muted">pixel</span></td>
+                <td><span class="badge badge-muted">after-reject</span></td>
+                <td
+                  class="cell-url"
+                  style="font-size: 11px; color: var(--text-muted); word-break: break-all"
+                >
+                  <code>https://collect.tealiumiq.com/event</code>
+                </td>
+              </tr>
+              <tr>
+                <td>Tracking Pixel</td>
+                <td><span class="badge badge-muted">pixel</span></td>
+                <td><span class="badge badge-muted">after-reject</span></td>
+                <td
+                  class="cell-url"
+                  style="font-size: 11px; color: var(--text-muted); word-break: break-all"
+                >
+                  <code>https://collect.tealiumiq.com/event</code>
+                </td>
+              </tr>
+              <tr>
+                <td>Tracking Pixel</td>
+                <td><span class="badge badge-muted">pixel</span></td>
+                <td><span class="badge badge-muted">after-reject</span></td>
+                <td
+                  class="cell-url"
+                  style="font-size: 11px; color: var(--text-muted); word-break: break-all"
+                >
+                  <code>https://collect.tealiumiq.com/event</code>
+                </td>
+              </tr>
+              <tr>
+                <td>Google AdSense</td>
+                <td><span class="badge badge-muted">advertising</span></td>
+                <td><span class="badge badge-muted">after-reject</span></td>
+                <td
+                  class="cell-url"
+                  style="font-size: 11px; color: var(--text-muted); word-break: break-all"
+                >
+                  <code>https://pagead2.googlesyndication.com/bg/7-JEQqPqQyEGd3nK0JmL7-npQZ…</code>
+                </td>
+              </tr>
+              <tr>
+                <td>Google Tag Services</td>
+                <td><span class="badge badge-muted">advertising</span></td>
+                <td><span class="badge badge-muted">after-accept</span></td>
+                <td
+                  class="cell-url"
+                  style="font-size: 11px; color: var(--text-muted); word-break: break-all"
+                >
+                  <code>https://www.googletagservices.com/tag/js/gpt.js</code>
+                </td>
+              </tr>
+              <tr>
+                <td>Google DoubleClick</td>
+                <td><span class="badge badge-muted">advertising</span></td>
+                <td><span class="badge badge-muted">after-accept</span></td>
+                <td
+                  class="cell-url"
+                  style="font-size: 11px; color: var(--text-muted); word-break: break-all"
+                >
+                  <code>https://securepubads.g.doubleclick.net/pagead/managed/js/gpt/m20260…</code>
+                </td>
+              </tr>
+              <tr>
+                <td>Google DoubleClick</td>
+                <td><span class="badge badge-muted">advertising</span></td>
+                <td><span class="badge badge-muted">after-accept</span></td>
+                <td
+                  class="cell-url"
+                  style="font-size: 11px; color: var(--text-muted); word-break: break-all"
+                >
+                  <code>https://securepubads.g.doubleclick.net/pagead/managed/dict/m2026022…</code>
+                </td>
+              </tr>
+              <tr>
+                <td>Facebook SDK</td>
+                <td><span class="badge badge-muted">social</span></td>
+                <td><span class="badge badge-muted">after-accept</span></td>
+                <td
+                  class="cell-url"
+                  style="font-size: 11px; color: var(--text-muted); word-break: break-all"
+                >
+                  <code>https://connect.facebook.net/fr_FR/sdk.js</code>
+                </td>
+              </tr>
+              <tr>
+                <td>Facebook SDK</td>
+                <td><span class="badge badge-muted">social</span></td>
+                <td><span class="badge badge-muted">after-accept</span></td>
+                <td
+                  class="cell-url"
+                  style="font-size: 11px; color: var(--text-muted); word-break: break-all"
+                >
+                  <code>https://connect.facebook.net/fr_FR/sdk.js?hash=1d43b1045098adf3ab81…</code>
+                </td>
+              </tr>
+              <tr>
+                <td>Google AdSense</td>
+                <td><span class="badge badge-muted">advertising</span></td>
+                <td><span class="badge badge-muted">after-accept</span></td>
+                <td
+                  class="cell-url"
+                  style="font-size: 11px; color: var(--text-muted); word-break: break-all"
+                >
+                  <code>https://pagead2.googlesyndication.com/pagead/ping?e=1</code>
+                </td>
+              </tr>
+              <tr>
+                <td>Google DoubleClick</td>
+                <td><span class="badge badge-muted">advertising</span></td>
+                <td><span class="badge badge-muted">after-accept</span></td>
+                <td
+                  class="cell-url"
+                  style="font-size: 11px; color: var(--text-muted); word-break: break-all"
+                >
+                  <code>https://cm.g.doubleclick.net/partnerpixels?gdpr_consent=CQgVeAAQgVe…</code>
+                </td>
+              </tr>
+              <tr>
+                <td>Google DoubleClick</td>
+                <td><span class="badge badge-muted">advertising</span></td>
+                <td><span class="badge badge-muted">after-accept</span></td>
+                <td
+                  class="cell-url"
+                  style="font-size: 11px; color: var(--text-muted); word-break: break-all"
+                >
+                  <code>https://securepubads.g.doubleclick.net/gampad/ads?pvsid=15503692787…</code>
+                </td>
+              </tr>
+              <tr>
+                <td>Google DoubleClick</td>
+                <td><span class="badge badge-muted">advertising</span></td>
+                <td><span class="badge badge-muted">after-accept</span></td>
+                <td
+                  class="cell-url"
+                  style="font-size: 11px; color: var(--text-muted); word-break: break-all"
+                >
+                  <code>https://securepubads.g.doubleclick.net/gampad/ads?pvsid=15503692787…</code>
+                </td>
+              </tr>
+              <tr>
+                <td>Google AdSense</td>
+                <td><span class="badge badge-muted">advertising</span></td>
+                <td><span class="badge badge-muted">after-accept</span></td>
+                <td
+                  class="cell-url"
+                  style="font-size: 11px; color: var(--text-muted); word-break: break-all"
+                >
+                  <code>https://a8e9d96076a113cd5b9a721e0f16f85d.safeframe.googlesyndicatio…</code>
+                </td>
+              </tr>
+              <tr>
+                <td>Outbrain</td>
+                <td><span class="badge badge-muted">advertising</span></td>
+                <td><span class="badge badge-muted">after-accept</span></td>
+                <td
+                  class="cell-url"
+                  style="font-size: 11px; color: var(--text-muted); word-break: break-all"
+                >
+                  <code>https://amplify.outbrain.com/cp/obtp.js</code>
+                </td>
+              </tr>
+              <tr>
+                <td>Facebook SDK</td>
+                <td><span class="badge badge-muted">social</span></td>
+                <td><span class="badge badge-muted">after-accept</span></td>
+                <td
+                  class="cell-url"
+                  style="font-size: 11px; color: var(--text-muted); word-break: break-all"
+                >
+                  <code>https://connect.facebook.net/en_US/fbevents.js</code>
+                </td>
+              </tr>
+              <tr>
+                <td>Tracking Pixel</td>
+                <td><span class="badge badge-muted">pixel</span></td>
+                <td><span class="badge badge-muted">after-accept</span></td>
+                <td
+                  class="cell-url"
+                  style="font-size: 11px; color: var(--text-muted); word-break: break-all"
+                >
+                  <code>https://collect.tealiumiq.com/event</code>
+                </td>
+              </tr>
+              <tr>
+                <td>Tracking Pixel</td>
+                <td><span class="badge badge-muted">pixel</span></td>
+                <td><span class="badge badge-muted">after-accept</span></td>
+                <td
+                  class="cell-url"
+                  style="font-size: 11px; color: var(--text-muted); word-break: break-all"
+                >
+                  <code>https://collect.tealiumiq.com/event</code>
+                </td>
+              </tr>
+              <tr>
+                <td>Tracking Pixel</td>
+                <td><span class="badge badge-muted">pixel</span></td>
+                <td><span class="badge badge-muted">after-accept</span></td>
+                <td
+                  class="cell-url"
+                  style="font-size: 11px; color: var(--text-muted); word-break: break-all"
+                >
+                  <code>https://collect.tealiumiq.com/event</code>
+                </td>
+              </tr>
+              <tr>
+                <td>Google AdSense</td>
+                <td><span class="badge badge-muted">advertising</span></td>
+                <td><span class="badge badge-muted">after-accept</span></td>
+                <td
+                  class="cell-url"
+                  style="font-size: 11px; color: var(--text-muted); word-break: break-all"
+                >
+                  <code>https://pagead2.googlesyndication.com/bg/7-JEQqPqQyEGd3nK0JmL7-npQZ…</code>
+                </td>
+              </tr>
+              <tr>
+                <td>Outbrain</td>
+                <td><span class="badge badge-muted">advertising</span></td>
+                <td><span class="badge badge-muted">after-accept</span></td>
+                <td
+                  class="cell-url"
+                  style="font-size: 11px; color: var(--text-muted); word-break: break-all"
+                >
+                  <code>https://wave.outbrain.com/mtWavesBundler/handler/00244a93dd4b6c51b6…</code>
+                </td>
+              </tr>
+              <tr>
+                <td>Outbrain</td>
+                <td><span class="badge badge-muted">advertising</span></td>
+                <td><span class="badge badge-muted">after-accept</span></td>
+                <td
+                  class="cell-url"
+                  style="font-size: 11px; color: var(--text-muted); word-break: break-all"
+                >
+                  <code>https://amplify.outbrain.com/topics</code>
+                </td>
+              </tr>
+              <tr>
+                <td>Outbrain</td>
+                <td><span class="badge badge-muted">advertising</span></td>
+                <td><span class="badge badge-muted">after-accept</span></td>
+                <td
+                  class="cell-url"
+                  style="font-size: 11px; color: var(--text-muted); word-break: break-all"
+                >
+                  <code
+                    >https://tr.outbrain.com/unifiedPixel?au=false&amp;bust=0028185788252543…</code
+                  >
+                </td>
+              </tr>
+              <tr>
+                <td>Outbrain</td>
+                <td><span class="badge badge-muted">advertising</span></td>
+                <td><span class="badge badge-muted">after-accept</span></td>
+                <td
+                  class="cell-url"
+                  style="font-size: 11px; color: var(--text-muted); word-break: break-all"
+                >
+                  <code>https://tr.outbrain.com/cachedClickId?marketerId=00244a93dd4b6c51b6…</code>
+                </td>
+              </tr>
+              <tr>
+                <td>Facebook SDK</td>
+                <td><span class="badge badge-muted">social</span></td>
+                <td><span class="badge badge-muted">after-accept</span></td>
+                <td
+                  class="cell-url"
+                  style="font-size: 11px; color: var(--text-muted); word-break: break-all"
+                >
+                  <code>https://connect.facebook.net/signals/config/1660821730768627?v=2.9.…</code>
+                </td>
+              </tr>
+              <tr>
+                <td>Google AdSense</td>
+                <td><span class="badge badge-muted">advertising</span></td>
+                <td><span class="badge badge-muted">after-accept</span></td>
+                <td
+                  class="cell-url"
+                  style="font-size: 11px; color: var(--text-muted); word-break: break-all"
+                >
+                  <code
+                    >https://pagead2.googlesyndication.com/pagead/sodar?id=sodar2&amp;v=252&amp;…</code
+                  >
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header">
+          <h2>IAB TCF</h2>
+          <span class="badge badge-ok">TCF v2</span>
+          <span class="badge badge-muted">CMP 7</span>
+        </div>
+        <div class="section-body">
+          <p
+            style="margin: 0 0 16px; font-size: 12px; color: var(--text-muted); font-style: italic"
+          >
+            Informational only — does not affect the compliance score.
+          </p>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Property</th>
+                <th>Value</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="font-weight: 500; width: 40%">CMP API (<code>__tcfapi</code>)</td>
+                <td><span class="status-ok">✓ Present</span></td>
+              </tr>
+              <tr>
+                <td style="font-weight: 500; width: 40%">
+                  Locator frame (<code>__tcfapiLocator</code>)
+                </td>
+                <td><span class="status-ok">✓ Present</span></td>
+              </tr>
+              <tr>
+                <td style="font-weight: 500; width: 40%">Consent string cookie</td>
+                <td><span style="color: var(--text-muted)">—</span></td>
+              </tr>
+              <tr>
+                <td style="font-weight: 500; width: 40%">CMP ID</td>
+                <td>7</td>
+              </tr>
+            </tbody>
+          </table>
+          <div style="margin-top: 20px">
+            <div
+              style="
+                font-size: 12px;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.04em;
+                color: var(--text-muted);
+                margin-bottom: 8px;
+              "
+            >
+              Decoded consent string
+            </div>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Field</th>
+                  <th>Value</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="font-weight: 500; width: 40%">Version</td>
+                  <td>TCF v2</td>
+                </tr>
+                <tr>
+                  <td style="font-weight: 500; width: 40%">Created</td>
+                  <td>2026-02-28</td>
+                </tr>
+                <tr>
+                  <td style="font-weight: 500; width: 40%">Last updated</td>
+                  <td>2026-02-28</td>
+                </tr>
+                <tr>
+                  <td style="font-weight: 500; width: 40%">CMP ID</td>
+                  <td>7</td>
+                </tr>
+                <tr>
+                  <td style="font-weight: 500; width: 40%">CMP version</td>
+                  <td>1</td>
+                </tr>
+                <tr>
+                  <td style="font-weight: 500; width: 40%">Consent language</td>
+                  <td>EN</td>
+                </tr>
+                <tr>
+                  <td style="font-weight: 500; width: 40%">Vendor list version</td>
+                  <td>147</td>
+                </tr>
+                <tr>
+                  <td style="font-weight: 500; width: 40%">TCF policy version</td>
+                  <td>5</td>
+                </tr>
+                <tr>
+                  <td style="font-weight: 500; width: 40%">Service specific</td>
+                  <td>Yes</td>
+                </tr>
+                <tr>
+                  <td style="font-weight: 500; width: 40%">Publisher country</td>
+                  <td>AA</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p style="margin-top: 16px; font-size: 13px; color: var(--text-muted)">
+            No purposes with explicit consent.
+          </p>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header">
+          <h2>Recommendations</h2>
+          <span class="count-badge">3</span>
+        </div>
+        <div class="section-body">
+          <ul class="rec-list">
+            <li class="rec-item">
+              <span class="rec-num">1</span>
+              <span
+                >Do not set any non-essential cookie before consent. Gate the initialisation of
+                third-party scripts on the acceptance callback.</span
+              >
+            </li>
+            <li class="rec-item">
+              <span class="rec-num">2</span>
+              <span
+                >Complete the modal information: processing purposes, identity of sub-processors,
+                retention period, right to withdraw.</span
+              >
+            </li>
+            <li class="rec-item">
+              <span class="rec-num">3</span>
+              <span
+                >Remove or block non-essential cookies after rejection, and verify consent handling
+                server-side.</span
+              >
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header">
+          <h2>Compliance checklist</h2>
+          <span class="count-badge">12 rules</span>
+          <span class="badge badge-ok">8 ✓</span>
+          <span class="badge badge-critical">3 ✗</span>
+          <span class="badge badge-warning">1 ⚠</span>
+        </div>
+        <div class="section-body no-pad">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Category</th>
+                <th>Rule</th>
+                <th>Status</th>
+                <th>Detail</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td
+                  rowspan="3"
+                  style="font-weight: 600; vertical-align: top; background: var(--bg)"
+                >
+                  Consent
+                </td>
+                <td>Consent modal detected</td>
+                <td><span class="status-ok">✓ Compliant</span></td>
+                <td style="color: var(--text-muted); font-size: 12px">
+                  Detected (.didomi-popup-container)
+                </td>
+              </tr>
+              <tr>
+                <td>No pre-ticked checkboxes</td>
+                <td><span class="status-ok">✓ Compliant</span></td>
+                <td style="color: var(--text-muted); font-size: 12px">None detected</td>
+              </tr>
+              <tr>
+                <td>Unambiguous accept label</td>
+                <td><span class="status-ok">✓ Compliant</span></td>
+                <td style="color: var(--text-muted); font-size: 12px">TOUT ACCEPTER</td>
+              </tr>
+              <tr>
+                <td
+                  rowspan="3"
+                  style="font-weight: 600; vertical-align: top; background: var(--bg)"
+                >
+                  Easy refusal
+                </td>
+                <td>Reject button at first layer</td>
+                <td><span class="status-ok">✓ Compliant</span></td>
+                <td style="color: var(--text-muted); font-size: 12px">Continuer sans accepter →</td>
+              </tr>
+              <tr>
+                <td>Reject ≤ clicks than accept</td>
+                <td><span class="status-ok">✓ Compliant</span></td>
+                <td style="color: var(--text-muted); font-size: 12px">Accept: 1 · Reject: 1</td>
+              </tr>
+              <tr>
+                <td>Button size symmetry</td>
+                <td><span class="status-ok">✓ Compliant</span></td>
+                <td style="color: var(--text-muted); font-size: 12px">Comparable sizes</td>
+              </tr>
+              <tr>
+                <td
+                  rowspan="3"
+                  style="font-weight: 600; vertical-align: top; background: var(--bg)"
+                >
+                  Transparency
+                </td>
+                <td>Granular controls available</td>
+                <td><span class="status-warn">⚠ Warning</span></td>
+                <td style="color: var(--text-muted); font-size: 12px">No granular controls</td>
+              </tr>
+              <tr>
+                <td>Privacy policy in modal</td>
+                <td><span class="status-ok">✓ Compliant</span></td>
+                <td style="color: var(--text-muted); font-size: 12px">
+                  https://www.m6.fr/politique-de-confidentialite/cookies-partenaires
+                </td>
+              </tr>
+              <tr>
+                <td>Privacy policy on page</td>
+                <td><span class="status-ok">✓ Compliant</span></td>
+                <td style="color: var(--text-muted); font-size: 12px">
+                  https://www.m6.fr/politique-de-confidentialite/cookies-partenaires
+                </td>
+              </tr>
+              <tr>
+                <td
+                  rowspan="3"
+                  style="font-weight: 600; vertical-align: top; background: var(--bg)"
+                >
+                  Cookie behavior
+                </td>
+                <td>No non-essential cookie before consent</td>
+                <td><span class="status-ko">✗ Non-compliant</span></td>
+                <td style="color: var(--text-muted); font-size: 12px">2: gmid, ucid</td>
+              </tr>
+              <tr>
+                <td>Non-essential cookies removed after reject</td>
+                <td><span class="status-ko">✗ Non-compliant</span></td>
+                <td style="color: var(--text-muted); font-size: 12px">2 persisting</td>
+              </tr>
+              <tr>
+                <td>No tracker before consent</td>
+                <td><span class="status-ko">✗ Non-compliant</span></td>
+                <td style="color: var(--text-muted); font-size: 12px">8 tracker(s)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="footer">
+        Generated by <a href="https://github.com/Slashgear/gdpr-report">gdpr-cookie-scanner</a>
+        on 28 February 2026 at 16:00
+      </div>
+    </div>
+  </body>
+</html>

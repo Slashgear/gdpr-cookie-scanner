@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>GDPR Report — arte.tv</title>
+    <title>GDPR Report — ouest-france.fr</title>
     <style>
       *,
       *::before,
@@ -12,8 +12,8 @@
       }
 
       :root {
-        --grade: #ea580c;
-        --grade-bg: #fff7ed;
+        --grade: #dc2626;
+        --grade-bg: #fef2f2;
         --surface: #ffffff;
         --bg: #f1f5f9;
         --border: #e2e8f0;
@@ -446,14 +446,14 @@
   <body>
     <div class="page">
       <div class="hero">
-        <div class="grade-badge" style="background: #ea580c">D</div>
+        <div class="grade-badge" style="background: #dc2626">F</div>
         <div class="hero-info">
-          <h1>arte.tv</h1>
-          <p class="hero-meta">Scanned on 24 February 2026 at 15:00 · 14.6s</p>
+          <h1>ouest-france.fr</h1>
+          <p class="hero-meta">Scanned on 22 February 2026 at 22:00 · 6.6s</p>
         </div>
         <div class="hero-score">
           <div>
-            <span class="score-num" style="color: #ea580c">53</span
+            <span class="score-num" style="color: #dc2626">25</span
             ><span class="score-den">/100</span>
           </div>
           <div class="score-label">Compliance score</div>
@@ -463,16 +463,16 @@
       <div class="score-grid">
         <div class="score-card">
           <div class="score-card-label">Consent validity</div>
-          <div class="score-card-value">10<span>/25</span></div>
+          <div class="score-card-value">0<span>/25</span></div>
           <div class="progress-track">
-            <div class="progress-fill" style="width: 40%; background: #ea580c"></div>
+            <div class="progress-fill" style="width: 0%; background: #dc2626"></div>
           </div>
         </div>
         <div class="score-card">
           <div class="score-card-label">Easy refusal</div>
-          <div class="score-card-value">25<span>/25</span></div>
+          <div class="score-card-value">0<span>/25</span></div>
           <div class="progress-track">
-            <div class="progress-fill" style="width: 100%; background: #16a34a"></div>
+            <div class="progress-fill" style="width: 0%; background: #dc2626"></div>
           </div>
         </div>
         <div class="score-card">
@@ -484,9 +484,9 @@
         </div>
         <div class="score-card">
           <div class="score-card-label">Cookie behavior</div>
-          <div class="score-card-value">18<span>/25</span></div>
+          <div class="score-card-value">25<span>/25</span></div>
           <div class="progress-track">
-            <div class="progress-fill" style="width: 72%; background: #ca8a04"></div>
+            <div class="progress-fill" style="width: 100%; background: #16a34a"></div>
           </div>
         </div>
       </div>
@@ -494,42 +494,22 @@
       <div class="section">
         <div class="section-header">
           <h2>Issues</h2>
-          <span class="count-badge">7</span>
-          <span class="badge badge-critical">2 critical</span>
-          <span class="badge badge-warning">5 warnings</span>
+          <span class="count-badge">2</span>
+          <span class="badge badge-critical">1 critical</span>
+          <span class="badge badge-warning">1 warning</span>
         </div>
         <div class="section-body">
           <div class="issue-list">
             <div class="issue-card critical">
-              <div class="issue-title">
-                1 non-essential cookie(s) deposited before any interaction
-              </div>
-              <p class="issue-evidence">ABV (unknown)</p>
-            </div>
-            <div class="issue-card critical">
-              <div class="issue-title">1 non-essential cookie(s) persist after rejection</div>
-              <p class="issue-evidence">ABV (unknown)</p>
-            </div>
-            <div class="issue-card warning">
-              <div class="issue-title">Missing required information: &quot;purposes&quot;</div>
-              <p class="issue-evidence">The consent text does not mention purposes</p>
-            </div>
-            <div class="issue-card warning">
-              <div class="issue-title">Missing required information: &quot;third-parties&quot;</div>
-              <p class="issue-evidence">The consent text does not mention third-parties</p>
-            </div>
-            <div class="issue-card warning">
-              <div class="issue-title">Missing required information: &quot;duration&quot;</div>
-              <p class="issue-evidence">The consent text does not mention duration</p>
-            </div>
-            <div class="issue-card warning">
-              <div class="issue-title">Missing required information: &quot;withdrawal&quot;</div>
-              <p class="issue-evidence">The consent text does not mention withdrawal</p>
-            </div>
-            <div class="issue-card warning">
-              <div class="issue-title">No privacy policy link found in the consent modal</div>
+              <div class="issue-title">No cookie consent modal detected</div>
               <p class="issue-evidence">
-                GDPR Art. 13 requires the privacy policy to be accessible from the consent interface
+                A consent mechanism is required before depositing non-essential cookies
+              </p>
+            </div>
+            <div class="issue-card warning">
+              <div class="issue-title">No privacy policy link found on the page</div>
+              <p class="issue-evidence">
+                A privacy policy must be accessible from every page (GDPR Art. 13)
               </p>
             </div>
           </div>
@@ -537,76 +517,12 @@
       </div>
 
       <div class="section">
-        <div class="section-header">
-          <h2>Consent modal</h2>
-          <span class="badge badge-ok">Detected</span>
-        </div>
+        <div class="section-header"><h2>Consent modal</h2></div>
         <div class="section-body">
-          <img src="modal-initial.png" alt="Consent modal screenshot" class="modal-screenshot" />
-          <div class="info-grid" style="margin-bottom: 20px">
-            <div class="info-item">
-              <div class="info-label">Selector</div>
-              <div class="info-value"><code>div.ds-eg90wg</code></div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">Granular controls</div>
-              <div class="info-value"><span class="status-warn">✗ No</span></div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">Privacy policy link</div>
-              <div class="info-value"><span class="badge badge-warning">Not found</span></div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">Pre-ticked checkboxes</div>
-              <div class="info-value"><span class="status-ok">✓ None</span></div>
-            </div>
-          </div>
-          <div
-            style="
-              font-size: 12px;
-              font-weight: 600;
-              text-transform: uppercase;
-              letter-spacing: 0.04em;
-              color: var(--text-muted);
-              margin-bottom: 8px;
-            "
-          >
-            Buttons
-          </div>
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Type</th>
-                <th>Label</th>
-                <th>Font size</th>
-                <th>Contrast</th>
-                <th>Clicks</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><span class="btn-chip accept">accept</span></td>
-                <td>J'accepte</td>
-                <td>16px</td>
-                <td>21:1</td>
-                <td>1</td>
-              </tr>
-              <tr>
-                <td><span class="btn-chip reject">reject</span></td>
-                <td>Je refuse</td>
-                <td>16px</td>
-                <td>21:1</td>
-                <td>1</td>
-              </tr>
-              <tr>
-                <td><span class="btn-chip unknown">unknown</span></td>
-                <td>Paramétrer mes choix</td>
-                <td>16px</td>
-                <td>21:1</td>
-                <td>1</td>
-              </tr>
-            </tbody>
-          </table>
+          <span class="badge badge-critical">Not detected</span>
+          <p style="margin: 12px 0 0; color: var(--text-muted); font-size: 13px">
+            No consent banner was found on the page.
+          </p>
         </div>
       </div>
 
@@ -628,50 +544,9 @@
               "
             >
               Before interaction
-              <span class="count-badge">4</span>
-              <span class="badge badge-critical">1 non-essential</span>
+              <span class="count-badge">0</span>
             </div>
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Domain</th>
-                  <th>Category</th>
-                  <th>Expiry</th>
-                  <th>Consent</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td><code>AUTH_SESSION_ID</code></td>
-                  <td style="color: var(--text-muted)">id.arte.tv</td>
-                  <td><span class="badge badge-muted">strictly-necessary</span></td>
-                  <td style="color: var(--text-muted)">Session</td>
-                  <td><span class="badge badge-muted">No</span></td>
-                </tr>
-                <tr>
-                  <td><code>KC_AUTH_SESSION_HASH</code></td>
-                  <td style="color: var(--text-muted)">id.arte.tv</td>
-                  <td><span class="badge badge-muted">unknown</span></td>
-                  <td style="color: var(--text-muted)">< 1 day</td>
-                  <td><span class="badge badge-muted">No</span></td>
-                </tr>
-                <tr>
-                  <td><code>ABV</code></td>
-                  <td style="color: var(--text-muted)">.arte.tv</td>
-                  <td><span class="badge badge-muted">unknown</span></td>
-                  <td style="color: var(--text-muted)">Session</td>
-                  <td><span class="badge badge-warning">Required</span></td>
-                </tr>
-                <tr>
-                  <td><code>validated-age</code></td>
-                  <td style="color: var(--text-muted)">www.arte.tv</td>
-                  <td><span class="badge badge-muted">unknown</span></td>
-                  <td style="color: var(--text-muted)">12mo</td>
-                  <td><span class="badge badge-muted">No</span></td>
-                </tr>
-              </tbody>
-            </table>
+            <p class="empty-state">No cookies detected.</p>
           </div>
           <div style="margin-bottom: 24px">
             <div
@@ -688,58 +563,9 @@
               "
             >
               After reject
-              <span class="count-badge">5</span>
-
-              <span class="badge badge-critical">1 non-essential</span>
+              <span class="count-badge">0</span>
             </div>
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Domain</th>
-                  <th>Category</th>
-                  <th>Expiry</th>
-                  <th>Consent</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td><code>AUTH_SESSION_ID</code></td>
-                  <td style="color: var(--text-muted)">id.arte.tv</td>
-                  <td><span class="badge badge-muted">strictly-necessary</span></td>
-                  <td style="color: var(--text-muted)">Session</td>
-                  <td><span class="badge badge-muted">No</span></td>
-                </tr>
-                <tr>
-                  <td><code>KC_AUTH_SESSION_HASH</code></td>
-                  <td style="color: var(--text-muted)">id.arte.tv</td>
-                  <td><span class="badge badge-muted">unknown</span></td>
-                  <td style="color: var(--text-muted)">< 1 day</td>
-                  <td><span class="badge badge-muted">No</span></td>
-                </tr>
-                <tr>
-                  <td><code>ABV</code></td>
-                  <td style="color: var(--text-muted)">.arte.tv</td>
-                  <td><span class="badge badge-muted">unknown</span></td>
-                  <td style="color: var(--text-muted)">Session</td>
-                  <td><span class="badge badge-warning">Required</span></td>
-                </tr>
-                <tr>
-                  <td><code>validated-age</code></td>
-                  <td style="color: var(--text-muted)">www.arte.tv</td>
-                  <td><span class="badge badge-muted">unknown</span></td>
-                  <td style="color: var(--text-muted)">12mo</td>
-                  <td><span class="badge badge-muted">No</span></td>
-                </tr>
-                <tr>
-                  <td><code>user_consent</code></td>
-                  <td style="color: var(--text-muted)">www.arte.tv</td>
-                  <td><span class="badge badge-muted">unknown</span></td>
-                  <td style="color: var(--text-muted)">12mo</td>
-                  <td><span class="badge badge-muted">No</span></td>
-                </tr>
-              </tbody>
-            </table>
+            <p class="empty-state">No cookies detected.</p>
           </div>
           <div style="margin-bottom: 24px">
             <div
@@ -756,94 +582,17 @@
               "
             >
               After accept
-              <span class="count-badge">5</span>
+              <span class="count-badge">0</span>
             </div>
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Domain</th>
-                  <th>Category</th>
-                  <th>Expiry</th>
-                  <th>Consent</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td><code>AUTH_SESSION_ID</code></td>
-                  <td style="color: var(--text-muted)">id.arte.tv</td>
-                  <td><span class="badge badge-muted">strictly-necessary</span></td>
-                  <td style="color: var(--text-muted)">Session</td>
-                  <td><span class="badge badge-muted">No</span></td>
-                </tr>
-                <tr>
-                  <td><code>KC_AUTH_SESSION_HASH</code></td>
-                  <td style="color: var(--text-muted)">id.arte.tv</td>
-                  <td><span class="badge badge-muted">unknown</span></td>
-                  <td style="color: var(--text-muted)">< 1 day</td>
-                  <td><span class="badge badge-muted">No</span></td>
-                </tr>
-                <tr>
-                  <td><code>ABV</code></td>
-                  <td style="color: var(--text-muted)">.arte.tv</td>
-                  <td><span class="badge badge-muted">unknown</span></td>
-                  <td style="color: var(--text-muted)">Session</td>
-                  <td><span class="badge badge-warning">Required</span></td>
-                </tr>
-                <tr>
-                  <td><code>validated-age</code></td>
-                  <td style="color: var(--text-muted)">www.arte.tv</td>
-                  <td><span class="badge badge-muted">unknown</span></td>
-                  <td style="color: var(--text-muted)">12mo</td>
-                  <td><span class="badge badge-muted">No</span></td>
-                </tr>
-                <tr>
-                  <td><code>user_consent</code></td>
-                  <td style="color: var(--text-muted)">www.arte.tv</td>
-                  <td><span class="badge badge-muted">unknown</span></td>
-                  <td style="color: var(--text-muted)">12mo</td>
-                  <td><span class="badge badge-muted">No</span></td>
-                </tr>
-              </tbody>
-            </table>
+            <p class="empty-state">No cookies detected.</p>
           </div>
         </div>
       </div>
 
       <div class="section">
-        <div class="section-header">
-          <h2>Network trackers</h2>
-          <span class="count-badge">2</span>
-        </div>
-        <div class="section-body no-pad">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Tracker</th>
-                <th>Category</th>
-                <th>Phase</th>
-                <th>URL</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>Tracking Pixel</td>
-                <td><span class="badge badge-muted">pixel</span></td>
-                <td><span class="badge badge-muted">after-reject</span></td>
-                <td style="font-size: 11px; color: var(--text-muted); word-break: break-all">
-                  <code>https://event.arte.tv/api/server-side-tracking/v1/tracking</code>
-                </td>
-              </tr>
-              <tr>
-                <td>Tracking Pixel</td>
-                <td><span class="badge badge-muted">pixel</span></td>
-                <td><span class="badge badge-muted">after-accept</span></td>
-                <td style="font-size: 11px; color: var(--text-muted); word-break: break-all">
-                  <code>https://event.arte.tv/api/server-side-tracking/v1/tracking</code>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        <div class="section-header"><h2>Network trackers</h2></div>
+        <div class="section-body">
+          <div class="no-issues">✓ No network tracker detected</div>
         </div>
       </div>
 
@@ -857,22 +606,22 @@
             <li class="rec-item">
               <span class="rec-num">1</span>
               <span
-                >Do not set any non-essential cookie before consent. Gate the initialisation of
-                third-party scripts on the acceptance callback.</span
+                >Deploy a CMP solution (Axeptio, Didomi, OneTrust, Cookiebot) that displays a
+                consent modal before any non-essential cookie.</span
               >
             </li>
             <li class="rec-item">
               <span class="rec-num">2</span>
               <span
-                >Complete the modal information: processing purposes, identity of sub-processors,
-                retention period, right to withdraw.</span
+                >Add a &quot;Reject all&quot; button at the first layer of the modal, requiring no
+                more clicks than &quot;Accept all&quot; (CNIL 2022).</span
               >
             </li>
             <li class="rec-item">
               <span class="rec-num">3</span>
               <span
-                >Remove or block non-essential cookies after rejection, and verify consent handling
-                server-side.</span
+                >Complete the modal information: processing purposes, identity of sub-processors,
+                retention period, right to withdraw.</span
               >
             </li>
           </ul>
@@ -883,9 +632,9 @@
         <div class="section-header">
           <h2>Compliance checklist</h2>
           <span class="count-badge">12 rules</span>
-          <span class="badge badge-ok">8 ✓</span>
-          <span class="badge badge-critical">2 ✗</span>
-          <span class="badge badge-warning">2 ⚠</span>
+          <span class="badge badge-ok">5 ✓</span>
+          <span class="badge badge-critical">6 ✗</span>
+          <span class="badge badge-warning">1 ⚠</span>
         </div>
         <div class="section-body no-pad">
           <table class="data-table">
@@ -906,8 +655,8 @@
                   Consent
                 </td>
                 <td>Consent modal detected</td>
-                <td><span class="status-ok">✓ Compliant</span></td>
-                <td style="color: var(--text-muted); font-size: 12px">Detected (div.ds-eg90wg)</td>
+                <td><span class="status-ko">✗ Non-compliant</span></td>
+                <td style="color: var(--text-muted); font-size: 12px">No consent banner found</td>
               </tr>
               <tr>
                 <td>No pre-ticked checkboxes</td>
@@ -917,7 +666,7 @@
               <tr>
                 <td>Unambiguous accept label</td>
                 <td><span class="status-ok">✓ Compliant</span></td>
-                <td style="color: var(--text-muted); font-size: 12px">J'accepte</td>
+                <td style="color: var(--text-muted); font-size: 12px">No accept button</td>
               </tr>
               <tr>
                 <td
@@ -927,17 +676,17 @@
                   Easy refusal
                 </td>
                 <td>Reject button at first layer</td>
-                <td><span class="status-ok">✓ Compliant</span></td>
-                <td style="color: var(--text-muted); font-size: 12px">Je refuse</td>
+                <td><span class="status-ko">✗ Non-compliant</span></td>
+                <td style="color: var(--text-muted); font-size: 12px">Not found</td>
               </tr>
               <tr>
                 <td>Reject ≤ clicks than accept</td>
-                <td><span class="status-ok">✓ Compliant</span></td>
-                <td style="color: var(--text-muted); font-size: 12px">Accept: 1 · Reject: 1</td>
+                <td><span class="status-ko">✗ Non-compliant</span></td>
+                <td style="color: var(--text-muted); font-size: 12px">Cannot verify</td>
               </tr>
               <tr>
                 <td>Button size symmetry</td>
-                <td><span class="status-ok">✓ Compliant</span></td>
+                <td><span class="status-ko">✗ Non-compliant</span></td>
                 <td style="color: var(--text-muted); font-size: 12px">Comparable sizes</td>
               </tr>
               <tr>
@@ -948,20 +697,18 @@
                   Transparency
                 </td>
                 <td>Granular controls available</td>
-                <td><span class="status-warn">⚠ Warning</span></td>
+                <td><span class="status-ko">✗ Non-compliant</span></td>
                 <td style="color: var(--text-muted); font-size: 12px">No granular controls</td>
               </tr>
               <tr>
                 <td>Privacy policy in modal</td>
-                <td><span class="status-warn">⚠ Warning</span></td>
+                <td><span class="status-ko">✗ Non-compliant</span></td>
                 <td style="color: var(--text-muted); font-size: 12px">Not found</td>
               </tr>
               <tr>
                 <td>Privacy policy on page</td>
-                <td><span class="status-ok">✓ Compliant</span></td>
-                <td style="color: var(--text-muted); font-size: 12px">
-                  https://www.arte.tv/sites/corporate/credits/
-                </td>
+                <td><span class="status-warn">⚠ Warning</span></td>
+                <td style="color: var(--text-muted); font-size: 12px">Not found</td>
               </tr>
               <tr>
                 <td
@@ -971,13 +718,13 @@
                   Cookie behavior
                 </td>
                 <td>No non-essential cookie before consent</td>
-                <td><span class="status-ko">✗ Non-compliant</span></td>
-                <td style="color: var(--text-muted); font-size: 12px">1: ABV</td>
+                <td><span class="status-ok">✓ Compliant</span></td>
+                <td style="color: var(--text-muted); font-size: 12px">None</td>
               </tr>
               <tr>
                 <td>Non-essential cookies removed after reject</td>
-                <td><span class="status-ko">✗ Non-compliant</span></td>
-                <td style="color: var(--text-muted); font-size: 12px">1 persisting</td>
+                <td><span class="status-ok">✓ Compliant</span></td>
+                <td style="color: var(--text-muted); font-size: 12px">Correctly removed</td>
               </tr>
               <tr>
                 <td>No tracker before consent</td>
@@ -991,7 +738,7 @@
 
       <div class="footer">
         Generated by <a href="https://github.com/Slashgear/gdpr-report">gdpr-cookie-scanner</a>
-        on 24 February 2026 at 15:00
+        on 22 February 2026 at 22:00
       </div>
     </div>
   </body>
