@@ -66,6 +66,32 @@ Patterns that are explicitly listed in CNIL/EDPB guidelines but not yet detected
 
 ---
 
+## Website (`docs/`)
+
+The site is served as GitHub Pages from the `docs/` directory. Reports and cards are maintained manually.
+
+- **HTML reports on the site** — generate `.html` reports into `docs/reports/<host>/` and point the "Live Reports" cards directly at the GitHub Pages URL instead of GitHub's Markdown renderer. Visitors stay on the site and get the full styled report experience.
+
+- **Per-report `<title>` and `<meta description>`** — each HTML report should carry a specific page title (`"github.com — Grade F (15/100) | gdpr-cookie-scanner"`) and a meta description summarising the scan result. Currently the generator uses a generic title.
+
+- **Open Graph / Twitter Card tags** — add `og:title`, `og:description`, `og:url` (and ideally `og:image` with a grade badge) to each report page so social shares display a meaningful preview card.
+
+- **`sitemap.xml`** — auto-generated file listing the home page + every report page. Critical for search engine discovery of individual report pages. Can be a simple script that reads `docs/reports/` and writes the XML.
+
+- **JSON-LD structured data** — `SoftwareApplication` schema on the home page; a `Dataset` or `Article` schema on each report page with `name`, `url`, `datePublished`, and a custom `score` property. Enables Google rich snippets.
+
+- **`robots.txt`** — confirm (or add) a `robots.txt` that allows full crawling of `docs/` including report sub-directories.
+
+- **Screenshots in the HTML report** — `after-reject.png` and `after-accept.png` are already captured alongside each report. Embedding them in the HTML report as visual evidence would make reports significantly more compelling.
+
+- **Fix outdated copy** — the "What it checks" feature card still says "3 Markdown reports". Update to reflect the current single-file output and the HTML format.
+
+- **"Submit a site" workflow** — a GitHub Issues template that lets users request a scan. A workflow picks it up, runs the scanner, commits the HTML report to `docs/reports/`, and posts a link back in the issue.
+
+- **Dark mode** — `style.css` has no `@media (prefers-color-scheme: dark)` support. The design is simple enough that adding a dark palette would be straightforward.
+
+---
+
 ## Testing
 
 - **Report output tests** — no tests currently validate the content of generated Markdown, HTML, or JSON files. Add snapshot tests for at least the JSON output and spot-checks for key sections in HTML.
