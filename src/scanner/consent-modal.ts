@@ -467,8 +467,10 @@ function classifyButtonType(
   reject: RegExp[],
   preferences: RegExp[],
 ): ConsentButtonType {
-  if (accept.some((p) => p.test(text))) return "accept";
+  // Reject is tested first: phrases like "continuer sans accepter" contain "accepter"
+  // which would otherwise match the accept pattern before reaching the reject pattern.
   if (reject.some((p) => p.test(text))) return "reject";
+  if (accept.some((p) => p.test(text))) return "accept";
   if (preferences.some((p) => p.test(text))) return "preferences";
   // Close buttons: word-form match OR standalone symbol (× ✕ ✗ ✖ ✘)
   if (

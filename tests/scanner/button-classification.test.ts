@@ -191,6 +191,38 @@ describe("classifyButtonText — null (unknown language)", () => {
   });
 });
 
+// ── "Continue without accepting" dark pattern ─────────────────────────────────
+//
+// Some sites hide their reject action behind a phrase that contains the word
+// "accept" or an equivalent, making automated classifiers misread it as an
+// accept button. These must be classified as "reject".
+
+describe('classifyButtonText — "continue without accepting" dark pattern', () => {
+  it('FR: "Continuer sans accepter" → reject', () => {
+    expect(classifyButtonText("Continuer sans accepter", "fr")).toBe("reject");
+  });
+
+  it('EN: "Continue without accepting" → reject', () => {
+    expect(classifyButtonText("Continue without accepting", "en")).toBe("reject");
+  });
+
+  it('EN: "Continue without consent" → reject', () => {
+    expect(classifyButtonText("Continue without consent", "en")).toBe("reject");
+  });
+
+  it('ES: "Continuar sin aceptar" → reject', () => {
+    expect(classifyButtonText("Continuar sin aceptar", "es")).toBe("reject");
+  });
+
+  it('FR: "Accepter" alone → still accept (no regression)', () => {
+    expect(classifyButtonText("Accepter", "fr")).toBe("accept");
+  });
+
+  it('FR: "Tout accepter" → still accept (no regression)', () => {
+    expect(classifyButtonText("Tout accepter", "fr")).toBe("accept");
+  });
+});
+
 // ── BCP 47 subtag normalisation (sanity) ─────────────────────────────────────
 
 describe("classifyButtonText — full BCP 47 tags should be pre-normalised", () => {
