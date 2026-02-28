@@ -6,6 +6,7 @@ import { captureCookies } from "./cookies.js";
 import { createNetworkInterceptor } from "./network.js";
 import { detectConsentModal, findPrivacyPolicyUrl } from "./consent-modal.js";
 import { analyzeCompliance } from "../analyzers/compliance.js";
+import { detectTcf } from "./tcf.js";
 
 type PhaseCallback = (message: string) => void;
 
@@ -51,6 +52,9 @@ export class Scanner {
     );
     const networkBeforeInteraction = interceptor1.getRequests();
     interceptor1.stop();
+
+    // Detect IAB TCF implementation (informational, does not affect score)
+    const tcfInfo = await detectTcf(session1.page, cookiesBeforeInteraction);
 
     // Look for a privacy policy link anywhere on the page (typically footer/nav)
     const privacyPolicyUrl = await findPrivacyPolicyUrl(session1.page);
@@ -202,6 +206,7 @@ export class Scanner {
       compliance,
       screenshotPaths,
       errors,
+      tcf: tcfInfo,
     };
   }
 }

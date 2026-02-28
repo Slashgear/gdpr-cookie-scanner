@@ -1,6 +1,7 @@
 import { basename } from "path";
 import type { ScanResult, ScannedCookie, DarkPatternIssue, ConsentButton } from "../types.js";
 import { lookupCookie } from "../classifiers/cookie-lookup.js";
+import { IAB_PURPOSES, IAB_SPECIAL_FEATURES } from "../analyzers/tcf-decoder.js";
 
 const GRADE_COLOR: Record<string, string> = {
   A: "#16a34a",
@@ -418,6 +419,8 @@ export function generateHtmlReport(result: ScanResult): string {
 
   ${buildNetworkSection(result)}
 
+  ${buildTcfSection(result)}
+
   ${buildRecommendationsSection(result)}
 
   ${buildChecklistSection(result)}
@@ -750,6 +753,149 @@ function buildNetworkSection(result: ScanResult): string {
       <tbody>${rows}</tbody>
     </table>
     ${trackers.length > 50 ? `<p style="padding:12px 14px;font-size:12px;color:var(--text-muted)">… and ${trackers.length - 50} more.</p>` : ""}
+  </div>
+</div>`;
+}
+
+// ── IAB TCF ───────────────────────────────────────────────────────────────────
+
+function buildTcfSection(result: ScanResult): string {
+  const { tcf } = result;
+
+  const infoNote = `<p style="margin:0 0 16px;font-size:12px;color:var(--text-muted);font-style:italic">Informational only — does not affect the compliance score.</p>`;
+
+  if (!tcf.detected) {
+    return `<div class="section">
+  <div class="section-header">
+    <h2>IAB TCF</h2>
+    <span class="badge badge-muted">Not detected</span>
+  </div>
+  <div class="section-body">
+    ${infoNote}
+    <p style="color:var(--text-muted);font-size:13px;margin:0">No IAB Transparency &amp; Consent Framework implementation found on this page.</p>
+  </div>
+</div>`;
+  }
+
+  const versionBadge = tcf.version
+    ? `<span class="badge badge-ok">TCF v${tcf.version}</span>`
+    : `<span class="badge badge-ok">Detected</span>`;
+
+  const metaRows = [
+    [
+      "CMP API (<code>__tcfapi</code>)",
+      tcf.apiPresent
+        ? `<span class="status-ok">✓ Present</span>`
+        : `<span class="status-warn">✗ Not present</span>`,
+    ],
+    [
+      "Locator frame (<code>__tcfapiLocator</code>)",
+      tcf.locatorFramePresent
+        ? `<span class="status-ok">✓ Present</span>`
+        : `<span class="status-warn">✗ Not present</span>`,
+    ],
+    [
+      "Consent string cookie",
+      tcf.cookieName
+        ? `<code>${esc(tcf.cookieName)}</code>`
+        : `<span style="color:var(--text-muted)">—</span>`,
+    ],
+    [
+      "CMP ID",
+      tcf.cmpId !== null ? String(tcf.cmpId) : `<span style="color:var(--text-muted)">—</span>`,
+    ],
+  ]
+    .map(
+      ([label, value]) =>
+        `<tr><td style="font-weight:500;width:40%">${label}</td><td>${value}</td></tr>`,
+    )
+    .join("\n");
+
+  const cs = tcf.consentString;
+
+  let consentStringHtml = `<p style="color:var(--text-muted);font-size:13px;margin-top:16px">No consent string could be decoded.</p>`;
+
+  if (cs) {
+    const decodedRows = [
+      ["Version", `TCF v${cs.version}`],
+      ["Created", cs.created.toISOString().split("T")[0]],
+      ["Last updated", cs.lastUpdated.toISOString().split("T")[0]],
+      ["CMP ID", String(cs.cmpId)],
+      ["CMP version", String(cs.cmpVersion)],
+      ["Consent language", cs.consentLanguage],
+      ["Vendor list version", String(cs.vendorListVersion)],
+      ...(cs.tcfPolicyVersion !== undefined
+        ? [["TCF policy version", String(cs.tcfPolicyVersion)]]
+        : []),
+      ...(cs.isServiceSpecific !== undefined
+        ? [["Service specific", cs.isServiceSpecific ? "Yes" : "No"]]
+        : []),
+      ...(cs.publisherCC ? [["Publisher country", cs.publisherCC]] : []),
+    ]
+      .map(
+        ([label, value]) =>
+          `<tr><td style="font-weight:500;width:40%">${esc(label)}</td><td>${esc(value)}</td></tr>`,
+      )
+      .join("\n");
+
+    const purposesConsentHtml =
+      cs.purposesConsent.length > 0
+        ? `<div style="margin-top:20px">
+    <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--text-muted);margin-bottom:8px">Purposes with consent</div>
+    <table class="data-table">
+      <thead><tr><th>ID</th><th>Purpose</th></tr></thead>
+      <tbody>${cs.purposesConsent.map((id) => `<tr><td>${id}</td><td>${esc(IAB_PURPOSES[id] ?? "Unknown")}</td></tr>`).join("")}</tbody>
+    </table>
+  </div>`
+        : `<p style="margin-top:16px;font-size:13px;color:var(--text-muted)">No purposes with explicit consent.</p>`;
+
+    const purposesLiHtml =
+      cs.purposesLegitimateInterest.length > 0
+        ? `<div style="margin-top:20px">
+    <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--text-muted);margin-bottom:8px">Purposes with legitimate interest</div>
+    <table class="data-table">
+      <thead><tr><th>ID</th><th>Purpose</th></tr></thead>
+      <tbody>${cs.purposesLegitimateInterest.map((id) => `<tr><td>${id}</td><td>${esc(IAB_PURPOSES[id] ?? "Unknown")}</td></tr>`).join("")}</tbody>
+    </table>
+  </div>`
+        : "";
+
+    const specialFeaturesHtml =
+      cs.specialFeatureOptins.length > 0
+        ? `<div style="margin-top:20px">
+    <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--text-muted);margin-bottom:8px">Special features opted in</div>
+    <table class="data-table">
+      <thead><tr><th>ID</th><th>Feature</th></tr></thead>
+      <tbody>${cs.specialFeatureOptins.map((id) => `<tr><td>${id}</td><td>${esc(IAB_SPECIAL_FEATURES[id] ?? "Unknown")}</td></tr>`).join("")}</tbody>
+    </table>
+  </div>`
+        : "";
+
+    consentStringHtml = `<div style="margin-top:20px">
+    <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--text-muted);margin-bottom:8px">Decoded consent string</div>
+    <table class="data-table">
+      <thead><tr><th>Field</th><th>Value</th></tr></thead>
+      <tbody>${decodedRows}</tbody>
+    </table>
+  </div>
+  ${purposesConsentHtml}
+  ${purposesLiHtml}
+  ${specialFeaturesHtml}`;
+  }
+
+  return `<div class="section">
+  <div class="section-header">
+    <h2>IAB TCF</h2>
+    ${versionBadge}
+    ${tcf.cmpId !== null ? `<span class="badge badge-muted">CMP ${tcf.cmpId}</span>` : ""}
+  </div>
+  <div class="section-body">
+    ${infoNote}
+    <table class="data-table">
+      <thead><tr><th>Property</th><th>Value</th></tr></thead>
+      <tbody>${metaRows}</tbody>
+    </table>
+    ${consentStringHtml}
   </div>
 </div>`;
 }

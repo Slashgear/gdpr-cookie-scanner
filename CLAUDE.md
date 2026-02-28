@@ -19,7 +19,18 @@ node dist/cli.js scan <url> -o ./reports --locale fr-FR --verbose
 node dist/cli.js list-trackers
 ```
 
-There are no tests currently.
+## Tests
+
+Use [Vitest](https://vitest.dev/) for unit tests. Test files live in `tests/` and mirror the source structure (`tests/analyzers/`, `tests/classifiers/`, `tests/scanner/`, `tests/unit/`).
+
+```bash
+pnpm test          # run all tests
+pnpm test:watch    # watch mode
+```
+
+**When to write tests:** every new feature or bug fix must include tests. Pure functions (decoders, classifiers, analyzers) are the primary targets. Browser-dependent code (scanner phases) is not unit-tested.
+
+**When to update the README:** every new user-facing feature must be documented in `README.md` — CLI flags, output formats, new report sections, etc.
 
 ## Commit checklist
 

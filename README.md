@@ -317,8 +317,31 @@ All formats contain:
 - Detected dark patterns (missing reject button, visual asymmetry, pre-ticked boxes, misleading wording…)
 - Cookie table before interaction, after reject, after accept
 - Network tracker requests by phase
+- **IAB TCF detection** — see below
 - Targeted recommendations
 - Legal references (RGPD, ePrivacy directive, CEPD guidelines, CNIL 2022)
+
+### IAB TCF detection
+
+When a site uses the [IAB Transparency & Consent Framework](https://iabeurope.eu/tcf-2-0/), the scanner automatically detects and decodes it. This is **informational only** — it does not affect the compliance score.
+
+Detected signals:
+
+- `window.__tcfapi` (TCF v2) or `window.__cmp` (TCF v1) JavaScript API
+- `__tcfapiLocator` iframe
+- `euconsent-v2` / `euconsent` cookie
+
+When a consent string is found (via API or cookie), it is decoded to expose:
+
+| Field                             | Description                                     |
+| --------------------------------- | ----------------------------------------------- |
+| CMP ID & version                  | Which Consent Management Platform is in use     |
+| Consent language                  | Language the consent was collected in           |
+| Vendor list version               | IAB GVL version at time of consent              |
+| Purposes with consent             | IAB purposes explicitly consented to (IDs 1–11) |
+| Purposes with legitimate interest | IAB purposes claimed under legitimate interest  |
+| Special features opted in         | Geolocation, device scanning (IDs 1–2)          |
+| Publisher country                 | Country code of the publisher                   |
 
 ## Scoring
 

@@ -15,6 +15,7 @@ import type {
   DarkPatternIssue,
   ConsentButton,
 } from "../types.js";
+import { IAB_PURPOSES, IAB_SPECIAL_FEATURES } from "../analyzers/tcf-decoder.js";
 import type { ScanOptions } from "../types.js";
 import { lookupCookie } from "../classifiers/cookie-lookup.js";
 
@@ -170,8 +171,12 @@ export class ReportGenerator {
     sections.push(`## 6. Network Requests — Detected Trackers\n`);
     sections.push(this.buildNetworkSection(r));
 
+    // ── IAB TCF ───────────────────────────────────────────────────
+    sections.push(`## 7. IAB TCF (Transparency & Consent Framework)\n`);
+    sections.push(this.buildTcfSection(r));
+
     // ── Recommendations ───────────────────────────────────────────
-    sections.push(`## 7. Recommendations\n`);
+    sections.push(`## 8. Recommendations\n`);
     sections.push(this.buildRecommendations(r));
 
     // ── Scan errors ───────────────────────────────────────────────
@@ -483,6 +488,83 @@ ${rows.join("\n")}
         lines.push(`\n_... and ${requests.length - 20} additional request(s)._`);
       }
       lines.push("");
+    }
+
+    return lines.join("\n");
+  }
+
+  private buildTcfSection(r: ScanResult): string {
+    const { tcf } = r;
+    const lines: string[] = [];
+
+    lines.push(`> Informational only — does not affect the compliance score.\n`);
+
+    if (!tcf.detected) {
+      lines.push("**TCF detected:** ❌ No TCF implementation found on this page.");
+      return lines.join("\n");
+    }
+
+    lines.push(`**TCF detected:** ✅ Yes${tcf.version ? ` (v${tcf.version})` : ""}`);
+    lines.push(`**CMP API (\`__tcfapi\`):** ${tcf.apiPresent ? "✅ Present" : "❌ Not present"}`);
+    lines.push(
+      `**Locator frame (\`__tcfapiLocator\`):** ${tcf.locatorFramePresent ? "✅ Present" : "❌ Not present"}`,
+    );
+    lines.push(`**Consent string cookie:** ${tcf.cookieName ? `\`${tcf.cookieName}\`` : "—"}`);
+    lines.push(`**CMP ID:** ${tcf.cmpId ?? "—"}`);
+
+    const cs = tcf.consentString;
+    if (!cs) {
+      lines.push("\n_No consent string could be decoded._");
+      return lines.join("\n");
+    }
+
+    lines.push("\n### Decoded consent string\n");
+    lines.push("| Field | Value |");
+    lines.push("|-------|-------|");
+    lines.push(`| Version | TCF v${cs.version} |`);
+    lines.push(`| Created | ${cs.created.toISOString().split("T")[0]} |`);
+    lines.push(`| Last updated | ${cs.lastUpdated.toISOString().split("T")[0]} |`);
+    lines.push(`| CMP ID | ${cs.cmpId} |`);
+    lines.push(`| CMP version | ${cs.cmpVersion} |`);
+    lines.push(`| Consent language | ${cs.consentLanguage} |`);
+    lines.push(`| Vendor list version | ${cs.vendorListVersion} |`);
+    if (cs.tcfPolicyVersion !== undefined) {
+      lines.push(`| TCF policy version | ${cs.tcfPolicyVersion} |`);
+    }
+    if (cs.isServiceSpecific !== undefined) {
+      lines.push(`| Service specific | ${cs.isServiceSpecific ? "Yes" : "No"} |`);
+    }
+    if (cs.publisherCC) {
+      lines.push(`| Publisher country | ${cs.publisherCC} |`);
+    }
+
+    if (cs.purposesConsent.length > 0) {
+      lines.push("\n### Purposes with consent\n");
+      lines.push("| ID | Purpose |");
+      lines.push("|----|---------|");
+      for (const id of cs.purposesConsent) {
+        lines.push(`| ${id} | ${IAB_PURPOSES[id] ?? "Unknown"} |`);
+      }
+    } else {
+      lines.push("\n_No purposes with explicit consent._");
+    }
+
+    if (cs.purposesLegitimateInterest.length > 0) {
+      lines.push("\n### Purposes with legitimate interest\n");
+      lines.push("| ID | Purpose |");
+      lines.push("|----|---------|");
+      for (const id of cs.purposesLegitimateInterest) {
+        lines.push(`| ${id} | ${IAB_PURPOSES[id] ?? "Unknown"} |`);
+      }
+    }
+
+    if (cs.specialFeatureOptins.length > 0) {
+      lines.push("\n### Special features opted in\n");
+      lines.push("| ID | Feature |");
+      lines.push("|----|---------|");
+      for (const id of cs.specialFeatureOptins) {
+        lines.push(`| ${id} | ${IAB_SPECIAL_FEATURES[id] ?? "Unknown"} |`);
+      }
     }
 
     return lines.join("\n");

@@ -130,6 +130,34 @@ export interface ScanOptions {
   strict?: boolean;
 }
 
+export interface TcfConsentString {
+  raw: string;
+  version: 1 | 2;
+  created: Date;
+  lastUpdated: Date;
+  cmpId: number;
+  cmpVersion: number;
+  consentLanguage: string;
+  vendorListVersion: number;
+  // TCF v2 only:
+  tcfPolicyVersion?: number;
+  isServiceSpecific?: boolean;
+  specialFeatureOptins: number[]; // IDs of opted-in special features
+  purposesConsent: number[]; // IDs of purposes with consent
+  purposesLegitimateInterest: number[]; // IDs of purposes with legitimate interest
+  publisherCC?: string;
+}
+
+export interface TcfInfo {
+  detected: boolean;
+  version: 1 | 2 | null;
+  apiPresent: boolean; // window.__tcfapi found
+  locatorFramePresent: boolean; // iframe __tcfapiLocator found
+  cookieName: string | null; // "euconsent-v2" or "euconsent"
+  cmpId: number | null;
+  consentString: TcfConsentString | null;
+}
+
 export interface ScanResult {
   url: string;
   scanDate: string;
@@ -145,4 +173,5 @@ export interface ScanResult {
   compliance: ComplianceScore;
   screenshotPaths: string[];
   errors: string[];
+  tcf: TcfInfo;
 }
