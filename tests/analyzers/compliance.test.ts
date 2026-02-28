@@ -327,6 +327,68 @@ describe("easyRefusal dimension", () => {
     });
     expect(result.breakdown.easyRefusal).toBe(25);
   });
+
+  it("deducts 5 for colour nudging (green accept + grey reject)", () => {
+    const modal = makeModal({
+      buttons: [
+        makeButton("accept", "Accept all", 1, { backgroundColor: "rgb(34, 197, 94)" }),
+        makeButton("reject", "Reject all", 1, { backgroundColor: "rgb(160, 160, 160)" }),
+      ],
+    });
+    const result = analyzeCompliance({
+      modal,
+      privacyPolicyUrl: "https://example.com/privacy",
+      cookiesBeforeInteraction: [],
+      cookiesAfterAccept: [makeCookie("_ga", true, "after-accept")],
+      cookiesAfterReject: [],
+      networkBeforeInteraction: [],
+      networkAfterAccept: [],
+      networkAfterReject: [],
+    });
+    expect(result.breakdown.easyRefusal).toBeLessThanOrEqual(20);
+    expect(result.issues.some((i) => i.type === "nudging" && i.severity === "warning")).toBe(true);
+  });
+
+  it("deducts 5 for colour nudging (green accept + red reject)", () => {
+    const modal = makeModal({
+      buttons: [
+        makeButton("accept", "Accept all", 1, { backgroundColor: "rgb(34, 197, 94)" }),
+        makeButton("reject", "Reject all", 1, { backgroundColor: "rgb(185, 28, 28)" }),
+      ],
+    });
+    const result = analyzeCompliance({
+      modal,
+      privacyPolicyUrl: "https://example.com/privacy",
+      cookiesBeforeInteraction: [],
+      cookiesAfterAccept: [makeCookie("_ga", true, "after-accept")],
+      cookiesAfterReject: [],
+      networkBeforeInteraction: [],
+      networkAfterAccept: [],
+      networkAfterReject: [],
+    });
+    expect(result.breakdown.easyRefusal).toBeLessThanOrEqual(20);
+    expect(result.issues.some((i) => i.type === "nudging")).toBe(true);
+  });
+
+  it("does NOT flag colour nudging when accept is blue (not green)", () => {
+    const modal = makeModal({
+      buttons: [
+        makeButton("accept", "Accept all", 1, { backgroundColor: "rgb(59, 130, 246)" }),
+        makeButton("reject", "Reject all", 1, { backgroundColor: "rgb(160, 160, 160)" }),
+      ],
+    });
+    const result = analyzeCompliance({
+      modal,
+      privacyPolicyUrl: "https://example.com/privacy",
+      cookiesBeforeInteraction: [],
+      cookiesAfterAccept: [makeCookie("_ga", true, "after-accept")],
+      cookiesAfterReject: [],
+      networkBeforeInteraction: [],
+      networkAfterAccept: [],
+      networkAfterReject: [],
+    });
+    expect(result.breakdown.easyRefusal).toBe(25);
+  });
 });
 
 // ── C. Transparency ───────────────────────────────────────────────────────────

@@ -6,6 +6,7 @@ import type {
   NetworkRequest,
 } from "../types.js";
 import { analyzeButtonWording, analyzeModalText } from "./wording.js";
+import { detectColourNudging } from "./colour.js";
 
 interface ComplianceInput {
   modal: ConsentModal;
@@ -114,6 +115,24 @@ export function analyzeCompliance(input: ComplianceInput): ComplianceScore {
     // Indirect reject label ("continuer sans accepter", "continue without accepting"…)
     if (wordingResult?.hasIndirectRejectLabel) {
       easyRefusal -= 5;
+    }
+
+    // Colour nudging: green accept + grey/red reject
+    if (acceptButton && rejectButton) {
+      const { isNudging, acceptHue, rejectHue } = detectColourNudging(
+        acceptButton.backgroundColor,
+        rejectButton.backgroundColor,
+      );
+      if (isNudging) {
+        issues.push({
+          type: "nudging",
+          severity: "warning",
+          description:
+            'Accept button uses a "positive" colour (green) while reject is visually de-emphasised',
+          evidence: `Accept: ${acceptButton.backgroundColor} (${acceptHue}), Reject: ${rejectButton.backgroundColor} (${rejectHue}) — EDPB Guidelines 03/2022 § 3.3.3`,
+        });
+        easyRefusal -= 5;
+      }
     }
 
     // Font size asymmetry
