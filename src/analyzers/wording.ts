@@ -15,6 +15,35 @@ const MISLEADING_ACCEPT_LABELS = [
 const FAKE_REJECT_LABELS = [/^(×|✕|✖|close|fermer|dismiss|ignorer|skip|passer)$/i];
 
 /**
+ * Indirect reject labels: the button does refuse, but without using a clear negative
+ * word like "refuse/reject". The user has to infer the refusal from context.
+ * Flagged as a dark pattern per EDPB Guidelines 03/2022 (§ 3.3.3 — hiding choices).
+ *
+ * Pattern logic: "continue/proceed + without/sans/sin/senza/ohne + consent-related word".
+ */
+const INDIRECT_REJECT_LABELS = [
+  // English
+  /\bcontinue\s+without\b/i,
+  /\bproceed\s+without\b/i,
+  /\bwithout\s+(accepting|accept|consent|consenting)\b/i,
+  // French
+  /\bcontinuer\s+sans\b/i,
+  /\bsans\s+(accepter|consentir|cookies)\b/i,
+  // Spanish
+  /\bcontinuar\s+sin\b/i,
+  /\bsin\s+(aceptar|consentir)\b/i,
+  // Italian
+  /\bcontinua\s+senza\b/i,
+  /\bsenza\s+(accettare|consenso)\b/i,
+  // German
+  /\bweiter\s+ohne\b/i,
+  /\bohne\s+(akzeptieren|zustimmen)\b/i,
+  // Dutch
+  /\bvervolgenen?\s+zonder\b/i,
+  /\bzonder\s+(accepteren|toestemming)\b/i,
+];
+
+/**
  * Required informational elements in consent text (RGPD Art. 13-14).
  */
 const REQUIRED_INFO_PATTERNS = [
@@ -32,6 +61,7 @@ export interface WordingAnalysis {
   missingInfo: string[];
   hasPositiveActionForAccept: boolean;
   hasExplicitRejectOption: boolean;
+  hasIndirectRejectLabel: boolean;
 }
 
 export function analyzeButtonWording(buttons: ConsentButton[]): WordingAnalysis {
@@ -80,11 +110,25 @@ export function analyzeButtonWording(buttons: ConsentButton[]): WordingAnalysis 
     }
   }
 
+  // ── Indirect reject (refusal implied, not stated) ─────────────
+  const hasIndirectRejectLabel =
+    !!rejectButton && INDIRECT_REJECT_LABELS.some((p) => p.test(rejectButton.text));
+  if (hasIndirectRejectLabel && rejectButton) {
+    issues.push({
+      type: "misleading-wording",
+      severity: "warning",
+      description: `Reject button uses indirect wording: "${rejectButton.text}"`,
+      evidence:
+        'EDPB Guidelines 03/2022: the refusal option must be as clear as acceptance — indirect phrases like "continue without accepting" obscure the user\'s choice',
+    });
+  }
+
   return {
     issues,
     missingInfo: [], // filled in by analyzeModalText
     hasPositiveActionForAccept: !!acceptButton,
     hasExplicitRejectOption: !!rejectButton,
+    hasIndirectRejectLabel,
   };
 }
 

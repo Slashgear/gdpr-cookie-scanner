@@ -84,6 +84,44 @@ describe("analyzeButtonWording", () => {
     });
   });
 
+  describe("indirect reject — refusal implied, not stated", () => {
+    it.each([
+      "Continuer sans accepter",
+      "Continue without accepting",
+      "Continue without consent",
+      "Proceed without accepting",
+      "Continuar sin aceptar",
+      "Continua senza accettare",
+      "Weiter ohne akzeptieren",
+    ])('flags "%s" as indirect reject (warning)', (text) => {
+      const buttons = [makeButton("accept", "Accept all"), makeButton("reject", text)];
+      const result = analyzeButtonWording(buttons);
+      expect(result.hasIndirectRejectLabel).toBe(true);
+      const issue = result.issues.find(
+        (i) => i.type === "misleading-wording" && i.severity === "warning",
+      );
+      expect(issue).toBeDefined();
+    });
+
+    it("does NOT flag an explicit Reject button as indirect", () => {
+      const buttons = [makeButton("accept", "Accept all"), makeButton("reject", "Reject all")];
+      const result = analyzeButtonWording(buttons);
+      expect(result.hasIndirectRejectLabel).toBe(false);
+    });
+
+    it("does NOT flag 'Tout refuser' as indirect", () => {
+      const buttons = [makeButton("accept", "Tout accepter"), makeButton("reject", "Tout refuser")];
+      const result = analyzeButtonWording(buttons);
+      expect(result.hasIndirectRejectLabel).toBe(false);
+    });
+
+    it("returns hasIndirectRejectLabel: false when there is no reject button", () => {
+      const buttons = [makeButton("accept", "Accept all")];
+      const result = analyzeButtonWording(buttons);
+      expect(result.hasIndirectRejectLabel).toBe(false);
+    });
+  });
+
   describe("fake reject — close/dismiss button disguised as reject", () => {
     it.each(["×", "✕", "close", "Fermer", "dismiss", "skip"])(
       'flags "%s" reject button as misleading (fake reject)',

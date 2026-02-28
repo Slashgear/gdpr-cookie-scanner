@@ -287,6 +287,46 @@ describe("easyRefusal dimension", () => {
     });
     expect(result.issues.some((i) => i.type === "nudging")).toBe(true);
   });
+
+  it("deducts 5 for indirect reject label ('continuer sans accepter' dark pattern)", () => {
+    const modal = makeModal({
+      buttons: [
+        makeButton("accept", "Tout accepter", 1),
+        makeButton("reject", "Continuer sans accepter", 1),
+      ],
+    });
+    const result = analyzeCompliance({
+      modal,
+      privacyPolicyUrl: "https://example.com/privacy",
+      cookiesBeforeInteraction: [],
+      cookiesAfterAccept: [makeCookie("_ga", true, "after-accept")],
+      cookiesAfterReject: [],
+      networkBeforeInteraction: [],
+      networkAfterAccept: [],
+      networkAfterReject: [],
+    });
+    expect(result.breakdown.easyRefusal).toBeLessThanOrEqual(20);
+    expect(
+      result.issues.some((i) => i.type === "misleading-wording" && i.severity === "warning"),
+    ).toBe(true);
+  });
+
+  it("does NOT deduct for an explicit reject label", () => {
+    const modal = makeModal({
+      buttons: [makeButton("accept", "Tout accepter", 1), makeButton("reject", "Tout refuser", 1)],
+    });
+    const result = analyzeCompliance({
+      modal,
+      privacyPolicyUrl: "https://example.com/privacy",
+      cookiesBeforeInteraction: [],
+      cookiesAfterAccept: [makeCookie("_ga", true, "after-accept")],
+      cookiesAfterReject: [],
+      networkBeforeInteraction: [],
+      networkAfterAccept: [],
+      networkAfterReject: [],
+    });
+    expect(result.breakdown.easyRefusal).toBe(25);
+  });
 });
 
 // ── C. Transparency ───────────────────────────────────────────────────────────

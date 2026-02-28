@@ -32,6 +32,10 @@ export function analyzeCompliance(input: ComplianceInput): ComplianceScore {
   ].some((r) => r.requiresConsent);
   const consentRequired = hasNonEssentialCookies || hasNonEssentialTrackers;
 
+  // Run wording analysis once — modal may not be detected, so these can be null
+  const wordingResult = input.modal.detected ? analyzeButtonWording(input.modal.buttons) : null;
+  const textResult = input.modal.detected ? analyzeModalText(input.modal.text) : null;
+
   // ── A. Consent validity (0-25) ────────────────────────────────
   let consentValidity = 25;
 
@@ -44,10 +48,8 @@ export function analyzeCompliance(input: ComplianceInput): ComplianceScore {
     });
     consentValidity = 0;
   } else if (input.modal.detected) {
-    // Wording analysis
-    const wordingResult = analyzeButtonWording(input.modal.buttons);
-    const textResult = analyzeModalText(input.modal.text);
-    issues.push(...wordingResult.issues, ...textResult.issues);
+    // Wording analysis (wordingResult / textResult hoisted above)
+    issues.push(...wordingResult!.issues, ...textResult!.issues);
 
     // Pre-ticked checkboxes
     const preTicked = input.modal.checkboxes.filter((c) => c.isCheckedByDefault);
@@ -62,9 +64,9 @@ export function analyzeCompliance(input: ComplianceInput): ComplianceScore {
     }
 
     // Missing info deductions
-    if (textResult.missingInfo.includes("purposes")) consentValidity -= 5;
-    if (textResult.missingInfo.includes("third-parties")) consentValidity -= 5;
-    if (textResult.missingInfo.length >= 3) consentValidity -= 5;
+    if (textResult!.missingInfo.includes("purposes")) consentValidity -= 5;
+    if (textResult!.missingInfo.includes("third-parties")) consentValidity -= 5;
+    if (textResult!.missingInfo.length >= 3) consentValidity -= 5;
   }
 
   // ── B. Easy refusal (0-25) ────────────────────────────────────
@@ -107,6 +109,11 @@ export function analyzeCompliance(input: ComplianceInput): ComplianceScore {
         });
         easyRefusal -= 5;
       }
+    }
+
+    // Indirect reject label ("continuer sans accepter", "continue without accepting"…)
+    if (wordingResult?.hasIndirectRejectLabel) {
+      easyRefusal -= 5;
     }
 
     // Font size asymmetry
@@ -167,9 +174,8 @@ export function analyzeCompliance(input: ComplianceInput): ComplianceScore {
       transparency -= 10;
     }
     // Already deducted in consentValidity for missing info
-    const wordingResult = analyzeModalText(input.modal.text);
-    if (wordingResult.missingInfo.length > 0) {
-      transparency -= wordingResult.missingInfo.length * 3;
+    if (textResult!.missingInfo.length > 0) {
+      transparency -= textResult!.missingInfo.length * 3;
     }
     // No privacy policy link in the modal
     if (!input.modal.privacyPolicyUrl) {
