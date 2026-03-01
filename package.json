@@ -53,7 +53,10 @@
     "update-trackers": "node --experimental-strip-types scripts/update-trackers.ts",
     "update-trackers:dry": "node --experimental-strip-types scripts/update-trackers.ts --dry-run",
     "update:ocd": "node scripts/update-cookie-db.mjs",
-    "build:showcase": "node scripts/build-showcase.mjs && pnpm format"
+    "build:showcase": "node scripts/build-showcase.mjs && pnpm format",
+    "website:dev": "pnpm --filter @slashgear/gdpr-website dev",
+    "website:build": "pnpm --filter @slashgear/gdpr-website build",
+    "website:typecheck": "pnpm --filter @slashgear/gdpr-website typecheck"
   },
   "dependencies": {
     "commander": "^14.0.3",

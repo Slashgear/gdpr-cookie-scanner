@@ -10,9 +10,9 @@ import { readdir, readFile, writeFile } from "fs/promises";
 import { join, resolve } from "path";
 import { existsSync } from "fs";
 
-const DOCS_DIR = resolve("docs");
-const REPORTS_DIR = join(DOCS_DIR, "reports");
-const INDEX_HTML = join(DOCS_DIR, "index.html");
+const WEBSITE_PUBLIC_DIR = resolve("website/public");
+const REPORTS_DIR = join(WEBSITE_PUBLIC_DIR, "reports");
+const INDEX_HTML = join(WEBSITE_PUBLIC_DIR, "index.html");
 
 const START_MARKER = "<!-- ── REPORTS_START ── -->";
 const END_MARKER = "<!-- ── REPORTS_END ── -->";

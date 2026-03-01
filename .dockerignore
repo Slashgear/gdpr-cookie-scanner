@@ -7,6 +7,9 @@ dist/
 reports/
 gdpr-reports/
 tests/
+docs/
+website/node_modules/
+website/dist/
 *.md
 *.log
 .DS_Store

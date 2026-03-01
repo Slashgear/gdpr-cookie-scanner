@@ -1,0 +1,29 @@
+{
+  "name": "@slashgear/gdpr-website",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Web interface for gdpr-cookie-scanner",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/index.ts",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit",
+    "lint": "oxlint .",
+    "format": "oxfmt ."
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.14.0",
+    "hono": "^4.7.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "oxfmt": "^0.34.0",
+    "oxlint": "^1.48.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.5.0"
+  },
+  "engines": {
+    "node": ">=24.0.0"
+  }
+}

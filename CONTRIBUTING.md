@@ -2,20 +2,32 @@
 
 ## Prerequisites
 
-- Node.js ≥ 20
+- Node.js ≥ 24
 - pnpm
-- Playwright: `npx playwright install chromium`
+- Playwright: `pnpm exec playwright install chromium`
+
+## Repository structure
+
+This is a **pnpm workspace monorepo** with two packages:
+
+| Package                          | Path       | Description                                                                                                  |
+| -------------------------------- | ---------- | ------------------------------------------------------------------------------------------------------------ |
+| `@slashgear/gdpr-cookie-scanner` | `/` (root) | Published CLI tool                                                                                           |
+| `@slashgear/gdpr-website`        | `website/` | Hono web app — not published, deployed as a Docker image to [gdpr.slashgear.dev](https://gdpr.slashgear.dev) |
 
 ## Getting started
 
 ```bash
 git clone https://github.com/Slashgear/gdpr-report.git
 cd gdpr-report
-pnpm install
-pnpm build
+pnpm install          # installs all workspace packages
+pnpm build            # builds the CLI
 
 # Run the CLI locally
 node dist/cli.js scan https://example.com
+
+# Run the website locally (http://localhost:8080)
+pnpm website:dev
 ```
 
 ## Workflow
@@ -28,6 +40,7 @@ node dist/cli.js scan https://example.com
    pnpm lint
    pnpm typecheck
    pnpm build
+   pnpm website:typecheck
    ```
 4. Open a Pull Request targeting `main`
 
@@ -37,6 +50,21 @@ node dist/cli.js scan https://example.com
 - **Consent modal detection** — improve CMP detection in `src/scanner/consent-modal.ts`
 - **Compliance rules** — refine scoring rules in `src/analyzers/compliance.ts`
 - **Report** — improve report rendering in `src/report/generator.ts`
+- **Website** — Hono server and landing page in `website/src/` and `website/public/`
+
+## Website — live reports showcase
+
+The `website/public/reports/` directory contains pre-generated HTML reports (grades A–D only).
+After adding new reports, run:
+
+```bash
+pnpm build:showcase   # regenerates the report cards in website/public/index.html
+```
+
+The script reads `website/public/reports/` and injects sorted report cards between the
+`<!-- ── REPORTS_START ── -->` / `<!-- ── REPORTS_END ── -->` markers.
+
+Report screenshots (`.png`) are tracked via **Git LFS** — make sure `git lfs` is installed before cloning.
 
 ## Releasing
 
