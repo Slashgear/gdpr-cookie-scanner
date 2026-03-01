@@ -12,7 +12,7 @@
     "rgpd",
     "scanner"
   ],
-  "homepage": "https://github.com/Slashgear/gdpr-cookie-scanner#readme",
+  "homepage": "https://gdpr.slashgear.dev",
   "bugs": {
     "url": "https://github.com/Slashgear/gdpr-cookie-scanner/issues"
   },
