@@ -387,15 +387,26 @@ async function extractButtons(
 
       const type = classifyButtonType(text, accept, reject, preferences);
 
-      // Build a unique selector for this button
+      // Build a unique selector for this button.
+      // Prefer a class-based selector only when it uniquely identifies the element;
+      // otherwise fall back to Playwright's :has-text() pseudo-selector so that
+      // buttons sharing the same CSS classes (e.g. design-system components) can
+      // still be clicked individually.
       const selector = await el.evaluate((node) => {
         const el = node as Element;
         if (el.id) return `#${el.id}`;
-        const classes = Array.from(el.classList).slice(0, 3).join(".");
         const tag = el.tagName.toLowerCase();
-        // Try to build a text-based selector as fallback
-        const escapedText = el.textContent?.trim().substring(0, 30) ?? "";
-        return classes ? `${tag}.${classes}` : `${tag}:has-text("${escapedText}")`;
+        const classes = Array.from(el.classList).slice(0, 3).join(".");
+        if (classes && document.querySelectorAll(`${tag}.${classes}`).length === 1) {
+          return `${tag}.${classes}`;
+        }
+        // :has-text() is a Playwright-specific selector supported by page.click()
+        const escapedText = (el.textContent?.trim() ?? "")
+          .replace(/\\/g, "\\\\")
+          .replace(/"/g, '\\"')
+          .substring(0, 40);
+        if (escapedText) return `${tag}:has-text("${escapedText}")`;
+        return classes ? `${tag}.${classes}` : tag;
       });
 
       const contrastRatio = computeContrastRatio(

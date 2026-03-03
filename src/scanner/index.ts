@@ -98,7 +98,12 @@ export class Scanner {
     if (rejectButton) {
       try {
         await session1.page.click(rejectButton.selector, { timeout: 5000 });
-        await session1.page.waitForTimeout(2000);
+        // Some CMPs trigger a full page reload on reject — wait for networkidle
+        // so server-set cookies are captured; fall back to a plain delay if no
+        // navigation occurs within the timeout.
+        await session1.page
+          .waitForLoadState("networkidle", { timeout: 5000 })
+          .catch(() => session1.page.waitForTimeout(2000));
         cookiesAfterReject = await captureCookies(
           session1.context,
           "after-reject",
@@ -154,7 +159,12 @@ export class Scanner {
 
       if (acceptButton) {
         await session2.page.click(acceptButton.selector, { timeout: 5000 });
-        await session2.page.waitForTimeout(3000);
+        // Some CMPs trigger a full page reload on accept — wait for networkidle
+        // so server-set cookies are captured; fall back to a plain delay if no
+        // navigation occurs within the timeout.
+        await session2.page
+          .waitForLoadState("networkidle", { timeout: 5000 })
+          .catch(() => session2.page.waitForTimeout(3000));
         cookiesAfterAccept = await captureCookies(
           session2.context,
           "after-accept",
