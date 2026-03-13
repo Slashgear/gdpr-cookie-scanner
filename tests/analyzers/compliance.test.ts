@@ -67,6 +67,7 @@ function makeCookie(
 
 function makeTracker(
   capturedAt: NetworkRequest["capturedAt"] = "before-interaction",
+  overrides: Partial<NetworkRequest> = {},
 ): NetworkRequest {
   return {
     url: "https://google-analytics.com/collect",
@@ -80,7 +81,18 @@ function makeTracker(
     capturedAt,
     responseStatus: 200,
     contentType: null,
+    ...overrides,
   };
+}
+
+function makePlausibleTracker(
+  capturedAt: NetworkRequest["capturedAt"] = "before-interaction",
+): NetworkRequest {
+  return makeTracker(capturedAt, {
+    url: "https://plausible.io/api/event",
+    trackerName: "Plausible Analytics",
+    requiresConsent: false,
+  });
 }
 
 const EMPTY_INPUT = {
@@ -101,6 +113,43 @@ const EMPTY_INPUT = {
   networkAfterAccept: [],
   networkAfterReject: [],
 };
+
+// ── Consent-exempt analytics (Plausible, Fathom…) ─────────────────────────────
+
+describe("consent-exempt analytics", () => {
+  it("scores 100 with no issues when only Plausible is used and there is no consent banner", () => {
+    const result = analyzeCompliance({
+      ...EMPTY_INPUT,
+      networkBeforeInteraction: [makePlausibleTracker("before-interaction")],
+      networkAfterAccept: [makePlausibleTracker("after-accept")],
+    });
+    expect(result.total).toBe(100);
+    expect(result.grade).toBe("A");
+    expect(result.issues).toHaveLength(0);
+  });
+
+  it("does not flag Plausible as a pre-consent tracker violation", () => {
+    const result = analyzeCompliance({
+      ...EMPTY_INPUT,
+      networkBeforeInteraction: [makePlausibleTracker("before-interaction")],
+    });
+    expect(result.issues.some((i) => i.type === "auto-consent")).toBe(false);
+    expect(result.breakdown.cookieBehavior).toBe(25);
+  });
+
+  it("still flags a consent-requiring tracker fired before interaction alongside Plausible", () => {
+    const result = analyzeCompliance({
+      ...EMPTY_INPUT,
+      networkBeforeInteraction: [
+        makePlausibleTracker("before-interaction"),
+        makeTracker("before-interaction"),
+      ],
+      networkAfterAccept: [makeTracker("after-accept")],
+    });
+    expect(result.issues.some((i) => i.type === "auto-consent")).toBe(true);
+    expect(result.breakdown.cookieBehavior).toBeLessThan(25);
+  });
+});
 
 // ── Grade thresholds ──────────────────────────────────────────────────────────
 

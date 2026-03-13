@@ -725,17 +725,27 @@ function buildNetworkSection(result: ScanResult): string {
 </div>`;
   }
 
-  const preTrackers = result.networkBeforeInteraction.filter((r) => r.trackerCategory !== null);
+  const preTrackers = result.networkBeforeInteraction.filter(
+    (r) => r.trackerCategory !== null && r.requiresConsent,
+  );
 
   const rows = trackers
     .slice(0, 50)
     .map((req) => {
       const isBefore = req.capturedAt === "before-interaction";
       const url = req.url.length > 70 ? req.url.substring(0, 67) + "…" : req.url;
+      let phaseCell: string;
+      if (isBefore) {
+        phaseCell = req.requiresConsent
+          ? `<span class="badge badge-critical">before consent</span>`
+          : `<span class="badge badge-ok">exempt</span>`;
+      } else {
+        phaseCell = `<span class="badge badge-muted">${esc(req.capturedAt)}</span>`;
+      }
       return `<tr>
       <td>${esc(req.trackerName ?? "Unknown")}</td>
       <td><span class="badge badge-muted">${esc(req.trackerCategory ?? "")}</span></td>
-      <td>${isBefore ? `<span class="badge badge-critical">before consent</span>` : `<span class="badge badge-muted">${esc(req.capturedAt)}</span>`}</td>
+      <td>${phaseCell}</td>
       <td class="cell-url" style="font-size:11px;color:var(--text-muted);word-break:break-all"><code>${esc(url)}</code></td>
     </tr>`;
     })
@@ -1079,7 +1089,7 @@ function buildChecklistSection(result: ScanResult): string {
   );
 
   const preTrackers = result.networkBeforeInteraction.filter(
-    (r) => r.trackerCategory !== null && r.trackerCategory !== "cdn",
+    (r) => r.trackerCategory !== null && r.trackerCategory !== "cdn" && r.requiresConsent,
   );
   push(
     "Cookie behavior",

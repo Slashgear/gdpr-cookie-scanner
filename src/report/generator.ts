@@ -475,13 +475,19 @@ ${rows.join("\n")}
 
     for (const { label, requests } of phases) {
       if (requests.length === 0) continue;
-      lines.push(`### ${label} (${requests.length} tracker(s))\n`);
-      lines.push("| Tracker | Category | URL | Type |");
-      lines.push("|---------|-----------|-----|------|");
+      const consentRequiringCount = requests.filter((req) => req.requiresConsent).length;
+      const phaseStatus =
+        consentRequiringCount > 0
+          ? `❌ ${consentRequiringCount} requiring consent`
+          : `✅ all exempt`;
+      lines.push(`### ${label} (${requests.length} tracker(s) — ${phaseStatus})\n`);
+      lines.push("| Tracker | Category | Consent req. | URL | Type |");
+      lines.push("|---------|-----------|--------------|-----|------|");
       for (const req of requests.slice(0, 20)) {
         const url = req.url.length > 60 ? req.url.substring(0, 57) + "..." : req.url;
+        const consent = req.requiresConsent ? "⚠️ Yes" : "✅ No (exempt)";
         lines.push(
-          `| ${req.trackerName ?? "Unknown"} | ${req.trackerCategory} | \`${url}\` | ${req.resourceType} |`,
+          `| ${req.trackerName ?? "Unknown"} | ${req.trackerCategory} | ${consent} | \`${url}\` | ${req.resourceType} |`,
         );
       }
       if (requests.length > 20) {
