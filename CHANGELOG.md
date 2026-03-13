@@ -1,5 +1,30 @@
 # @slashgear/gdpr-cookie-scanner
 
+## 3.8.1
+
+### Patch Changes
+
+- 3204616: Fix cookie capture after accept/reject on sites with non-unique button CSS classes
+
+  Two bugs prevented cookies from being captured after interacting with the consent modal:
+
+  1. **Non-unique button selector** — on sites built with a design system (e.g. Scaleway), all CMP buttons share identical CSS classes. The generated selector matched multiple elements and Playwright resolved to the first one, which was often hidden. The selector generator now checks that the class-based selector is unique in the DOM; if not, it falls back to Playwright's `:has-text()` pseudo-selector so each button is targeted individually.
+
+  2. **Page navigation not awaited** — some CMPs trigger a full page reload when the user accepts or rejects. The scanner was capturing cookies after a fixed delay, before the server had time to set them via `Set-Cookie`. The delay is now replaced by `waitForLoadState("networkidle")` so cookies are captured once the page (and any post-navigation requests) has settled.
+
+- 032376e: Fix false non-compliance indicators for sites using only consent-exempt analytics (Plausible, Fathom, etc.)
+
+  Sites that use privacy-respecting, cookieless analytics tools (exempt under the CNIL exemption) and have no consent banner should score 100 with no non-compliance flags. Two bugs in the HTML report were causing the opposite:
+
+  1. The HTML network section was showing a red "before consent" badge for all trackers fired before interaction, regardless of whether they require consent — Plausible was being flagged as a violation even though it is explicitly marked `consentRequired: false`.
+  2. The HTML checklist "No tracker before consent" rule was not filtering by `requiresConsent`, so it displayed ❌ Non-compliant for sites that only use Plausible.
+
+  Fixes:
+
+  - HTML network section: consent-exempt trackers fired before interaction now show a green "exempt" badge instead of the red "before consent" badge. The header count badge only counts consent-requiring trackers.
+  - HTML checklist: "No tracker before consent" now correctly filters by `requiresConsent`.
+  - Markdown network section: added a "Consent req." column so readers can immediately see which trackers require consent and which are exempt.
+
 ## 3.8.0
 
 ### Minor Changes
