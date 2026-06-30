@@ -2,5 +2,5 @@ packages:
   - "."
   - website
 
-onlyBuiltDependencies:
-  - esbuild
+allowBuilds:
+  esbuild: true
