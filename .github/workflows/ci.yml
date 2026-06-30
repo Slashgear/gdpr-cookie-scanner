@@ -45,7 +45,7 @@ jobs:
 
       - name: Install Playwright browsers
         timeout-minutes: 10
-        run: npx playwright install chromium-headless-shell --with-deps
+        run: npx playwright install chromium-headless-shell
 
       - name: Test
         id: test
