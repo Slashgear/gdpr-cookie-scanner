@@ -26,7 +26,7 @@ COPY package.json pnpm-lock.yaml ./
 RUN pnpm install --prod --frozen-lockfile
 
 # Install Chromium + its system dependencies, then clean up apt caches
-RUN pnpm exec playwright install chromium --with-deps \
+RUN pnpm exec playwright install chromium-headless-shell --with-deps \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /app/dist ./dist

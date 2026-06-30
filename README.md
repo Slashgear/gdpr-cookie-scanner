@@ -25,7 +25,7 @@ Manually verifying that a consent banner behaves correctly — no cookies droppe
 
 ```bash
 npm install -g @slashgear/gdpr-cookie-scanner
-npx playwright install chromium
+npx playwright install chromium-headless-shell
 ```
 
 Or run without installing:
@@ -33,7 +33,7 @@ Or run without installing:
 ```bash
 npx @slashgear/gdpr-cookie-scanner scan https://example.com
 # Playwright is still required the first time:
-npx playwright install chromium
+npx playwright install chromium-headless-shell
 ```
 
 ## Docker
@@ -221,7 +221,7 @@ The package can be used as a Node.js library — no CLI required.
 
 ```bash
 npm install @slashgear/gdpr-cookie-scanner
-npx playwright install chromium
+npx playwright install chromium-headless-shell
 ```
 
 ### Quick scan

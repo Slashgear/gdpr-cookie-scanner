@@ -4,7 +4,7 @@
 
 - Node.js ≥ 24
 - pnpm
-- Playwright: `pnpm exec playwright install chromium`
+- Playwright: `pnpm exec playwright install chromium-headless-shell`
 
 ## Repository structure
 
