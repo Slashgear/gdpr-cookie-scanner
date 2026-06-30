@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect } from "bun:test";
 import { analyzeButtonWording, analyzeModalText } from "../../src/analyzers/wording.js";
 import type { ConsentButton } from "../../src/types.js";
 

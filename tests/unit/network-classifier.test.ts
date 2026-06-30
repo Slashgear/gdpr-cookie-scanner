@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect } from "bun:test";
 import { classifyNetworkRequest } from "../../src/classifiers/network-classifier.js";
 
 describe("classifyNetworkRequest", () => {

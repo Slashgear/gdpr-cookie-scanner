@@ -2,15 +2,15 @@
 FROM node:24-slim AS builder
 WORKDIR /app
 
-RUN npm install -g pnpm@latest
+RUN npm install -g bun
 
-COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile
+COPY package.json bun.lock ./
+RUN bun install --frozen-lockfile
 
 COPY tsconfig.json ./
 COPY scripts ./scripts
 COPY src ./src
-RUN pnpm build
+RUN bun run build
 
 # ── Stage 2: runtime ──────────────────────────────────────────────────────────
 # node:24-slim + Chromium only (~400-600 MB) vs the full Playwright image
@@ -19,14 +19,14 @@ FROM node:24-slim
 WORKDIR /app
 ENV NODE_ENV=production
 
-RUN npm install -g pnpm@latest
+RUN npm install -g bun
 
 # Install production dependencies first — playwright CLI is needed for browser install
-COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --prod --frozen-lockfile
+COPY package.json bun.lock ./
+RUN bun install --production --frozen-lockfile
 
-# Install Chromium + its system dependencies, then clean up apt caches
-RUN pnpm exec playwright install chromium-headless-shell --with-deps \
+# Install Chromium headless shell + clean up apt caches
+RUN bunx playwright install chromium-headless-shell \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /app/dist ./dist

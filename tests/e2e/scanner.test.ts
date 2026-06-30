@@ -1,14 +1,11 @@
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { describe, it, expect, beforeAll, afterAll } from "bun:test";
 import { mkdtemp, rm } from "fs/promises";
 import { tmpdir } from "os";
 import { join } from "path";
 import { Scanner } from "../../src/scanner/index.js";
 import { startTestServer, type TestServer } from "../helpers/test-server.js";
 
-// E2E tests spin up real Playwright browsers — allow generous timeouts
-const E2E_TIMEOUT = 60_000;
-
-describe("Scanner E2E", { timeout: E2E_TIMEOUT }, () => {
+describe("Scanner E2E", () => {
   let server: TestServer;
   let outputDir: string;
 

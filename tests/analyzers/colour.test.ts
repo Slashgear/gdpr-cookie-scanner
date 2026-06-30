@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect } from "bun:test";
 import { rgbToHsl, classifyHue, detectColourNudging } from "../../src/analyzers/colour.js";
 
 // ── rgbToHsl ──────────────────────────────────────────────────────────────────
