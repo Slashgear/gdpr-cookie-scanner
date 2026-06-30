@@ -37,7 +37,14 @@ jobs:
       - name: Build
         run: pnpm build
 
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+
       - name: Install Playwright browsers
+        timeout-minutes: 10
         run: pnpm exec playwright install chromium-headless-shell --with-deps
 
       - name: Test
