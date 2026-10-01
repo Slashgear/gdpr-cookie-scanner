@@ -25610,5 +25610,29 @@
       "privacyLink": "https://vercel.com/legal/privacy-policy",
       "wildcardMatch": "1"
     }
+  ],
+  "Kompare": [
+    {
+      "id": "ff19b7d7-6074-46cb-953d-9be893890838",
+      "category": "Analytics",
+      "cookie": "__kmp",
+      "domain": "",
+      "description": "Used to attribute bookings referred to the visited website via Kompare's comparison and distribution services (conversion measurement). Set as a first-party cookie on the visited website; only a new referred click starts a new 30-day window, ordinary page views do not extend it.",
+      "retentionPeriod": "30 days",
+      "dataController": "Kompare ApS",
+      "privacyLink": "https://kompare.io/cookies",
+      "wildcardMatch": "0"
+    },
+    {
+      "id": "1b8ac06a-938c-4100-b27a-1ffd9d72cc37",
+      "category": "Functional",
+      "cookie": "__kmp_dnt",
+      "domain": "",
+      "description": "Remembers that the user has opted out of Kompare tracking. Set as a first-party cookie on the visited website.",
+      "retentionPeriod": "10 years",
+      "dataController": "Kompare ApS",
+      "privacyLink": "https://kompare.io/cookies",
+      "wildcardMatch": "0"
+    }
   ]
 }
