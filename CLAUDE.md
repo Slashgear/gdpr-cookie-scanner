@@ -10,8 +10,8 @@ pnpm dev           # Watch mode compilation
 pnpm typecheck     # Type-check without emitting
 pnpm lint          # oxlint
 pnpm lint:fix      # oxlint --fix
-pnpm format        # oxfmt (auto-format)
-pnpm format:check  # oxfmt --check (used in CI)
+pnpm format        # bun fmt (auto-format)
+pnpm format:check  # bun fmt --check (used in CI)
 
 # Run the CLI after building
 node dist/cli.js scan <url>
@@ -79,7 +79,7 @@ Phase 3 and 4 require two separate browser sessions so cookie state is fully iso
 - **`src/classifiers/tracker-list.ts`** — Static database of tracker domains by category
 - **`src/analyzers/compliance.ts`** — Scores 4 dimensions (0–25 each) and surfaces `DarkPatternIssue` objects: consent validity, easy refusal, transparency, cookie behavior
 - **`src/analyzers/wording.ts`** — Text analysis of button labels and modal copy
-- **`src/report/generator.ts`** — Renders report files from `ScanResult` in the requested formats. The default output format is HTML. Markdown output produces 3 files: the main compliance report (`gdpr-report-*.md`), the checklist (`gdpr-checklist-*.md`), and the cookie inventory (`gdpr-cookies-*.md`); runs `oxfmt` on all generated Markdown files
+- **`src/report/generator.ts`** — Renders report files from `ScanResult` in the requested formats. The default output format is HTML. Markdown output produces 3 files: the main compliance report (`gdpr-report-*.md`), the checklist (`gdpr-checklist-*.md`), and the cookie inventory (`gdpr-cookies-*.md`); runs `bun fmt` (best-effort) on all generated Markdown files
 - **`src/types.ts`** — All shared TypeScript interfaces (`ScanResult`, `ScanOptions`, `ComplianceScore`, `ConsentModal`, etc.)
 
 ### Compliance scoring

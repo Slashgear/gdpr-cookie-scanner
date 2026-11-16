@@ -24,7 +24,7 @@ async function extractMeta(hostDir) {
 
   const content = await readFile(join(REPORTS_DIR, hostDir, htmlFile), "utf8");
 
-  // oxfmt may split closing tags across lines — match opening tag content only
+  // The formatter may split closing tags across lines — match opening tag content only
   const grade = content.match(/"grade-badge"[^>]*>([A-F])<\/div>/)?.[1] ?? "?";
   const score = content.match(/"score-num"[^>]*>(\d+)/)?.[1] ?? "?";
 

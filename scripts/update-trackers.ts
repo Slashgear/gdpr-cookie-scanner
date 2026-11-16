@@ -21,13 +21,7 @@ import { fileURLToPath } from "node:url";
 // ── Types (inlined so the script runs without tsc) ────────────────────────────
 
 type TrackerCategory =
-  | "analytics"
-  | "advertising"
-  | "social"
-  | "fingerprinting"
-  | "pixel"
-  | "cdn"
-  | "unknown";
+  "analytics" | "advertising" | "social" | "fingerprinting" | "pixel" | "cdn" | "unknown";
 
 interface TrackerEntry {
   name: string;

@@ -103,5 +103,5 @@ Merging that PR triggers the workflow again, which:
 ## Conventions
 
 - Local imports must include the `.js` extension (ESM NodeNext module)
-- Formatting is handled by oxfmt (`pnpm format`), do not format manually
+- Formatting is handled by `bun fmt` (`bun run format`), do not format manually
 - Commit messages follow the [Conventional Commits](https://www.conventionalcommits.org/) convention

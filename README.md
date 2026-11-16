@@ -382,7 +382,7 @@ Axeptio, Cookiebot, OneTrust, Didomi, Tarteaucitron, Usercentrics, and about twe
 pnpm dev          # Watch-mode compilation
 pnpm typecheck    # Type-check without compiling
 pnpm lint         # oxlint
-pnpm format       # oxfmt
+pnpm format       # bun fmt
 ```
 
 ## Release
