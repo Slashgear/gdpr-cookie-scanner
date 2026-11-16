@@ -32,21 +32,22 @@ jobs:
 
       - name: Create release PR or publish to npm
         id: changesets
-        uses: changesets/action@v1
+        uses: changesets/action@v2
         with:
-          publish: bunx changeset publish
-          title: "chore: release new version"
-          commit: "chore: release new version"
-          createGithubReleases: true
+          publish-script: bunx changeset publish
+          pr-title: "chore: release new version"
+          commit-message: "chore: release new version"
+          create-github-releases: true
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # v2 no longer writes an .npmrc from NPM_TOKEN: the one written by
+          # actions/setup-node (registry-url) reads NODE_AUTH_TOKEN instead.
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Extract published version
         if: steps.changesets.outputs.published == 'true'
         id: version
         run: |
-          VERSION=$(echo '${{ steps.changesets.outputs.publishedPackages }}' | jq -r '.[0].version')
+          VERSION=$(echo '${{ steps.changesets.outputs.published-packages }}' | jq -r '.[0].version')
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "image=ghcr.io/$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
 

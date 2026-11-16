@@ -6,7 +6,8 @@
     {
       "matchDepTypes": ["devDependencies"],
       "automerge": true,
-      "automergeType": "squash"
+      "automergeType": "pr",
+      "automergeStrategy": "squash"
     },
     {
       "matchPackageNames": ["playwright"],

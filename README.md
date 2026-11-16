@@ -302,13 +302,13 @@ A real Chromium browser loads the page, interacts with the consent modal (reject
 
 Each scan produces up to 5 file types in `<output-dir>/<hostname>/`:
 
-| Format | Files                                                          | Description                                                                                                                                        |
-| ------ | -------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `md`   | `gdpr-report-*.md`, `gdpr-checklist-*.md`, `gdpr-cookies-*.md` | Main compliance report, per-rule checklist with legal references, and deduplicated cookie inventory                                                |
-| `html` | `gdpr-report-*.html`                                           | Self-contained styled report — grade badge, score cards, dark-pattern issues, cookie and tracker tables. Opens in any browser, no dependencies     |
-| `json` | `gdpr-report-*.json`                                           | Full raw scan result for programmatic processing or CI integration                                                                                 |
-| `pdf`  | `gdpr-report-*.pdf`                                            | PDF built from the Markdown reports via Playwright                                                                                                 |
-| `csv`  | `gdpr-cookies-*.csv`                                           | Deduplicated cookie inventory with OCD descriptions, platform, retention period and privacy link — ready for spreadsheet review or DPA submissions |
+| Format | Files                | Description                                                                                                                                        |
+| ------ | -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `md`   | `gdpr-report-*.md`   | Single file with the main compliance report, the per-rule checklist with legal references, and the deduplicated cookie inventory                   |
+| `html` | `gdpr-report-*.html` | Self-contained styled report — grade badge, score cards, dark-pattern issues, cookie and tracker tables. Opens in any browser, no dependencies     |
+| `json` | `gdpr-report-*.json` | Full raw scan result for programmatic processing or CI integration                                                                                 |
+| `pdf`  | `gdpr-report-*.pdf`  | PDF printed from the HTML report via Playwright                                                                                                    |
+| `csv`  | `gdpr-cookies-*.csv` | Deduplicated cookie inventory with OCD descriptions, platform, retention period and privacy link — ready for spreadsheet review or DPA submissions |
 
 All formats contain:
 
@@ -379,10 +379,13 @@ Axeptio, Cookiebot, OneTrust, Didomi, Tarteaucitron, Usercentrics, and about twe
 ## Development
 
 ```bash
-pnpm dev          # Watch-mode compilation
-pnpm typecheck    # Type-check without compiling
-pnpm lint         # oxlint
-pnpm format       # bun fmt
+bun install          # Install dependencies (Bun 1.4.4)
+bun run build        # Compile to dist/
+bun run dev          # Watch-mode compilation
+bun run typecheck    # Type-check without compiling
+bun run lint         # oxlint
+bun run format       # bun fmt
+bun run test         # Unit + e2e tests (bun test)
 ```
 
 ## Release
