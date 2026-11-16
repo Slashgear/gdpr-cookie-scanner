@@ -7,6 +7,7 @@ import type {
 } from "../types.js";
 import { analyzeButtonWording, analyzeModalText } from "./wording.js";
 import { detectColourNudging } from "./colour.js";
+import { diffCookies } from "../scanner/cookies.js";
 
 interface ComplianceInput {
   modal: ConsentModal;
@@ -17,6 +18,24 @@ interface ComplianceInput {
   networkBeforeInteraction: NetworkRequest[];
   networkAfterAccept: NetworkRequest[];
   networkAfterReject: NetworkRequest[];
+}
+
+/**
+ * Consent-requiring cookies that appeared after the user clicked "reject".
+ *
+ * `captureCookies()` tags every cookie present in the browser context with the
+ * current phase, so `cookiesAfterReject` also contains cookies that were already
+ * set before any interaction. Those are penalised by the "before interaction"
+ * check; diffing against the pre-interaction snapshot keeps only the cookies the
+ * site actually deposited after the refusal, so nothing is penalised twice.
+ */
+export function getConsentCookiesSetAfterReject(
+  cookiesBeforeInteraction: ScannedCookie[],
+  cookiesAfterReject: ScannedCookie[],
+): ScannedCookie[] {
+  return diffCookies(cookiesBeforeInteraction, cookiesAfterReject).added.filter(
+    (c) => c.requiresConsent && c.capturedAt === "after-reject",
+  );
 }
 
 export function analyzeCompliance(input: ComplianceInput): ComplianceScore {
@@ -236,16 +255,18 @@ export function analyzeCompliance(input: ComplianceInput): ComplianceScore {
     cookieBehavior -= Math.min(20, illegalPreConsentCookies.length * 4);
   }
 
-  // Non-essential cookies persisting after reject
-  const consentCookiesAfterReject = input.cookiesAfterReject.filter(
-    (c) => c.requiresConsent && c.capturedAt === "after-reject",
+  // Non-essential cookies deposited after reject (pre-interaction cookies are
+  // already penalised above and must not be counted a second time)
+  const consentCookiesAfterReject = getConsentCookiesSetAfterReject(
+    input.cookiesBeforeInteraction,
+    input.cookiesAfterReject,
   );
 
   if (consentCookiesAfterReject.length > 0) {
     issues.push({
       type: "auto-consent",
       severity: "critical",
-      description: `${consentCookiesAfterReject.length} non-essential cookie(s) persist after rejection`,
+      description: `${consentCookiesAfterReject.length} non-essential cookie(s) set after rejection`,
       evidence: consentCookiesAfterReject.map((c) => `${c.name} (${c.category})`).join(", "),
     });
     cookieBehavior -= Math.min(15, consentCookiesAfterReject.length * 3);

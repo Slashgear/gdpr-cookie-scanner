@@ -347,12 +347,12 @@ When a consent string is found (via API or cookie), it is decoded to expose:
 
 The score is made up of 4 criteria (25 points each):
 
-| Criterion            | What is evaluated                                                                              |
-| -------------------- | ---------------------------------------------------------------------------------------------- |
-| **Consent validity** | Pre-ticked boxes, ambiguous wording, missing information                                       |
-| **Easy refusal**     | Missing or buried reject button, click asymmetry, visual asymmetry                             |
-| **Transparency**     | Granular controls, mention of purposes / third parties / duration / right to withdraw          |
-| **Cookie behavior**  | Non-essential cookies before consent, cookies persisting after reject, trackers before consent |
+| Criterion            | What is evaluated                                                                       |
+| -------------------- | --------------------------------------------------------------------------------------- |
+| **Consent validity** | Pre-ticked boxes, ambiguous wording, missing information                                |
+| **Easy refusal**     | Missing or buried reject button, click asymmetry, visual asymmetry                      |
+| **Transparency**     | Granular controls, mention of purposes / third parties / duration / right to withdraw   |
+| **Cookie behavior**  | Non-essential cookies before consent, cookies set after reject, trackers before consent |
 
 **Grade scale:** A ≥ 90 · B ≥ 75 · C ≥ 55 · D ≥ 35 · F < 35
 
@@ -360,17 +360,17 @@ The score is made up of 4 criteria (25 points each):
 
 ## Detected dark patterns
 
-| Type                    | Severity         | Description                                           |
-| ----------------------- | ---------------- | ----------------------------------------------------- |
-| `no-reject-button`      | Critical         | No reject option in the modal                         |
-| `buried-reject`         | Critical         | Reject button not present at the first layer          |
-| `click-asymmetry`       | Critical         | Rejecting requires more clicks than accepting         |
-| `pre-ticked`            | Critical         | Pre-ticked checkboxes (invalid under RGPD Recital 32) |
-| `auto-consent`          | Critical         | Non-essential cookies/trackers before any consent     |
-| `asymmetric-prominence` | Warning          | Accept button significantly larger than reject        |
-| `nudging`               | Warning          | Accept button font larger than reject button font     |
-| `misleading-wording`    | Warning/Critical | Ambiguous labels ("OK", "Continue"…)                  |
-| `missing-info`          | Warning          | Mandatory information absent from the text            |
+| Type                    | Severity         | Description                                                                         |
+| ----------------------- | ---------------- | ----------------------------------------------------------------------------------- |
+| `no-reject-button`      | Critical         | No reject option in the modal                                                       |
+| `buried-reject`         | Critical         | Reject button not present at the first layer                                        |
+| `click-asymmetry`       | Critical         | Rejecting requires more clicks than accepting (e.g. reject only behind "Customize") |
+| `pre-ticked`            | Critical         | Pre-ticked checkboxes (invalid under RGPD Recital 32)                               |
+| `auto-consent`          | Critical         | Non-essential cookies/trackers before any consent                                   |
+| `asymmetric-prominence` | Warning          | Accept button significantly larger than reject                                      |
+| `nudging`               | Warning          | Accept button font larger than reject button font                                   |
+| `misleading-wording`    | Warning/Critical | Ambiguous labels ("OK", "Continue"…)                                                |
+| `missing-info`          | Warning          | Mandatory information absent from the text                                          |
 
 ## Automatically recognised CMPs
 

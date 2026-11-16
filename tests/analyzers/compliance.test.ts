@@ -1,5 +1,8 @@
 import { describe, it, expect } from "bun:test";
-import { analyzeCompliance } from "../../src/analyzers/compliance.js";
+import {
+  analyzeCompliance,
+  getConsentCookiesSetAfterReject,
+} from "../../src/analyzers/compliance.js";
 import type {
   ConsentModal,
   ConsentButton,
@@ -541,7 +544,7 @@ describe("cookieBehavior dimension", () => {
     expect(result.breakdown.cookieBehavior).toBeGreaterThanOrEqual(5); // 25 - min(20, 10*4) = 5
   });
 
-  it("deducts for non-essential cookies persisting after rejection", () => {
+  it("deducts for non-essential cookies set after rejection", () => {
     const result = analyzeCompliance({
       modal: makeModal(),
       privacyPolicyUrl: "https://example.com/privacy",
@@ -554,10 +557,48 @@ describe("cookieBehavior dimension", () => {
     });
     expect(
       result.issues.some(
-        (i) => i.type === "auto-consent" && i.description.includes("persist after rejection"),
+        (i) => i.type === "auto-consent" && i.description.includes("set after rejection"),
       ),
     ).toBe(true);
     expect(result.breakdown.cookieBehavior).toBeLessThan(25);
+  });
+
+  it("does not penalise a pre-consent cookie a second time when it is still present after reject", () => {
+    // captureCookies() tags every cookie in the context with the current phase,
+    // so a cookie set before interaction re-appears tagged "after-reject".
+    const onlyBefore = analyzeCompliance({
+      ...EMPTY_INPUT,
+      modal: makeModal(),
+      privacyPolicyUrl: "https://example.com/privacy",
+      cookiesBeforeInteraction: [makeCookie("_ga", true, "before-interaction")],
+    });
+    const result = analyzeCompliance({
+      ...EMPTY_INPUT,
+      modal: makeModal(),
+      privacyPolicyUrl: "https://example.com/privacy",
+      cookiesBeforeInteraction: [makeCookie("_ga", true, "before-interaction")],
+      cookiesAfterReject: [makeCookie("_ga", true, "after-reject")],
+    });
+    expect(result.issues.some((i) => i.description.includes("set after rejection"))).toBe(false);
+    expect(result.breakdown.cookieBehavior).toBe(onlyBefore.breakdown.cookieBehavior);
+    expect(result.breakdown.cookieBehavior).toBe(21); // 25 - 4, penalised once
+  });
+
+  it("only counts cookies newly added after reject when some were already present", () => {
+    const result = analyzeCompliance({
+      ...EMPTY_INPUT,
+      modal: makeModal(),
+      privacyPolicyUrl: "https://example.com/privacy",
+      cookiesBeforeInteraction: [makeCookie("_ga", true, "before-interaction")],
+      cookiesAfterReject: [
+        makeCookie("_ga", true, "after-reject"),
+        makeCookie("_fbp", true, "after-reject"),
+      ],
+    });
+    const issue = result.issues.find((i) => i.description.includes("set after rejection"));
+    expect(issue?.description).toStartWith("1 non-essential cookie(s)");
+    expect(issue?.evidence).toBe("_fbp (analytics)");
+    expect(result.breakdown.cookieBehavior).toBe(18); // 25 - 4 (before) - 3 (after reject)
   });
 
   it("deducts for tracker requests fired before consent", () => {
@@ -589,6 +630,32 @@ describe("cookieBehavior dimension", () => {
       networkAfterReject: [],
     });
     expect(result.breakdown.cookieBehavior).toBe(25);
+  });
+});
+
+// ── getConsentCookiesSetAfterReject ─────────────────────────────────────────
+
+describe("getConsentCookiesSetAfterReject", () => {
+  it("ignores cookies that were already present before interaction", () => {
+    expect(
+      getConsentCookiesSetAfterReject(
+        [makeCookie("_ga", true, "before-interaction")],
+        [makeCookie("_ga", true, "after-reject")],
+      ),
+    ).toHaveLength(0);
+  });
+
+  it("returns consent-requiring cookies added after reject", () => {
+    const result = getConsentCookiesSetAfterReject(
+      [],
+      [makeCookie("_ga", true, "after-reject"), makeCookie("PHPSESSID", false, "after-reject")],
+    );
+    expect(result.map((c) => c.name)).toEqual(["_ga"]);
+  });
+
+  it("returns nothing when the reject click failed (after-reject = before snapshot)", () => {
+    const before = [makeCookie("_ga", true, "before-interaction")];
+    expect(getConsentCookiesSetAfterReject(before, before)).toHaveLength(0);
   });
 });
 

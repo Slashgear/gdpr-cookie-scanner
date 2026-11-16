@@ -2,6 +2,7 @@ import { basename } from "path";
 import type { ScanResult, ScannedCookie, DarkPatternIssue, ConsentButton } from "../types.js";
 import { lookupCookie } from "../classifiers/cookie-lookup.js";
 import { IAB_PURPOSES, IAB_SPECIAL_FEATURES } from "../analyzers/tcf-decoder.js";
+import { getConsentCookiesSetAfterReject } from "../analyzers/compliance.js";
 
 const GRADE_COLOR: Record<string, string> = {
   A: "#16a34a",
@@ -1076,16 +1077,15 @@ function buildChecklistSection(result: ScanResult): string {
       : `${illegalPre.length}: ${illegalPre.map((c) => c.name).join(", ")}`,
   );
 
-  const persistAfterReject = result.cookiesAfterReject.filter(
-    (c) => c.requiresConsent && c.capturedAt === "after-reject",
+  const persistAfterReject = getConsentCookiesSetAfterReject(
+    result.cookiesBeforeInteraction,
+    result.cookiesAfterReject,
   );
   push(
     "Cookie behavior",
-    "Non-essential cookies removed after reject",
+    "No non-essential cookie set after reject",
     persistAfterReject.length === 0 ? "ok" : "ko",
-    persistAfterReject.length === 0
-      ? "Correctly removed"
-      : `${persistAfterReject.length} persisting`,
+    persistAfterReject.length === 0 ? "None set" : `${persistAfterReject.length} set after reject`,
   );
 
   const preTrackers = result.networkBeforeInteraction.filter(
