@@ -13,10 +13,12 @@
 
 ## Checklist
 
-- [ ] `pnpm format:check` passes
-- [ ] `pnpm lint` passes
-- [ ] `pnpm typecheck` passes
-- [ ] `pnpm build` passes
+- [ ] `bun run format:check` passes
+- [ ] `bun run lint` passes
+- [ ] `bun run typecheck` passes
+- [ ] `bun run build` passes
+- [ ] `bun run test` passes
+- [ ] Changeset added (if the published package changes)
 - [ ] Manually tested on at least one site
 
 ## Legal reference (if new rule)
