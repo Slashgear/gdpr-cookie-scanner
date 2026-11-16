@@ -21,7 +21,7 @@ jobs:
       DATA_FILE: src/data/open-cookie-database.json
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           # Optional PAT / GitHub App token: PRs pushed with the default
           # GITHUB_TOKEN do not trigger the CI workflow.
@@ -31,7 +31,7 @@ jobs:
         with:
           bun-version: 1.4.4
 
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
 

@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Two-Layer Reject Test Site</title>
+  </head>
+  <body>
+    <main>
+      <h1>Welcome</h1>
+      <p>The reject button is only reachable after opening the preferences panel.</p>
+    </main>
+
+    <footer>
+      <a href="/privacy-policy">Privacy Policy</a>
+    </footer>
+
+    <!-- Reject is buried behind "Customize": one click to accept, two to reject -->
+    <div
+      id="cookie-banner"
+      style="
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: #1a1a2e;
+        color: #fff;
+        padding: 20px;
+        z-index: 9999;
+      "
+    >
+      <p style="margin: 0 0 10px 0">
+        We use cookies for analytics purposes with third-party vendors. Cookies expire after 13
+        months. You may withdraw your consent at any time. See our
+        <a href="/privacy-policy" style="color: #90e0ef">Privacy Policy</a>.
+      </p>
+      <button id="accept-btn" style="padding: 10px 20px; font-size: 14px">Accept all</button>
+      <button id="customize-btn" style="padding: 10px 20px; font-size: 14px">Customize</button>
+
+      <div id="preferences-panel" style="display: none; margin-top: 12px">
+        <label><input type="checkbox" id="analytics-toggle" /> Analytics</label>
+        <button id="reject-btn" style="padding: 10px 20px; font-size: 14px">Reject all</button>
+      </div>
+    </div>
+
+    <script>
+      function close(value) {
+        document.getElementById("cookie-banner").style.display = "none";
+        document.cookie = "consent=" + value + "; path=/; max-age=31536000";
+      }
+      document.getElementById("accept-btn").addEventListener("click", function () {
+        close("accepted");
+      });
+      document.getElementById("customize-btn").addEventListener("click", function () {
+        document.getElementById("preferences-panel").style.display = "block";
+      });
+      document.getElementById("reject-btn").addEventListener("click", function () {
+        close("rejected");
+      });
+    </script>
+  </body>
+</html>

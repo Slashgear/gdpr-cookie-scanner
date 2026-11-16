@@ -4,7 +4,11 @@ import type { ScanOptions, ScanResult } from "../types.js";
 import { createBrowser, clearState, closeBrowser } from "./browser.js";
 import { captureCookies } from "./cookies.js";
 import { createNetworkInterceptor } from "./network.js";
-import { detectConsentModal, findPrivacyPolicyUrl } from "./consent-modal.js";
+import {
+  detectConsentModal,
+  findPrivacyPolicyUrl,
+  measureRejectClickDepth,
+} from "./consent-modal.js";
 import { analyzeCompliance } from "../analyzers/compliance.js";
 import { detectTcf } from "./tcf.js";
 
@@ -80,6 +84,11 @@ export class Scanner {
       screenshotPaths.push(screenshotPath);
       modal.screenshotPath = screenshotPath;
     }
+
+    // If refusing is not possible on the first layer, open the preferences
+    // layer to find the reject button and record its real click depth.
+    // Done after the screenshot because it changes what is displayed.
+    await measureRejectClickDepth(session1.page, modal);
 
     // ────────────────────────────────────────────────────────────
     // Phase 3 — Click REJECT, capture state after
