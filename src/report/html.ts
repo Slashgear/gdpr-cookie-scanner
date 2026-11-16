@@ -639,8 +639,11 @@ function buildCookiesSection(result: ScanResult): string {
   ];
 
   const illegalPre = result.cookiesBeforeInteraction.filter((c) => c.requiresConsent);
-  const illegalPost = result.cookiesAfterReject.filter(
-    (c) => c.requiresConsent && c.capturedAt === "after-reject",
+  // Same set as the score: only cookies added after the reject click. The table
+  // below still lists every cookie present, including pre-consent ones.
+  const illegalPost = getConsentCookiesSetAfterReject(
+    result.cookiesBeforeInteraction,
+    result.cookiesAfterReject,
   );
 
   const phaseTables = phases
@@ -651,7 +654,7 @@ function buildCookiesSection(result: ScanResult): string {
       ${esc(label)}
       <span class="count-badge">${filtered.length}</span>
       ${phase === "before-interaction" && illegalPre.length > 0 ? `<span class="badge badge-critical">${illegalPre.length} non-essential</span>` : ""}
-      ${phase === "after-reject" && illegalPost.length > 0 ? `<span class="badge badge-critical">${illegalPost.length} non-essential</span>` : ""}
+      ${phase === "after-reject" && illegalPost.length > 0 ? `<span class="badge badge-critical">${illegalPost.length} non-essential set after reject</span>` : ""}
     </div>
     ${cookieTable(filtered)}
   </div>`;
