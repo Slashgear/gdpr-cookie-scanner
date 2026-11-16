@@ -3,7 +3,7 @@
 FROM node:24-slim AS builder
 WORKDIR /app
 
-RUN npm install -g bun
+RUN npm install -g bun@1.4.4
 
 COPY package.json bun.lock ./
 RUN bun install --frozen-lockfile
@@ -16,7 +16,7 @@ RUN bun run build
 # ── Stage 2: runtime ──────────────────────────────────────────────────────────
 # oven/bun:slim (~90 MB) vs node:24-slim (~200 MB) — saves ~110 MB.
 # Playwright runs fine under Bun (verified by e2e test suite).
-FROM oven/bun:slim
+FROM oven/bun:1.4.4-slim
 WORKDIR /app
 ENV NODE_ENV=production
 
