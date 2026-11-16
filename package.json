@@ -56,7 +56,7 @@
     "build:showcase": "bun scripts/build-showcase.mjs && bun run format"
   },
   "dependencies": {
-    "commander": "^14.0.3",
+    "commander": "^15.1.0",
     "nanospinner": "^1.2.2",
     "playwright": "^1.65.1"
   },
