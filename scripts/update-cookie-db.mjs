@@ -11,5 +11,11 @@ const data = await fetch(url).then((r) => {
 const parsed = JSON.parse(data);
 const count = Object.values(parsed).flat().length;
 
-writeFileSync("src/data/open-cookie-database.json", data, "utf-8");
+// Re-serialize with a stable layout (2-space indent, trailing newline) so the
+// diff only reflects real upstream changes, not formatting differences.
+writeFileSync(
+  "src/data/open-cookie-database.json",
+  `${JSON.stringify(parsed, null, 2)}\n`,
+  "utf-8",
+);
 console.log(`✔ Open Cookie Database updated — ${count} entries`);
