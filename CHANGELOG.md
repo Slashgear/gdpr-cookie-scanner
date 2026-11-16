@@ -1,5 +1,20 @@
 # @slashgear/gdpr-cookie-scanner
 
+## 3.8.3
+
+### Patch Changes
+
+- ed0e7c2: Upgrade Bun to 1.4.4 across CI, release workflows and the Docker image (now pinned instead of floating on `latest`, so the image matches CI), and bump Playwright to 1.65 for a more recent Chromium when scanning sites.
+- c946c68: Upgrade the release tooling to `@changesets/cli` 3 and `changesets/action` v2 (the action's v2 refuses to run with CLI v2, so both move together). The release workflow uses the renamed kebab-case inputs/outputs and relies on the `.npmrc` written by `actions/setup-node`, since the action no longer generates one from `NPM_TOKEN`. No change for package consumers.
+- b4d04df: Upgrade `commander` from 14 to 15. Commander 14 is now in maintenance mode; 15 is ESM-only and needs Node ≥ 22.12, both already satisfied by this ESM package targeting Node 24. The CLI does not use `--no-*` options, so the one behavioural change (implicit defaults for negated flags) does not apply.
+- 6b3f582: Build with TypeScript 7 (the native Go compiler) instead of 5.9. The emitted JavaScript and `.d.ts` files are byte-identical to the 5.9 output, and builds/type-checks now take ~0.3 s. `tsconfig.json` now lists `"types": ["node"]` explicitly, because TypeScript 6+ no longer auto-includes every `@types/*` package.
+- 03ad1b7: Refresh the vendored Open Cookie Database. The monthly update PRs since August never landed (they were closed or contained only a changeset), so cookie descriptions were several months behind upstream.
+- 672b2fd: Fix two scoring bugs:
+  
+  - **No more double penalty after reject.** `captureCookies()` tags every cookie present in the browser with the current phase, so a non-essential cookie set before any interaction was counted again as "persisting after rejection" and penalised twice. The after-reject check (and the matching checklist row and HTML "after reject" badge) now only counts cookies the site added after the reject click, using `diffCookies()` against the pre-interaction snapshot.
+  - **Click asymmetry is now actually detected.** `clickDepth` was hard-coded to `1`, so the "reject requires more clicks than accept" check could never fire. When the first layer has no visible reject button but has a "preferences/customize" button, the scanner now opens it and looks for the reject button there, recording `clickDepth: 2`. Reject buttons hidden on the first layer are no longer counted as one-click refusal.
+- 2496989: Replace oxfmt with Bun's built-in formatter (`bun fmt`, available since Bun 1.4). This drops a dev dependency, and Markdown reports are now tidied with `bun fmt` when Bun is available, which also covers the Docker image (oxfmt was a dev dependency, so production installs never formatted them).
+
 ## 3.8.2
 
 ### Patch Changes
