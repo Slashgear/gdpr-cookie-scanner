@@ -12,6 +12,9 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+      # Needed to dispatch CI: pushes made with GITHUB_TOKEN do not trigger
+      # pull_request workflows.
+      actions: write
 
     steps:
       - uses: actions/checkout@v6
@@ -30,6 +33,11 @@ jobs:
       - name: Fetch Open Cookie Database
         run: bun run update:ocd
 
+      # Format before diffing: comparing unformatted generated output against the
+      # formatted vendored file reported a change on every run.
+      - name: Format
+        run: bun run format
+
       - name: Detect changes
         id: diff
         run: |
@@ -40,10 +48,6 @@ jobs:
       - name: Type-check
         if: steps.diff.outputs.changed == 'true'
         run: bun run typecheck
-
-      - name: Format
-        if: steps.diff.outputs.changed == 'true'
-        run: bun run format
 
       - name: Create PR
         if: steps.diff.outputs.changed == 'true'
@@ -69,10 +73,10 @@ jobs:
 
           git add src/data/open-cookie-database.json ".changeset/${SLUG}.md"
           git commit -m "chore: update Open Cookie Database"
-          git push origin "$BRANCH"
+          git push --force origin "$BRANCH"
 
           gh pr create \
-            --title "chore: monthly Open Cookie Database update ($(date +%B %Y))" \
+            --title "chore: monthly Open Cookie Database update ($(date '+%B %Y'))" \
             --body "$(cat <<'BODY'
           ## Summary
 
@@ -91,3 +95,8 @@ jobs:
           BODY
           )" \
             --base main
+
+          # PRs opened with GITHUB_TOKEN don't trigger the pull_request CI.
+          # workflow_dispatch is exempt from that rule and its checks are
+          # reported on the branch head commit, so they show up on the PR.
+          gh workflow run ci.yml --ref "$BRANCH"

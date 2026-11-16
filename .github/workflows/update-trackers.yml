@@ -12,6 +12,9 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+      # Needed to dispatch CI: pushes made with GITHUB_TOKEN do not trigger
+      # pull_request workflows.
+      actions: write
 
     steps:
       - uses: actions/checkout@v6
@@ -30,16 +33,17 @@ jobs:
       - name: Fetch & merge tracker lists
         run: bun run update-trackers
 
+      # Format before diffing: comparing unformatted generated output against the
+      # formatted vendored file reported a change on every run.
+      - name: Format
+        run: bun run format
+
       - name: Detect changes
         id: diff
         run: |
           git diff --quiet src/classifiers/tracker-list.ts \
             && echo "changed=false" >> "$GITHUB_OUTPUT" \
             || echo "changed=true" >> "$GITHUB_OUTPUT"
-
-      - name: Format
-        if: steps.diff.outputs.changed == 'true'
-        run: bun run format
 
       - name: Type-check
         if: steps.diff.outputs.changed == 'true'
@@ -69,10 +73,10 @@ jobs:
 
           git add src/classifiers/tracker-list.ts ".changeset/${SLUG}.md"
           git commit -m "chore: update tracker DB from Disconnect.me and DuckDuckGo Tracker Radar"
-          git push origin "$BRANCH"
+          git push --force origin "$BRANCH"
 
           gh pr create \
-            --title "chore: monthly tracker DB update ($(date +%B %Y))" \
+            --title "chore: monthly tracker DB update ($(date '+%B %Y'))" \
             --body "$(cat <<'BODY'
           ## Summary
 
@@ -92,3 +96,8 @@ jobs:
           BODY
           )" \
             --base main
+
+          # PRs opened with GITHUB_TOKEN don't trigger the pull_request CI.
+          # workflow_dispatch is exempt from that rule and its checks are
+          # reported on the branch head commit, so they show up on the PR.
+          gh workflow run ci.yml --ref "$BRANCH"

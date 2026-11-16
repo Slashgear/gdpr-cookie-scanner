@@ -11,5 +11,12 @@ const data = await fetch(url).then((r) => {
 const parsed = JSON.parse(data);
 const count = Object.values(parsed).flat().length;
 
-writeFileSync("src/data/open-cookie-database.json", data, "utf-8");
+// Upstream uses 4-space indentation while the vendored copy is formatted by
+// `bun fmt` (2 spaces). Writing the raw payload made every run look like a
+// change, so normalise it to the repository's format before writing.
+writeFileSync(
+  "src/data/open-cookie-database.json",
+  `${JSON.stringify(parsed, null, 2)}\n`,
+  "utf-8",
+);
 console.log(`✔ Open Cookie Database updated — ${count} entries`);
