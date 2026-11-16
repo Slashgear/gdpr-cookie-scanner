@@ -342,10 +342,93 @@ export async function detectConsentModal(page: Page, options: ScanOptions): Prom
   };
 }
 
+/**
+ * True when the first layer has no visible reject button but offers a visible
+ * "preferences" button — i.e. refusing may be buried behind a second layer.
+ */
+export function needsSecondLayerProbe(buttons: ConsentButton[]): boolean {
+  return (
+    !buttons.some((b) => b.type === "reject" && b.isVisible) &&
+    buttons.some((b) => b.type === "preferences" && b.isVisible)
+  );
+}
+
+/**
+ * Merge the buttons found after opening the second layer into the first-layer list.
+ *
+ * Reject buttons that were present in the DOM but hidden on the first layer are
+ * not reachable in one click, so they are dropped; visible reject buttons found
+ * on the second layer are added with `clickDepth: 2`.
+ */
+export function mergeSecondLayerButtons(
+  firstLayer: ConsentButton[],
+  secondLayer: ConsentButton[],
+): ConsentButton[] {
+  const kept = firstLayer.filter((b) => !(b.type === "reject" && !b.isVisible));
+  const known = new Set(kept.map((b) => b.selector));
+  const seen = new Set<string>();
+  const secondLayerRejects = secondLayer
+    .filter((b) => b.type === "reject" && b.isVisible && !known.has(b.selector))
+    .filter((b) => {
+      if (seen.has(b.selector)) return false;
+      seen.add(b.selector);
+      return true;
+    })
+    .map((b) => ({ ...b, clickDepth: 2 }));
+  return [...kept, ...secondLayerRejects];
+}
+
+/**
+ * Measure how many clicks it really takes to refuse.
+ *
+ * When the first layer has no visible reject button but has a "preferences"
+ * button, click it and look for a reject button in the second layer. Found
+ * buttons get `clickDepth: 2`, which lets the compliance analyzer flag the
+ * click asymmetry. Mutates `modal.buttons`; leaves the second layer open so the
+ * reject button can be clicked in the next phase.
+ *
+ * Must be called after the initial modal screenshot, since it changes the page.
+ */
+export async function measureRejectClickDepth(page: Page, modal: ConsentModal): Promise<void> {
+  if (!modal.detected || !modal.selector || !needsSecondLayerProbe(modal.buttons)) return;
+
+  const preferencesButton = modal.buttons.find((b) => b.type === "preferences" && b.isVisible);
+  if (!preferencesButton) return;
+
+  try {
+    await page.click(preferencesButton.selector, { timeout: 5000 });
+  } catch {
+    return;
+  }
+  await page.waitForTimeout(1000);
+
+  const rawLang = await page.$eval("html", (el) => el.lang ?? "").catch(() => "");
+  const pageLang = rawLang.split("-")[0].toLowerCase() || null;
+
+  // The second layer may live inside the original container or in a separate
+  // CMP panel, so look in the original container first, then in known containers.
+  const candidates = [modal.selector, ...CMP_SELECTORS, ...HEURISTIC_SELECTORS];
+  const secondLayer: ConsentButton[] = [];
+  for (const selector of new Set(candidates)) {
+    try {
+      if (!(await page.$(selector))) continue;
+      const buttons = await extractButtons(page, selector, pageLang, 2);
+      secondLayer.push(...buttons);
+      if (buttons.some((b) => b.type === "reject" && b.isVisible)) break;
+    } catch {
+      continue;
+    }
+  }
+
+  modal.buttons = mergeSecondLayerButtons(modal.buttons, secondLayer);
+  modal.layerCount = Math.max(modal.layerCount, 2);
+}
+
 async function extractButtons(
   page: Page,
   modalSelector: string,
   lang: string | null,
+  clickDepth = 1,
 ): Promise<ConsentButton[]> {
   const { accept, reject, preferences } = resolveButtonPatterns(lang);
   const buttonEls = await page.$$(
@@ -424,7 +507,7 @@ async function extractButtons(
         backgroundColor: computedStyle.backgroundColor,
         textColor: computedStyle.color,
         contrastRatio,
-        clickDepth: 1,
+        clickDepth,
       });
     } catch {
       continue;
