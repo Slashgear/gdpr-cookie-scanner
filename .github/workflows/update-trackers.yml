@@ -6,15 +6,26 @@ on:
     - cron: "0 4 1 * *"
   workflow_dispatch:
 
+concurrency:
+  group: update-tracker-db
+  cancel-in-progress: false
+
 jobs:
   update:
     runs-on: ubuntu-latest
     permissions:
       contents: write
       pull-requests: write
+    env:
+      BRANCH: chore/tracker-db-update
+      DATA_FILE: src/classifiers/tracker-list.ts
 
     steps:
       - uses: actions/checkout@v7
+        with:
+          # Optional PAT / GitHub App token: PRs pushed with the default
+          # GITHUB_TOKEN do not trigger the CI workflow.
+          token: ${{ secrets.AUTOMATION_PR_TOKEN || github.token }}
 
       - uses: oven-sh/setup-bun@v2
         with:
@@ -30,65 +41,71 @@ jobs:
       - name: Fetch & merge tracker lists
         run: bun run update-trackers
 
+      - name: Format
+        run: bun fmt --no-script "$DATA_FILE"
+
+      # Compare only after formatting, otherwise a formatting-only difference
+      # opens a PR that contains nothing but a changeset.
       - name: Detect changes
         id: diff
         run: |
-          git diff --quiet src/classifiers/tracker-list.ts \
-            && echo "changed=false" >> "$GITHUB_OUTPUT" \
-            || echo "changed=true" >> "$GITHUB_OUTPUT"
-
-      - name: Format
-        if: steps.diff.outputs.changed == 'true'
-        run: bun run format
+          if git diff --quiet -- "$DATA_FILE"; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "No upstream change."
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            git diff --stat -- "$DATA_FILE"
+          fi
 
       - name: Type-check
         if: steps.diff.outputs.changed == 'true'
         run: bun run typecheck
 
-      - name: Create PR
+      - name: Create or update PR
         if: steps.diff.outputs.changed == 'true'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.AUTOMATION_PR_TOKEN || github.token }}
         run: |
-          BRANCH="chore/tracker-db-$(date +%Y%m)"
-          DATE="$(date +%Y-%m-%d)"
-          SLUG="tracker-db-update-${DATE}"
+          TITLE="chore: monthly tracker DB update ($(date -u '+%B %Y'))"
 
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git checkout -b "$BRANCH"
+          # A single, reused branch: a pending update is refreshed instead of
+          # piling up one PR per month.
+          git checkout -B "$BRANCH"
 
-          # Write changeset
-          cat > ".changeset/${SLUG}.md" << EOF
+          cat > .changeset/tracker-db-update.md << 'CHANGESET'
           ---
           "@slashgear/gdpr-cookie-scanner": patch
           ---
 
           chore: monthly tracker DB update from Disconnect.me and DuckDuckGo Tracker Radar
-          EOF
+          CHANGESET
 
-          git add src/classifiers/tracker-list.ts ".changeset/${SLUG}.md"
+          git add "$DATA_FILE" .changeset/tracker-db-update.md
           git commit -m "chore: update tracker DB from Disconnect.me and DuckDuckGo Tracker Radar"
-          git push origin "$BRANCH"
+          git push --force origin "$BRANCH"
 
-          gh pr create \
-            --title "chore: monthly tracker DB update ($(date +%B %Y))" \
-            --body "$(cat <<'BODY'
+          cat > "$RUNNER_TEMP/pr-body.md" << 'BODY'
           ## Summary
 
-          Automated monthly update of `src/classifiers/tracker-list.ts`.
+          Automated update of `src/classifiers/tracker-list.ts`.
 
-          - **Sources**: [Disconnect.me](https://github.com/disconnectme/disconnect-tracking-protection) · [DuckDuckGo Tracker Radar](https://github.com/duckduckgo/tracker-radar)
+          - **Sources**: [Disconnect.me](https://github.com/disconnectme/disconnect-tracking-protection) · [DuckDuckGo Tracker Blocklists](https://github.com/duckduckgo/tracker-blocklists)
           - Manually curated entries and `consentRequired: false` overrides are preserved unchanged.
           - New entries are appended in the `AUTO-GENERATED` section (prevalence ≥ 0.1 %).
+          - This PR is refreshed by every run until it is merged.
 
           ## Test plan
 
-          - [ ] `bun run typecheck` passes (validated by CI)
+          - [ ] `bun run typecheck` passes
           - [ ] Review the diff in `tracker-list.ts` for obviously incorrect category assignments
           - [ ] Spot-check 2–3 new domains against their actual tracker type
-
-          🤖 Generated with [Claude Code](https://claude.com/claude-code)
           BODY
-          )" \
-            --base main
+
+          PR_NUMBER="$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number')"
+          if [ -n "$PR_NUMBER" ]; then
+            gh pr edit "$PR_NUMBER" --title "$TITLE" --body-file "$RUNNER_TEMP/pr-body.md"
+          else
+            gh pr create --base main --head "$BRANCH" --title "$TITLE" --body-file "$RUNNER_TEMP/pr-body.md"
+          fi
