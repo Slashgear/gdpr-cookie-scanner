@@ -2,6 +2,7 @@ import { basename } from "path";
 import type { ScanResult, ScannedCookie, DarkPatternIssue, ConsentButton } from "../types.js";
 import { lookupCookie } from "../classifiers/cookie-lookup.js";
 import { IAB_PURPOSES, IAB_SPECIAL_FEATURES } from "../analyzers/tcf-decoder.js";
+import { getConsentCookiesSetAfterReject } from "../analyzers/compliance.js";
 
 const GRADE_COLOR: Record<string, string> = {
   A: "#16a34a",
@@ -638,8 +639,11 @@ function buildCookiesSection(result: ScanResult): string {
   ];
 
   const illegalPre = result.cookiesBeforeInteraction.filter((c) => c.requiresConsent);
-  const illegalPost = result.cookiesAfterReject.filter(
-    (c) => c.requiresConsent && c.capturedAt === "after-reject",
+  // Same set as the score: only cookies added after the reject click. The table
+  // below still lists every cookie present, including pre-consent ones.
+  const illegalPost = getConsentCookiesSetAfterReject(
+    result.cookiesBeforeInteraction,
+    result.cookiesAfterReject,
   );
 
   const phaseTables = phases
@@ -650,7 +654,7 @@ function buildCookiesSection(result: ScanResult): string {
       ${esc(label)}
       <span class="count-badge">${filtered.length}</span>
       ${phase === "before-interaction" && illegalPre.length > 0 ? `<span class="badge badge-critical">${illegalPre.length} non-essential</span>` : ""}
-      ${phase === "after-reject" && illegalPost.length > 0 ? `<span class="badge badge-critical">${illegalPost.length} non-essential</span>` : ""}
+      ${phase === "after-reject" && illegalPost.length > 0 ? `<span class="badge badge-critical">${illegalPost.length} non-essential set after reject</span>` : ""}
     </div>
     ${cookieTable(filtered)}
   </div>`;
@@ -1076,16 +1080,15 @@ function buildChecklistSection(result: ScanResult): string {
       : `${illegalPre.length}: ${illegalPre.map((c) => c.name).join(", ")}`,
   );
 
-  const persistAfterReject = result.cookiesAfterReject.filter(
-    (c) => c.requiresConsent && c.capturedAt === "after-reject",
+  const persistAfterReject = getConsentCookiesSetAfterReject(
+    result.cookiesBeforeInteraction,
+    result.cookiesAfterReject,
   );
   push(
     "Cookie behavior",
-    "Non-essential cookies removed after reject",
+    "No non-essential cookie set after reject",
     persistAfterReject.length === 0 ? "ok" : "ko",
-    persistAfterReject.length === 0
-      ? "Correctly removed"
-      : `${persistAfterReject.length} persisting`,
+    persistAfterReject.length === 0 ? "None set" : `${persistAfterReject.length} set after reject`,
   );
 
   const preTrackers = result.networkBeforeInteraction.filter(

@@ -94,6 +94,33 @@ describe("Scanner E2E", () => {
     });
   });
 
+  describe("two-layer-reject-site.html", () => {
+    let result: ScanResult;
+
+    beforeAll(async () => {
+      result = await new Scanner(makeOptions("two-layer-reject-site.html")).run();
+    });
+
+    it("finds the reject button on the second layer with clickDepth 2", () => {
+      const reject = result.modal.buttons.find((b) => b.type === "reject");
+      const accept = result.modal.buttons.find((b) => b.type === "accept");
+      expect(reject?.clickDepth).toBe(2);
+      expect(reject?.isVisible).toBe(true);
+      expect(accept?.clickDepth).toBe(1);
+    });
+
+    it("raises a click-asymmetry issue", () => {
+      expect(result.compliance.issues.some((i) => i.type === "click-asymmetry")).toBe(true);
+    });
+
+    it("still clicks the second-layer reject button in phase 3", () => {
+      expect(result.errors.some((e) => e.includes("reject"))).toBe(false);
+      expect(
+        result.cookiesAfterReject.some((c) => c.name === "consent" && c.value === "rejected"),
+      ).toBe(true);
+    });
+  });
+
   describe("no-modal-site.html", () => {
     let result: ScanResult;
 

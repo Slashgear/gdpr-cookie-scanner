@@ -14,6 +14,7 @@ import type {
   ConsentButton,
 } from "../types.js";
 import { IAB_PURPOSES, IAB_SPECIAL_FEATURES } from "../analyzers/tcf-decoder.js";
+import { getConsentCookiesSetAfterReject } from "../analyzers/compliance.js";
 import type { ScanOptions } from "../types.js";
 import { lookupCookie } from "../classifiers/cookie-lookup.js";
 
@@ -1004,19 +1005,20 @@ The **Description / Purpose** column is to be filled in by the DPO or technical 
           : `${illegalPre.length} illegal cookie(s): ${illegalPre.map((c) => `\`${c.name}\` (${c.category})`).join(", ")}`,
     });
 
-    const persistAfterReject = r.cookiesAfterReject.filter(
-      (c) => c.requiresConsent && c.capturedAt === "after-reject",
+    const persistAfterReject = getConsentCookiesSetAfterReject(
+      r.cookiesBeforeInteraction,
+      r.cookiesAfterReject,
     );
     rows.push({
       category: "Cookie behavior",
-      rule: "Non-essential cookies removed after rejection",
+      rule: "No non-essential cookie set after rejection",
       reference:
         "[GDPR Art. 7](https://gdpr-info.eu/art-7-gdpr/) · [CNIL Recommendation 2022](https://www.cnil.fr/fr/cookies-et-autres-traceurs/regles/cookies)",
       status: persistAfterReject.length === 0 ? ok : ko,
       detail:
         persistAfterReject.length === 0
-          ? "No non-essential cookie persisting after rejection"
-          : `${persistAfterReject.length} cookie(s) persisting: ${persistAfterReject.map((c) => `\`${c.name}\``).join(", ")}`,
+          ? "No new non-essential cookie set after rejection"
+          : `${persistAfterReject.length} cookie(s) set after rejection: ${persistAfterReject.map((c) => `\`${c.name}\``).join(", ")}`,
     });
 
     const preTrackers = r.networkBeforeInteraction.filter((req) => req.requiresConsent);
