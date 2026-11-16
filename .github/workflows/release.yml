@@ -11,6 +11,9 @@ jobs:
       contents: write
       pull-requests: write
       packages: write
+      # npm trusted publishing (OIDC): no long-lived npm token needed once the
+      # trusted publisher is configured for this workflow on npmjs.com.
+      id-token: write
 
     steps:
       - uses: actions/checkout@v7
@@ -39,8 +42,9 @@ jobs:
           commit-message: "chore: release new version"
           create-github-releases: true
         env:
-          # v2 no longer writes an .npmrc from NPM_TOKEN: the one written by
-          # actions/setup-node (registry-url) reads NODE_AUTH_TOKEN instead.
+          # Fallback only: npm uses trusted publishing (OIDC) when available
+          # and falls back to this token (read by the .npmrc that
+          # actions/setup-node writes for registry-url) otherwise.
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Extract published version
