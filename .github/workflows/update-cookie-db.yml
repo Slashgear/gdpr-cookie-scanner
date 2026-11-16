@@ -6,18 +6,26 @@ on:
     - cron: "0 4 1 * *"
   workflow_dispatch:
 
+concurrency:
+  group: update-cookie-db
+  cancel-in-progress: false
+
 jobs:
   update:
     runs-on: ubuntu-latest
     permissions:
       contents: write
       pull-requests: write
-      # Needed to dispatch CI: pushes made with GITHUB_TOKEN do not trigger
-      # pull_request workflows.
-      actions: write
+    env:
+      BRANCH: chore/cookie-db-update
+      DATA_FILE: src/data/open-cookie-database.json
 
     steps:
       - uses: actions/checkout@v6
+        with:
+          # Optional PAT / GitHub App token: PRs pushed with the default
+          # GITHUB_TOKEN do not trigger the CI workflow.
+          token: ${{ secrets.AUTOMATION_PR_TOKEN || github.token }}
 
       - uses: oven-sh/setup-bun@v2
         with:
@@ -33,70 +41,70 @@ jobs:
       - name: Fetch Open Cookie Database
         run: bun run update:ocd
 
-      # Format before diffing: comparing unformatted generated output against the
-      # formatted vendored file reported a change on every run.
       - name: Format
-        run: bun run format
+        run: bun fmt --no-script "$DATA_FILE"
 
+      # Compare only after formatting, otherwise a formatting-only difference
+      # opens a PR that contains nothing but a changeset.
       - name: Detect changes
         id: diff
         run: |
-          git diff --quiet src/data/open-cookie-database.json \
-            && echo "changed=false" >> "$GITHUB_OUTPUT" \
-            || echo "changed=true" >> "$GITHUB_OUTPUT"
+          if git diff --quiet -- "$DATA_FILE"; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "No upstream change."
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            git diff --stat -- "$DATA_FILE"
+          fi
 
       - name: Type-check
         if: steps.diff.outputs.changed == 'true'
         run: bun run typecheck
 
-      - name: Create PR
+      - name: Create or update PR
         if: steps.diff.outputs.changed == 'true'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.AUTOMATION_PR_TOKEN || github.token }}
         run: |
-          BRANCH="chore/cookie-db-$(date +%Y%m)"
-          DATE="$(date +%Y-%m-%d)"
-          SLUG="cookie-db-update-${DATE}"
+          TITLE="chore: monthly Open Cookie Database update ($(date -u '+%B %Y'))"
 
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git checkout -b "$BRANCH"
+          # A single, reused branch: a pending update is refreshed instead of
+          # piling up one PR per month.
+          git checkout -B "$BRANCH"
 
-          # Write changeset
-          cat > ".changeset/${SLUG}.md" << EOF
+          cat > .changeset/cookie-db-update.md << 'CHANGESET'
           ---
           "@slashgear/gdpr-cookie-scanner": patch
           ---
 
-          chore: monthly Open Cookie Database update
-          EOF
+          chore: update the vendored Open Cookie Database
+          CHANGESET
 
-          git add src/data/open-cookie-database.json ".changeset/${SLUG}.md"
+          git add "$DATA_FILE" .changeset/cookie-db-update.md
           git commit -m "chore: update Open Cookie Database"
           git push --force origin "$BRANCH"
 
-          gh pr create \
-            --title "chore: monthly Open Cookie Database update ($(date '+%B %Y'))" \
-            --body "$(cat <<'BODY'
+          cat > "$RUNNER_TEMP/pr-body.md" << 'BODY'
           ## Summary
 
-          Automated monthly update of `src/data/open-cookie-database.json`.
+          Automated update of `src/data/open-cookie-database.json`.
 
           - **Source**: [Open Cookie Database](https://github.com/jkwakman/Open-Cookie-Database) (Apache 2.0)
           - Cookie descriptions are used to pre-fill the Description column in reports.
+          - This PR is refreshed by every run until it is merged.
 
           ## Test plan
 
-          - [ ] `bun run typecheck` passes (validated by CI)
+          - [ ] `bun run typecheck` passes
           - [ ] `bun run build` produces `dist/data/open-cookie-database.json`
           - [ ] Spot-check a few cookie descriptions in the updated file
-
-          🤖 Generated with [Claude Code](https://claude.com/claude-code)
           BODY
-          )" \
-            --base main
 
-          # PRs opened with GITHUB_TOKEN don't trigger the pull_request CI.
-          # workflow_dispatch is exempt from that rule and its checks are
-          # reported on the branch head commit, so they show up on the PR.
-          gh workflow run ci.yml --ref "$BRANCH"
+          PR_NUMBER="$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number')"
+          if [ -n "$PR_NUMBER" ]; then
+            gh pr edit "$PR_NUMBER" --title "$TITLE" --body-file "$RUNNER_TEMP/pr-body.md"
+          else
+            gh pr create --base main --head "$BRANCH" --title "$TITLE" --body-file "$RUNNER_TEMP/pr-body.md"
+          fi

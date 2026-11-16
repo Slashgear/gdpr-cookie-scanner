@@ -11,9 +11,8 @@ const data = await fetch(url).then((r) => {
 const parsed = JSON.parse(data);
 const count = Object.values(parsed).flat().length;
 
-// Upstream uses 4-space indentation while the vendored copy is formatted by
-// `bun fmt` (2 spaces). Writing the raw payload made every run look like a
-// change, so normalise it to the repository's format before writing.
+// Re-serialize with a stable layout (2-space indent, trailing newline) so the
+// diff only reflects real upstream changes, not formatting differences.
 writeFileSync(
   "src/data/open-cookie-database.json",
   `${JSON.stringify(parsed, null, 2)}\n`,

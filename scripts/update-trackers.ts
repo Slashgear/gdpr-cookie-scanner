@@ -105,8 +105,10 @@ const DDG_CATEGORY_MAP: Record<string, TrackerCategory> = {
 const MIN_PREVALENCE = 0.001; // ≥ 0.1 %
 
 async function fetchDDG(): Promise<Map<string, TrackerEntry>> {
+  // Tracker Radar's generated `tds.json` is no longer published in the
+  // tracker-radar repo; the blocklist built from it lives in tracker-blocklists.
   const url =
-    "https://raw.githubusercontent.com/duckduckgo/tracker-radar/main/build-data/generated/tds.json";
+    "https://raw.githubusercontent.com/duckduckgo/tracker-blocklists/main/web/v6/extension-tds.json";
   const res = await fetch(url);
   if (!res.ok) throw new Error(`DDG Tracker Radar fetch failed: HTTP ${res.status}`);
   const data = (await res.json()) as DDGData;
