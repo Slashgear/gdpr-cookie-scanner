@@ -1,13 +1,11 @@
 import { execFile } from "child_process";
 import { writeFile, mkdir, readFile } from "fs/promises";
-import { basename, dirname, extname, join } from "path";
+import { basename, extname, join } from "path";
 import { promisify } from "util";
-import { fileURLToPath } from "url";
 import { generatePdf } from "./pdf.js";
 import { generateHtmlReport } from "./html.js";
 
 const execFileAsync = promisify(execFile);
-const oxfmtBin = join(dirname(fileURLToPath(import.meta.url)), "../../node_modules/.bin/oxfmt");
 import type {
   ScanResult,
   ScannedCookie,
@@ -46,7 +44,8 @@ export class ReportGenerator {
         this.buildCookiesInventory(result),
       ].join("\n\n---\n\n");
       await writeFile(mdPath, combined, "utf-8");
-      await execFileAsync(oxfmtBin, [mdPath]).catch(() => {});
+      // Best-effort: tidy the Markdown with Bun's formatter when Bun is available
+      await execFileAsync("bun", ["fmt", "--no-script", mdPath]).catch(() => {});
       paths.md = mdPath;
     }
 

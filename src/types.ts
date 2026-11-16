@@ -1,10 +1,5 @@
 export type CookieCategory =
-  | "strictly-necessary"
-  | "analytics"
-  | "advertising"
-  | "social"
-  | "personalization"
-  | "unknown";
+  "strictly-necessary" | "analytics" | "advertising" | "social" | "personalization" | "unknown";
 
 export type ConsentButtonType = "accept" | "reject" | "preferences" | "close" | "unknown";
 
@@ -37,13 +32,7 @@ export interface NetworkRequest {
 }
 
 export type TrackerCategory =
-  | "analytics"
-  | "advertising"
-  | "social"
-  | "fingerprinting"
-  | "pixel"
-  | "cdn"
-  | "unknown";
+  "analytics" | "advertising" | "social" | "fingerprinting" | "pixel" | "cdn" | "unknown";
 
 export interface ConsentButton {
   type: ConsentButtonType;

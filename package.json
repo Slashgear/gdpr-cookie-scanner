@@ -44,8 +44,8 @@
     "start": "node dist/cli.js",
     "lint": "oxlint .",
     "lint:fix": "oxlint --fix .",
-    "format": "oxfmt .",
-    "format:check": "oxfmt --check .",
+    "format": "bun fmt --no-script .",
+    "format:check": "bun fmt --no-script --check .",
     "typecheck": "tsc --noEmit",
     "test": "bun test tests/analyzers tests/classifiers tests/scanner tests/unit && bun test --timeout 120000 tests/e2e",
     "test:watch": "bun test --watch tests/analyzers tests/classifiers tests/scanner tests/unit",
@@ -63,7 +63,6 @@
   "devDependencies": {
     "@changesets/cli": "^2.31.1",
     "@types/node": "^24.19.2",
-    "oxfmt": "^0.34.0",
     "oxlint": "^1.94.0",
     "typescript": "^5.5.0"
   },

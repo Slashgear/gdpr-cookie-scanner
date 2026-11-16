@@ -1,4 +1,4 @@
-# Files excluded from oxfmt formatting
+# Files excluded from `bun fmt` formatting
 .changeset/
 CHANGELOG.md
 CLAUDE.md
